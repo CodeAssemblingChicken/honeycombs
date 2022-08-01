@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="50mm"
+   height="43.30127mm"
+   viewBox="0 0 50 43.30127"
+   version="1.1"
+   id="svg4638"
+   inkscape:version="1.2 (1:1.2.1+202207142221+cd75a1ee6d)"
+   sodipodi:docname="hex_black.svg"
+   inkscape:export-filename="hexagonz.png"
+   inkscape:export-xdpi="31.75"
+   inkscape:export-ydpi="31.75"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview4640"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#505050"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="1.2636359"
+     inkscape:cx="-137.69789"
+     inkscape:cy="257.19434"
+     inkscape:window-width="2560"
+     inkscape:window-height="1362"
+     inkscape:window-x="1920"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs4635" />
+  <g
+     inkscape:label="Ebene 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-153.31267,-16.50357)">
+    <g
+       id="g9791"
+       transform="translate(-2.0884335e-6,-43.30127)"
+       inkscape:export-filename="./g9791.png"
+       inkscape:export-xdpi="31.75"
+       inkscape:export-ydpi="31.75">
+      <path
+         sodipodi:type="star"
+         style="fill:#ffffff;stroke:none;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+         id="path7343-7"
+         inkscape:flatsided="true"
+         sodipodi:sides="6"
+         sodipodi:cx="142.8501"
+         sodipodi:cy="93.7649"
+         sodipodi:r1="25.053473"
+         sodipodi:r2="21.696945"
+         sodipodi:arg1="1.0471976"
+         sodipodi:arg2="1.5707963"
+         inkscape:rounded="0"
+         inkscape:randomized="0"
+         d="m 155.37683,115.46184 -25.05347,0 -12.52673,-21.696941 12.52673,-21.696943 25.05347,1e-6 12.52674,21.696944 z"
+         inkscape:transform-center-x="1.9543559e-06"
+         inkscape:transform-center-y="-1.794783e-06"
+         transform="matrix(0.99786566,0,0,0.99786566,35.767465,-12.109298)" />
+      <path
+         sodipodi:type="star"
+         style="fill:#24221c;stroke:none;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+         id="path7343-1-9"
+         inkscape:flatsided="true"
+         sodipodi:sides="6"
+         sodipodi:cx="142.8501"
+         sodipodi:cy="93.7649"
+         sodipodi:r1="25.053473"
+         sodipodi:r2="21.696945"
+         sodipodi:arg1="1.0471976"
+         sodipodi:arg2="1.5707963"
+         inkscape:rounded="0"
+         inkscape:randomized="0"
+         d="m 155.37683,115.46184 -25.05347,0 -12.52673,-21.696941 12.52673,-21.696943 25.05347,1e-6 12.52674,21.696944 z"
+         inkscape:transform-center-x="1.3507089e-06"
+         inkscape:transform-center-y="-1.7508561e-06"
+         transform="matrix(0.95795104,0,0,0.95795104,41.469272,-8.3667076)" />
+      <path
+         sodipodi:type="star"
+         style="fill:#484537;stroke:none;stroke-width:4;stroke-dasharray:none;stroke-opacity:1"
+         id="path7343-8-2"
+         inkscape:flatsided="true"
+         sodipodi:sides="6"
+         sodipodi:cx="142.8501"
+         sodipodi:cy="93.7649"
+         sodipodi:r1="25.053473"
+         sodipodi:r2="21.696945"
+         sodipodi:arg1="1.0471976"
+         sodipodi:arg2="1.5707963"
+         inkscape:rounded="0"
+         inkscape:randomized="0"
+         d="m 155.37683,115.46184 -25.05347,0 -12.52673,-21.696941 12.52673,-21.696943 25.05347,1e-6 12.52674,21.696944 z"
+         inkscape:transform-center-x="2.8031808e-06"
+         inkscape:transform-center-y="-2.0393611e-06"
+         transform="matrix(0.79829253,0,0,0.79829253,64.276506,6.6036574)" />
+    </g>
+  </g>
+</svg>

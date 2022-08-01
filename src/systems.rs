@@ -2,32 +2,33 @@ use std::time::Duration;
 
 use crate::components::{Cell, HiddenCell, MainCamera};
 use bevy::{
+    core::{Time, Timer},
     input::Input,
     math::{Vec2, Vec3},
-    prelude::{default, Camera, Commands, KeyCode, Query, Res, Transform, With},
+    prelude::{
+        Assets, Camera, Commands, Entity, EventReader, EventWriter, KeyCode, Query, Res, ResMut,
+        Transform, With,
+    },
     render::camera::RenderTarget,
     window::Windows,
 };
-use bevy_easings::{Ease, EaseFunction, EasingType};
-use bevy_ecs_tilemap::{MapQuery, Tile, TilePos};
-use rand::{thread_rng, Rng};
+use bevy_easings::*;
+use bevy_svg::prelude::Svg;
 
 pub fn click_cell(
     // need to get window dimensions
     wnds: Res<Windows>,
     // query to get camera transform
     q_camera: Query<(&Camera, &Transform), With<MainCamera>>,
-    cell_query: Query<(&Cell, &Transform), With<HiddenCell>>,
+    cell_query: Query<(Entity, &Cell, &Transform), With<HiddenCell>>,
 ) {
     if let Some(world_pos) = mouse_to_world_pos(wnds, q_camera) {
         println!("{:?}", world_pos);
-        if let Some(cell) = world_pos_to_cell(world_pos, cell_query) {
+        if let Some(cell) = world_pos_to_cell(world_pos, &cell_query) {
             println!("Yay");
         }
     }
 }
-
-fn hover_system() {}
 
 fn mouse_to_world_pos(
     // need to get window dimensions
@@ -69,17 +70,39 @@ fn mouse_to_world_pos(
 
 fn world_pos_to_cell(
     world_pos: Vec2,
-    cell_query: Query<(&Cell, &Transform), With<HiddenCell>>,
-) -> Option<Cell> {
-    for (cell, tf) in cell_query.iter() {
+    cell_query: &Query<(Entity, &Cell, &Transform), With<HiddenCell>>,
+) -> Option<Entity> {
+    for (entity, _cell, tf) in cell_query.iter() {
         if point_in_hexagon(world_pos, tf.translation.truncate()) {
-            return Some(*cell);
+            return Some(entity);
         }
     }
     return None;
 }
 
+const R: f32 = 25.0;
+const R2: f32 = R * R;
+const RI: f32 = 0.75 * R2;
+
 fn point_in_hexagon(p: Vec2, center: Vec2) -> bool {
+    let x = center + Vec2::new(25., -21.65);
+    let p = p - x;
+
+    let l2 = p.y * p.y + p.x * p.x;
+    if l2 > R2 {
+        return false;
+    }
+    // (sqrt(3)/2)^2 = 3/4
+    if l2 < RI {
+        return true;
+    }
+
+    return false;
+}
+
+fn point_in_hexagon_old(p: Vec2, center: Vec2) -> bool {
+    // let x = center + Vec2::new(22.5, -25.);
+    let p = (p - center) / 50.;
     // Check length (squared) against inner and outer radius
     // identity hexagon
     let l2 = p.y * p.y + p.x * p.x;
@@ -109,33 +132,81 @@ fn point_in_hexagon(p: Vec2, center: Vec2) -> bool {
     return true;
 }
 
+pub struct WiggleTimer(pub Timer);
+
 pub fn wiggle(
     mut commands: Commands,
-    keyboard_input: Res<Input<KeyCode>>,
-    mut map_query: MapQuery,
-    mut tile_query: Query<&mut Tile>,
+    time: Res<Time>,
+    mut timer: ResMut<WiggleTimer>,
+    mut event_hover_tile: EventReader<HoverEvent>,
+    mut cell_query: Query<(Entity, &mut Transform), With<Cell>>,
+    svgs: Res<Assets<Svg>>,
 ) {
-    if keyboard_input.just_pressed(KeyCode::V) {
-        let mut random = thread_rng();
-        let position = TilePos(1, 1);
-        let tile_entity = map_query.get_tile_entity(position, 0u16, 0u16);
+    // if let Some(svg) = svgs.get("hex_black.svg") {
+    //     println!("{}", svg.view_box);
+    // }
+    // return;
+    if !timer.0.tick(time.delta()).just_finished() {
+        return;
+    }
+    for ev in event_hover_tile.iter() {
+        // for (entity, mut t) in cell_query.iter_mut() {
+        if let Ok((entity, t)) = cell_query.get(ev.0) {
+            let mut t1 = t.clone();
+            t1.scale = Vec3::new(1.1, 1.1, 1.);
+            t1.translation += Vec3::new(-2.5, 2., 0.);
+            commands.entity(entity).insert(
+                t.ease_to(
+                    t1,
+                    EaseFunction::SineInOut,
+                    EasingType::Once {
+                        duration: Duration::from_millis(100),
+                    },
+                )
+                .ease_to(
+                    *t,
+                    EaseFunction::SineInOut,
+                    EasingType::Once {
+                        duration: Duration::from_millis(100),
+                    },
+                ),
+            );
+        }
+    }
+}
 
-        if tile_entity.is_ok() {
-            if let Ok(entity) = map_query.get_tile_entity(position, 0u16, 0u16) {
-                if let Ok(mut tile) = tile_query.get_mut(entity) {
-                    let t1 = Transform::from_translation(Vec3::new(0.0, 0.0, 1.0));
-                    let t2 = Transform::from_translation(Vec3::new(100.0, 100.0, 1.0));
-                    println!("Jo");
-                    commands.entity(entity).insert(t1.ease_to(
-                        t2,
-                        EaseFunction::QuarticOut,
-                        EasingType::Once {
-                            duration: Duration::from_millis(1000),
-                        },
-                    ));
-                    map_query.notify_chunk_for_tile(position, 0u16, 0u16);
-                }
+pub struct HoverEvent(Entity);
+
+pub struct HoveredTile {
+    pub x: u32,
+    pub y: u32,
+}
+
+pub fn hover_system(
+    commands: Commands,
+    windows: Res<Windows>,
+    camera_query: Query<(&Camera, &Transform), With<MainCamera>>,
+    // mut hovered_tile: ResMut<HoveredTile>,
+    // selection: Res<Selection>,
+    mut event_hover_tile: EventWriter<HoverEvent>,
+    cell_query: Query<(Entity, &Cell, &Transform), With<HiddenCell>>,
+) {
+    if let Some(world_pos) = mouse_to_world_pos(windows, camera_query) {
+        println!("{:?}", world_pos);
+        if let Some(cell) = world_pos_to_cell(world_pos, &cell_query) {
+            if let Ok((_, c, _t)) = cell_query.get(cell) {
+                // println!("{:?}", _t.translation);
+                event_hover_tile.send(HoverEvent(cell));
             }
         }
     }
+}
+
+pub fn hover_tile_system(
+    mut commands: Commands,
+    hovered_tile: Res<HoveredTile>,
+    // selection: Res<Selection>,
+    mut event_hover_update: EventReader<HoverEvent>,
+) {
+    for _ in event_hover_update.iter() {}
 }

@@ -9,6 +9,7 @@ edition = "2021"
 bevy = { version = "0.7.0", features = ["dynamic"] }
 bevy_easings = "0.7"
 bevy_ecs_tilemap = "0.6"
+bevy-inspector-egui = "0.11"
 bevy_svg = "0.7"
 rand = "0.8"
 
