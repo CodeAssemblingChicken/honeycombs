@@ -1,4 +1,4 @@
-use bevy::prelude::{Component, Entity};
+use bevy::prelude::Component;
 use bevy_inspector_egui::Inspectable;
 
 #[derive(Component)]
@@ -20,9 +20,3 @@ pub struct NumberCell {
 
 #[derive(Debug, Component)]
 pub struct EmptyCell;
-
-#[derive(Debug)]
-pub struct HoveredCell {
-    pub coords: Option<(u32, u32)>,
-    pub entity: Option<Entity>,
-}

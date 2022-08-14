@@ -3,14 +3,15 @@ mod helpers;
 mod interactable;
 mod systems;
 
+use bevy::prelude::ParallelSystemDescriptorCoercion;
 use bevy::{
     app::App,
     diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
     hierarchy::BuildChildren,
     math::Vec3,
     prelude::{
-        default, shape::RegularPolygon, AssetServer, Assets, Camera2dBundle, Color, Commands, Mesh,
-        Msaa, Res, ResMut, Transform,
+        default, shape::RegularPolygon, Assets, Camera2dBundle, ClearColor, Color, Commands, Mesh,
+        Msaa, ResMut, Transform,
     },
     sprite::{ColorMaterial, ColorMesh2dBundle},
     window::WindowDescriptor,
@@ -20,10 +21,15 @@ use bevy::{
 use bevy_easings::EasingsPlugin;
 use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
 // use chrono::Utc;
-use components::{Cell, HiddenCell, HoveredCell, MainCamera};
-use interactable::{hover::Hoverable, shapes::*};
+use components::{Cell, MainCamera};
+use interactable::hover::{just_hovered2, stop_hovering1, stop_hovering2};
+use interactable::{
+    hover::{hover_system, hovering, just_hovered1, Hoverable},
+    shapes::*,
+};
 use rand::{thread_rng, Rng};
-use systems::{click_cell, hover_system, wiggle};
+use systems::{hover, unhover};
+// use systems::wiggle;
 
 pub const RADIUS: f32 = 25.0;
 
@@ -34,22 +40,22 @@ fn main() {
             title: "Hexacells".to_string(),
             ..Default::default()
         })
-        .insert_resource(HoveredCell {
-            coords: None,
-            entity: None,
-        })
+        .insert_resource(ClearColor(Color::rgb(0.75, 0.75, 0.75)))
         .add_plugins(DefaultPlugins)
         .add_plugin(EasingsPlugin)
         .add_plugin(WorldInspectorPlugin::new())
-        .add_plugin(LogDiagnosticsPlugin::default())
-        .add_plugin(FrameTimeDiagnosticsPlugin::default())
+        // .add_plugin(LogDiagnosticsPlugin::default())
+        // .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_startup_system(setup)
         .add_system(helpers::camera::movement)
         .add_system(helpers::texture::set_texture_filters_to_nearest)
-        // .add_system(click_cell)
-        // .add_system(hover_system)
-        .add_system(interactable::hover::hover_system)
-        .add_system(wiggle)
+        .add_system(hover_system)
+        .add_system(hovering)
+        .add_system(just_hovered1.before(hovering))
+        .add_system(just_hovered2.after(just_hovered1))
+        .add_system(stop_hovering1.before(hovering))
+        .add_system(stop_hovering2.after(stop_hovering1))
+        // .add_system(wiggle)
         .register_inspectable::<Cell>()
         .run();
 }
@@ -108,8 +114,8 @@ fn setup(
         }),
     );
 
-    for x in 0..50 {
-        for y in 0..50 {
+    for x in 0..20 {
+        for y in 0..20 {
             let tx = (x * 45) as f32 + RADIUS;
             let ty = (y + 1) as f32 * RADIUS * 2.0
                 - match x % 2 {
@@ -136,33 +142,35 @@ fn setup(
                 .with_children(|parent| {
                     parent.spawn_bundle(ColorMesh2dBundle {
                         mesh: medium_hexagon.clone().into(),
-                        transform: medium_transform,
                         material: colors.0.into(),
+                        transform: medium_transform,
                         ..default()
                     });
                     parent.spawn_bundle(ColorMesh2dBundle {
                         mesh: small_hexagon.clone().into(),
-                        transform: small_transform,
                         material: colors.1.into(),
+                        transform: small_transform,
                         ..default()
                     });
                 })
                 .insert(Cell { x, y })
-                .insert(Hoverable {
+                .id();
+            if rand == 0 {
+                commands.entity(cell).insert(Hoverable {
                     ignore_scale: true,
                     pass_through: false,
                     shape: Shape::Hexagon(Hexagon {
                         radius: RADIUS,
                         point_up: false,
                     }),
-                    on_hover: Some(|_c, e, _t| println!("Yes {}", e.id())),
-                    ..default() // width: 50.,
-                                // height: 43.4,
-                })
-                .id();
-            // .insert(HiddenCell);
-            if rand == 0 {
-                commands.entity(cell).insert(HiddenCell);
+
+                    // on_hover: Some(|mut c, e, t| println!("hov")),
+                    // on_enter: Some(|mut c, e, t| println!("enter")),
+                    // on_exit: Some(|mut c, e, t| println!("stop")),
+                    on_enter: Some(|mut c, e, t| hover(&mut c, e, t)),
+                    on_exit: Some(|mut c, e, t| unhover(&mut c, e, t)),
+                    ..default()
+                });
             }
         }
     }
