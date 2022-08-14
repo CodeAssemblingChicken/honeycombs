@@ -6,11 +6,10 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = { version = "0.7.0", features = ["dynamic"] }
-bevy_easings = "0.7"
-bevy_ecs_tilemap = "0.6"
-bevy-inspector-egui = "0.11"
-bevy_svg = "0.7"
+bevy = { version = "0.8.0", features = ["dynamic"] }
+bevy_easings = "0.8"
+bevy-inspector-egui = "0.12"
+chrono = "0.4"
 rand = "0.8"
 
 # Enable a small amount of optimization in debug mode

@@ -1,19 +1,14 @@
 use std::time::Duration;
 
-use crate::components::{Cell, HiddenCell, MainCamera};
+use crate::components::{Cell, HiddenCell, HoveredCell, MainCamera};
 use bevy::{
-    core::{Time, Timer},
-    input::Input,
     math::{Vec2, Vec3},
-    prelude::{
-        Assets, Camera, Commands, Entity, EventReader, EventWriter, KeyCode, Query, Res, ResMut,
-        Transform, With,
-    },
+    prelude::{Camera, Commands, Entity, Query, Res, ResMut, Transform, With},
     render::camera::RenderTarget,
     window::Windows,
 };
 use bevy_easings::*;
-use bevy_svg::prelude::Svg;
+// use bevy_svg::prelude::Svg;
 
 pub fn click_cell(
     // need to get window dimensions
@@ -42,8 +37,14 @@ fn mouse_to_world_pos(
 
     // get the window that the camera is displaying to (or the primary window)
     let wnd = if let RenderTarget::Window(id) = camera.target {
+        if wnds.get(id).is_none() {
+            return None;
+        }
         wnds.get(id).unwrap()
     } else {
+        if wnds.get_primary().is_none() {
+            return None;
+        }
         wnds.get_primary().unwrap()
     };
 
@@ -56,7 +57,7 @@ fn mouse_to_world_pos(
         let ndc = (screen_pos / window_size) * 2.0 - Vec2::ONE;
 
         // matrix for undoing the projection and camera transform
-        let ndc_to_world = camera_transform.compute_matrix() * camera.projection_matrix.inverse();
+        let ndc_to_world = camera_transform.compute_matrix() * camera.projection_matrix().inverse();
 
         // use it to convert ndc to world-space coordinates
         let world_pos = ndc_to_world.project_point3(ndc.extend(-1.0));
@@ -85,8 +86,8 @@ const R2: f32 = R * R;
 const RI: f32 = 0.75 * R2;
 
 fn point_in_hexagon(p: Vec2, center: Vec2) -> bool {
-    let x = center + Vec2::new(25., -21.65);
-    let p = p - x;
+    // let x = center + Vec2::new(25., -21.65);
+    let p = p - center;
 
     let l2 = p.y * p.y + p.x * p.x;
     if l2 > R2 {
@@ -132,81 +133,72 @@ fn point_in_hexagon_old(p: Vec2, center: Vec2) -> bool {
     return true;
 }
 
-pub struct WiggleTimer(pub Timer);
-
 pub fn wiggle(
     mut commands: Commands,
-    time: Res<Time>,
-    mut timer: ResMut<WiggleTimer>,
-    mut event_hover_tile: EventReader<HoverEvent>,
-    mut cell_query: Query<(Entity, &mut Transform), With<Cell>>,
-    svgs: Res<Assets<Svg>>,
+    hovered_cell: Res<HoveredCell>,
+    cell_query: Query<(Entity, &mut Transform), With<Cell>>,
 ) {
-    // if let Some(svg) = svgs.get("hex_black.svg") {
-    //     println!("{}", svg.view_box);
-    // }
-    // return;
-    if !timer.0.tick(time.delta()).just_finished() {
-        return;
-    }
-    for ev in event_hover_tile.iter() {
-        // for (entity, mut t) in cell_query.iter_mut() {
-        if let Ok((entity, t)) = cell_query.get(ev.0) {
+    if hovered_cell.is_changed() && hovered_cell.entity.is_some() {
+        if let Ok((entity, t)) = cell_query.get(hovered_cell.entity.unwrap()) {
+            let mut t0 = t.clone();
+            t0.scale = Vec3::new(1.0, 1.0, 1.);
             let mut t1 = t.clone();
-            t1.scale = Vec3::new(1.1, 1.1, 1.);
-            t1.translation += Vec3::new(-2.5, 2., 0.);
+            t1.scale = Vec3::new(1.03, 1.03, 1.);
+            let mut t2 = t.clone();
+            t2.scale = Vec3::new(0.98, 0.98, 1.);
             commands.entity(entity).insert(
                 t.ease_to(
                     t1,
                     EaseFunction::SineInOut,
                     EasingType::Once {
-                        duration: Duration::from_millis(100),
+                        duration: Duration::from_millis(30),
                     },
                 )
                 .ease_to(
-                    *t,
+                    t2,
                     EaseFunction::SineInOut,
                     EasingType::Once {
-                        duration: Duration::from_millis(100),
+                        duration: Duration::from_millis(60),
+                    },
+                )
+                .ease_to(
+                    t1,
+                    EaseFunction::SineInOut,
+                    EasingType::Once {
+                        duration: Duration::from_millis(30),
                     },
                 ),
             );
+            // let x=commands.entity(entity)
         }
     }
-}
-
-pub struct HoverEvent(Entity);
-
-pub struct HoveredTile {
-    pub x: u32,
-    pub y: u32,
 }
 
 pub fn hover_system(
-    commands: Commands,
     windows: Res<Windows>,
+    mut hovered_cell: ResMut<HoveredCell>,
     camera_query: Query<(&Camera, &Transform), With<MainCamera>>,
-    // mut hovered_tile: ResMut<HoveredTile>,
-    // selection: Res<Selection>,
-    mut event_hover_tile: EventWriter<HoverEvent>,
     cell_query: Query<(Entity, &Cell, &Transform), With<HiddenCell>>,
 ) {
     if let Some(world_pos) = mouse_to_world_pos(windows, camera_query) {
-        println!("{:?}", world_pos);
+        // println!("{:?}", world_pos);
         if let Some(cell) = world_pos_to_cell(world_pos, &cell_query) {
             if let Ok((_, c, _t)) = cell_query.get(cell) {
-                // println!("{:?}", _t.translation);
-                event_hover_tile.send(HoverEvent(cell));
+                if let Some((x, y)) = hovered_cell.coords {
+                    if x == c.x && y == c.y {
+                        return;
+                    }
+                }
+                *hovered_cell = HoveredCell {
+                    coords: Some((c.x, c.y)),
+                    entity: Some(cell),
+                };
+                return;
             }
         }
     }
-}
-
-pub fn hover_tile_system(
-    mut commands: Commands,
-    hovered_tile: Res<HoveredTile>,
-    // selection: Res<Selection>,
-    mut event_hover_update: EventReader<HoverEvent>,
-) {
-    for _ in event_hover_update.iter() {}
+    *hovered_cell = HoveredCell {
+        coords: None,
+        entity: None,
+    };
 }
