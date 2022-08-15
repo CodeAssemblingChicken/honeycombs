@@ -37,7 +37,7 @@ fn main() {
     App::new()
         .insert_resource(Msaa { samples: 4 })
         .insert_resource(WindowDescriptor {
-            title: "Hexacells".to_string(),
+            title: "Hexacell".to_string(),
             ..Default::default()
         })
         .insert_resource(ClearColor(Color::rgb(0.75, 0.75, 0.75)))
