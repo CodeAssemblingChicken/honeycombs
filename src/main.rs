@@ -21,7 +21,9 @@ use bevy_easings::EasingsPlugin;
 #[cfg(feature = "debug")]
 use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
 // use chrono::Utc;
-use components::{Cell, CellColors, CellInner, CellOuter, EmptyCell, MainCamera, NumberCell};
+use components::{
+    Cell, CellColors, CellInner, CellOuter, EmptyCell, HiddenCell, MainCamera, NumberCell,
+};
 use interactable::{
     hover::{hover_system, Hoverable, MouseEnterEvent, MouseExitEvent, MouseOverEvent},
     shapes::*,
@@ -134,6 +136,24 @@ fn setup(
 
             let mut big_transform = Transform::from_translation(Vec3::new(tx, ty, 2.0));
             big_transform.rotate_z(f32::to_radians(90.0));
+
+            let b1 = ColorMesh2dBundle {
+                mesh: medium_hexagon.clone().into(),
+                material: colors.0.into(),
+                transform: medium_transform,
+                ..default()
+            };
+            let b2 = ColorMesh2dBundle {
+                mesh: small_hexagon.clone().into(),
+                material: colors.1.into(),
+                transform: small_transform,
+                ..default()
+            };
+
+            // do the same for the child
+            let child1 = commands.spawn_bundle(b1).insert(CellOuter).id();
+            let child2 = commands.spawn_bundle(b2).insert(CellInner).id();
+
             let cell = commands
                 .spawn()
                 .insert_bundle(ColorMesh2dBundle {
@@ -142,26 +162,35 @@ fn setup(
                     transform: big_transform,
                     ..default()
                 })
-                .with_children(|parent| {
-                    parent
-                        .spawn_bundle(ColorMesh2dBundle {
-                            mesh: medium_hexagon.clone().into(),
-                            material: colors.0.into(),
-                            transform: medium_transform,
-                            ..default()
-                        })
-                        .insert(CellOuter);
-                    parent
-                        .spawn_bundle(ColorMesh2dBundle {
-                            mesh: small_hexagon.clone().into(),
-                            material: colors.1.into(),
-                            transform: small_transform,
-                            ..default()
-                        })
-                        .insert(CellInner);
-                })
-                .insert(Cell { x, y })
+                // .with_children(|parent| {
+                //     parent
+                //         .spawn_bundle(ColorMesh2dBundle {
+                //             mesh: medium_hexagon.clone().into(),
+                //             material: c1,
+                //             transform: medium_transform,
+                //             ..default()
+                //         })
+                //         .insert(CellOuter);
+                //     parent
+                //         .spawn_bundle(ColorMesh2dBundle {
+                //             mesh: small_hexagon.clone().into(),
+                //             material: c2,
+                //             transform: small_transform,
+                //             ..default()
+                //         })
+                //         .insert(CellInner);
+                // })
                 .id();
+
+            commands.entity(cell).insert(Cell {
+                x,
+                y,
+                entity: Some(cell),
+                outer_hexagon: Some(child1),
+                inner_hexagon: Some(child2),
+            });
+            commands.entity(cell).push_children(&[child1, child2]);
+
             match rand {
                 1 => {
                     commands.entity(cell).insert(NumberCell { count: 0 });
@@ -172,14 +201,16 @@ fn setup(
                 _ => (),
             }
             if rand == 0 {
-                commands.entity(cell).insert(Hoverable {
-                    ignore_scale: true,
-                    pass_through: false,
-                    shape: Shape::Hexagon(Hexagon {
-                        radius: RADIUS,
-                        point_up: false,
-                    }),
-                    ..default()
+                commands.entity(cell).insert_bundle(HiddenCell {
+                    hoverable: Hoverable {
+                        ignore_scale: true,
+                        pass_through: false,
+                        shape: Shape::Hexagon(Hexagon {
+                            radius: RADIUS,
+                            point_up: false,
+                        }),
+                        ..default()
+                    },
                 });
             }
         }

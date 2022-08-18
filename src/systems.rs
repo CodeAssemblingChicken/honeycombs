@@ -1,60 +1,53 @@
 use crate::{
-    components::{Cell, CellColors, CellInner, CellOuter},
+    components::{Cell, CellColors, CellInner, CellOuter, HiddenCell},
     interactable::hover::{MouseEnterEvent, MouseExitEvent, MouseOverEvent},
 };
 use bevy::{
-    asset::HandleId,
     hierarchy::Children,
-    math::Vec3,
     prelude::{
-        ColorMaterial, Commands, Entity, EventReader, Handle, Query, ResMut, Transform, With,
-        Without,
+        ColorMaterial, Commands, EventReader, Handle, Query, ResMut, Transform, With, Without,
     },
 };
-use bevy_easings::*;
-use std::time::Duration;
 
-pub fn mouse_enter_cell(
+pub fn mouse_click_cell(
     mut commands: Commands,
-    cell_query: Query<(&Transform, &Children), With<Cell>>,
+    cell_query: Query<(&Transform, &Cell, &Children)>,
     mut child_query_inner: Query<&mut Handle<ColorMaterial>, (With<CellInner>, Without<CellOuter>)>,
     mut child_query_outer: Query<&mut Handle<ColorMaterial>, (With<CellOuter>, Without<CellInner>)>,
     cell_colors: ResMut<CellColors>,
     mut ev_mouse_enter: EventReader<MouseEnterEvent>,
 ) {
     for ev in ev_mouse_enter.iter() {
-        if let Ok((t, c)) = cell_query.get(ev.0) {
-            hover(&mut commands, ev.0, t);
-            for &child in c.iter() {
-                if let Ok(mut h) = child_query_inner.get_mut(child) {
-                    h.id = HandleId::from(&cell_colors.yellow_medium);
-                }
-                if let Ok(mut h) = child_query_outer.get_mut(child) {
-                    h.id = HandleId::from(&cell_colors.yellow_dark);
-                }
-            }
+        if let Ok((t, cell, ch)) = cell_query.get(ev.0) {
+            commands.entity(ev.0).remove_bundle::<HiddenCell>();
+        }
+    }
+}
+
+pub fn mouse_enter_cell(
+    mut commands: Commands,
+    cell_query: Query<(&Transform, &mut Cell)>,
+    mut child_query: Query<&mut Handle<ColorMaterial>>,
+    cell_colors: ResMut<CellColors>,
+    mut ev_mouse_enter: EventReader<MouseEnterEvent>,
+) {
+    for ev in ev_mouse_enter.iter() {
+        if let Ok((t, cell)) = cell_query.get(ev.0) {
+            cell.hover(&mut commands, t, &mut child_query, &cell_colors);
+            // hover(&mut commands, ev.0, t);
         }
     }
 }
 pub fn mouse_exit_cell(
     mut commands: Commands,
-    cell_query: Query<(&Transform, &Children), With<Cell>>,
-    mut child_query_inner: Query<&mut Handle<ColorMaterial>, (With<CellInner>, Without<CellOuter>)>,
-    mut child_query_outer: Query<&mut Handle<ColorMaterial>, (With<CellOuter>, Without<CellInner>)>,
+    cell_query: Query<(&Transform, &Cell)>,
+    mut child_query: Query<&mut Handle<ColorMaterial>>,
     cell_colors: ResMut<CellColors>,
     mut ev_mouse_exit: EventReader<MouseExitEvent>,
 ) {
     for ev in ev_mouse_exit.iter() {
-        if let Ok((t, c)) = cell_query.get(ev.0) {
-            unhover(&mut commands, ev.0, t);
-            for &child in c.iter() {
-                if let Ok(mut h) = child_query_inner.get_mut(child) {
-                    h.id = HandleId::from(&cell_colors.yellow_light);
-                }
-                if let Ok(mut h) = child_query_outer.get_mut(child) {
-                    h.id = HandleId::from(&cell_colors.yellow_medium);
-                }
-            }
+        if let Ok((t, cell)) = cell_query.get(ev.0) {
+            cell.unhover(&mut commands, t, &mut child_query, &cell_colors);
         }
     }
 }
@@ -66,31 +59,6 @@ pub fn mouse_over_cell(
     for ev in ev_mouse_over.iter() {
         // println!("{} is hovered.", ev.0.id());
     }
-}
-
-pub fn hover(commands: &mut Commands, entity: Entity, t: &Transform) {
-    // println!("Enter");
-    let mut t1 = t.clone();
-    t1.scale = Vec3::new(1.06, 1.06, 1.);
-    commands.entity(entity).insert(t.ease_to(
-        t1,
-        EaseFunction::ElasticOut,
-        EasingType::Once {
-            duration: Duration::from_millis(300),
-        },
-    ));
-}
-pub fn unhover(commands: &mut Commands, entity: Entity, t: &Transform) {
-    // println!("Exit");
-    let mut t1 = t.clone();
-    t1.scale = Vec3::new(1.0, 1.0, 1.);
-    commands.entity(entity).insert(t.ease_to(
-        t1,
-        EaseFunction::ElasticOut,
-        EasingType::Once {
-            duration: Duration::from_millis(300),
-        },
-    ));
 }
 
 // pub fn wiggle(
