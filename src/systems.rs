@@ -1,25 +1,48 @@
 use crate::{
-    components::{Cell, CellColors, CellInner, CellOuter, HiddenCell},
-    interactable::hover::{MouseEnterEvent, MouseExitEvent, MouseOverEvent},
+    components::{Cell, CellColors, EmptyCell, NumberCell, SfxHover},
+    interactable::{
+        click::{
+            MouseLeftJustEvent, MouseLeftPressedEvent, MouseLeftReleasedEvent, MouseRightJustEvent,
+            MouseRightPressedEvent, MouseRightReleasedEvent,
+        },
+        hover::{MouseEnterEvent, MouseExitEvent, MouseOverEvent},
+    },
 };
 use bevy::{
-    hierarchy::Children,
+    audio::{Audio, AudioSink},
     prelude::{
-        ColorMaterial, Commands, EventReader, Handle, Query, ResMut, Transform, With, Without,
+        Assets, ColorMaterial, Commands, EventReader, Handle, Query, Res, ResMut, Transform, With,
     },
 };
 
 pub fn mouse_click_cell(
     mut commands: Commands,
-    cell_query: Query<(&Transform, &Cell, &Children)>,
-    mut child_query_inner: Query<&mut Handle<ColorMaterial>, (With<CellInner>, Without<CellOuter>)>,
-    mut child_query_outer: Query<&mut Handle<ColorMaterial>, (With<CellOuter>, Without<CellInner>)>,
+    number_cell_query: Query<(&Transform, &Cell, &NumberCell)>,
+    empty_cell_query: Query<(&Transform, &Cell, &EmptyCell)>,
+    mut color_query: Query<&mut Handle<ColorMaterial>>,
     cell_colors: ResMut<CellColors>,
-    mut ev_mouse_enter: EventReader<MouseEnterEvent>,
+    mut ev_mouse_click: EventReader<MouseLeftJustEvent>,
 ) {
-    for ev in ev_mouse_enter.iter() {
-        if let Ok((t, cell, ch)) = cell_query.get(ev.0) {
-            commands.entity(ev.0).remove_bundle::<HiddenCell>();
+    for ev in ev_mouse_click.iter() {
+        println!("Click");
+        if let Ok((t, cell, nc)) = number_cell_query.get(ev.0) {
+            cell.uncover_number(
+                &mut commands,
+                ev.0,
+                t,
+                &mut color_query,
+                cell_colors.as_ref(),
+                nc,
+            );
+        }
+        if let Ok((t, cell, _ec)) = empty_cell_query.get(ev.0) {
+            cell.uncover_empty(
+                &mut commands,
+                ev.0,
+                t,
+                &mut color_query,
+                cell_colors.as_ref(),
+            );
         }
     }
 }
@@ -27,27 +50,29 @@ pub fn mouse_click_cell(
 pub fn mouse_enter_cell(
     mut commands: Commands,
     cell_query: Query<(&Transform, &mut Cell)>,
-    mut child_query: Query<&mut Handle<ColorMaterial>>,
+    mut color_query: Query<&mut Handle<ColorMaterial>>,
     cell_colors: ResMut<CellColors>,
     mut ev_mouse_enter: EventReader<MouseEnterEvent>,
+    audio: Res<Audio>,
+    clip: Res<SfxHover>,
 ) {
     for ev in ev_mouse_enter.iter() {
         if let Ok((t, cell)) = cell_query.get(ev.0) {
-            cell.hover(&mut commands, t, &mut child_query, &cell_colors);
-            // hover(&mut commands, ev.0, t);
+            audio.play(clip.0.clone());
+            cell.hover(&mut commands, t, &mut color_query, &cell_colors);
         }
     }
 }
 pub fn mouse_exit_cell(
     mut commands: Commands,
     cell_query: Query<(&Transform, &Cell)>,
-    mut child_query: Query<&mut Handle<ColorMaterial>>,
+    mut color_query: Query<&mut Handle<ColorMaterial>>,
     cell_colors: ResMut<CellColors>,
     mut ev_mouse_exit: EventReader<MouseExitEvent>,
 ) {
     for ev in ev_mouse_exit.iter() {
         if let Ok((t, cell)) = cell_query.get(ev.0) {
-            cell.unhover(&mut commands, t, &mut child_query, &cell_colors);
+            cell.unhover(&mut commands, t, &mut color_query, &cell_colors);
         }
     }
 }

@@ -5,12 +5,13 @@ mod systems;
 
 use bevy::{
     app::App,
+    audio::{Audio, AudioSink, AudioSource},
     // diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
     hierarchy::BuildChildren,
     math::Vec3,
     prelude::{
-        default, shape::RegularPolygon, Assets, Camera2dBundle, ClearColor, Color, Commands, Mesh,
-        Msaa, ParallelSystemDescriptorCoercion, ResMut, Transform,
+        default, shape::RegularPolygon, AssetServer, Assets, Camera2dBundle, ClearColor, Color,
+        Commands, Handle, Mesh, Msaa, ParallelSystemDescriptorCoercion, Res, ResMut, Transform,
     },
     sprite::{ColorMaterial, ColorMesh2dBundle},
     window::WindowDescriptor,
@@ -22,15 +23,18 @@ use bevy_easings::EasingsPlugin;
 use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
 // use chrono::Utc;
 use components::{
-    Cell, CellColors, CellInner, CellOuter, EmptyCell, HiddenCell, MainCamera, NumberCell,
+    Cell, CellColors, CellInner, CellOuter, EmptyCell, HiddenCell, MainCamera, NumberCell, SfxHover,
 };
 use interactable::{
+    click::{
+        click_system, Clickable, MouseLeftJustEvent, MouseLeftPressedEvent, MouseLeftReleasedEvent,
+        MouseRightJustEvent, MouseRightPressedEvent, MouseRightReleasedEvent,
+    },
     hover::{hover_system, Hoverable, MouseEnterEvent, MouseExitEvent, MouseOverEvent},
     shapes::*,
 };
 use rand::{thread_rng, Rng};
-use systems::{mouse_enter_cell, mouse_exit_cell, mouse_over_cell};
-// use systems::wiggle;
+use systems::{mouse_click_cell, mouse_enter_cell, mouse_exit_cell, mouse_over_cell};
 
 pub const RADIUS: f32 = 25.0;
 
@@ -50,13 +54,21 @@ fn main() {
         .add_event::<MouseOverEvent>()
         .add_event::<MouseEnterEvent>()
         .add_event::<MouseExitEvent>()
+        .add_event::<MouseLeftJustEvent>()
+        .add_event::<MouseLeftPressedEvent>()
+        .add_event::<MouseLeftReleasedEvent>()
+        .add_event::<MouseRightJustEvent>()
+        .add_event::<MouseRightPressedEvent>()
+        .add_event::<MouseRightReleasedEvent>()
         .add_startup_system(setup)
         .add_system(helpers::camera::movement)
         .add_system(helpers::texture::set_texture_filters_to_nearest)
         .add_system(mouse_over_cell)
         .add_system(mouse_enter_cell.before(mouse_over_cell))
-        .add_system(mouse_exit_cell.before(mouse_over_cell))
+        .add_system(mouse_exit_cell.before(mouse_enter_cell))
+        // .add_system(mouse_click_cell)
         .add_system(hover_system);
+    // .add_system(click_system);
 
     #[cfg(feature = "debug")]
     app.add_plugin(WorldInspectorPlugin::new())
@@ -69,7 +81,9 @@ fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    // asset_server: Res<AssetServer>,
+    asset_server: Res<AssetServer>,
+    audio: Res<Audio>,
+    audio_sinks: Res<Assets<AudioSink>>,
 ) {
     commands
         .spawn_bundle(Camera2dBundle::default())
@@ -121,7 +135,7 @@ fn setup(
 
     for x in 0..20 {
         for y in 0..20 {
-            let tx = (x * 45) as f32 + RADIUS;
+            let tx = x as f32 * RADIUS * 1.8;
             let ty = (y + 1) as f32 * RADIUS * 2.0
                 - match x % 2 {
                     0 => RADIUS,
@@ -162,32 +176,14 @@ fn setup(
                     transform: big_transform,
                     ..default()
                 })
-                // .with_children(|parent| {
-                //     parent
-                //         .spawn_bundle(ColorMesh2dBundle {
-                //             mesh: medium_hexagon.clone().into(),
-                //             material: c1,
-                //             transform: medium_transform,
-                //             ..default()
-                //         })
-                //         .insert(CellOuter);
-                //     parent
-                //         .spawn_bundle(ColorMesh2dBundle {
-                //             mesh: small_hexagon.clone().into(),
-                //             material: c2,
-                //             transform: small_transform,
-                //             ..default()
-                //         })
-                //         .insert(CellInner);
-                // })
                 .id();
 
             commands.entity(cell).insert(Cell {
                 x,
                 y,
-                entity: Some(cell),
-                outer_hexagon: Some(child1),
-                inner_hexagon: Some(child2),
+                entity: cell,
+                outer_hexagon: child1,
+                inner_hexagon: child2,
             });
             commands.entity(cell).push_children(&[child1, child2]);
 
@@ -201,10 +197,18 @@ fn setup(
                 _ => (),
             }
             if rand == 0 {
-                commands.entity(cell).insert_bundle(HiddenCell {
-                    hoverable: Hoverable {
+                let shape = commands.entity(cell).insert_bundle(HiddenCell {
+                    // hoverable: Hoverable {
+                    //     ignore_scale: true,
+                    //     pass_through: false,
+                    //     shape: Shape::Hexagon(Hexagon {
+                    //         radius: RADIUS,
+                    //         point_up: false,
+                    //     }),
+                    //     ..default()
+                    // },
+                    clickable: Clickable {
                         ignore_scale: true,
-                        pass_through: false,
                         shape: Shape::Hexagon(Hexagon {
                             radius: RADIUS,
                             point_up: false,
@@ -229,4 +233,7 @@ fn setup(
         blue_dark: blue.0.clone(),
         blue_light: blue.1.clone(),
     });
+
+    let sfx_hover: Handle<AudioSource> = asset_server.load("sfx/hover.ogg");
+    commands.insert_resource(SfxHover(sfx_hover));
 }
