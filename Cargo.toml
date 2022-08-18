@@ -9,12 +9,31 @@ edition = "2021"
 name = "hexacell"
 path = "src/main.rs"
 
+[features]
+default = []
+debug = ["bevy/dynamic", "bevy-inspector-egui"]
+
 [dependencies]
-bevy = { version = "0.8.0", features = ["dynamic"] }
 bevy_easings = "0.8"
-bevy-inspector-egui = "0.12"
 # chrono = "0.4"
 rand = "0.8"
+
+[dependencies.bevy]
+version = "0.8"
+# Disable the default features
+default-features = false
+features = ["bevy_core_pipeline", "bevy_asset", "bevy_sprite", "bevy_text", "x11"]
+# perhaps: "bevy_render", "bevy_ui",  "bevy_audio", "bevy_winit", "bevy_scene",
+#   "animation", "filesystem_watcher" , "wayland", "vorbis"
+
+[dependencies.bevy-inspector-egui]
+version = "0.12"
+# Disable the default features
+default-features = false
+features = ["bevy_sprite"]
+optional = true
+# perhaps: "bevy_ui"
+
 
 # Enable a small amount of optimization in debug mode
 [profile.dev]

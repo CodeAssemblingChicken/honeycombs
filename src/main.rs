@@ -3,39 +3,39 @@ mod helpers;
 mod interactable;
 mod systems;
 
-use bevy::prelude::ParallelSystemDescriptorCoercion;
 use bevy::{
     app::App,
-    diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
+    // diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
     hierarchy::BuildChildren,
     math::Vec3,
     prelude::{
         default, shape::RegularPolygon, Assets, Camera2dBundle, ClearColor, Color, Commands, Mesh,
-        Msaa, ResMut, Transform,
+        Msaa, ParallelSystemDescriptorCoercion, ResMut, Transform,
     },
     sprite::{ColorMaterial, ColorMesh2dBundle},
     window::WindowDescriptor,
     DefaultPlugins,
 };
-
 use bevy_easings::EasingsPlugin;
+
+#[cfg(feature = "debug")]
 use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
 // use chrono::Utc;
-use components::{Cell, MainCamera};
-use interactable::hover::{just_hovered2, stop_hovering1, stop_hovering2};
+use components::{Cell, CellColors, CellInner, CellOuter, EmptyCell, MainCamera, NumberCell};
 use interactable::{
-    hover::{hover_system, hovering, just_hovered1, Hoverable},
+    hover::{hover_system, Hoverable, MouseEnterEvent, MouseExitEvent, MouseOverEvent},
     shapes::*,
 };
 use rand::{thread_rng, Rng};
-use systems::{hover, unhover};
+use systems::{mouse_enter_cell, mouse_exit_cell, mouse_over_cell};
 // use systems::wiggle;
 
 pub const RADIUS: f32 = 25.0;
 
 fn main() {
-    App::new()
-        .insert_resource(Msaa { samples: 4 })
+    let mut app = App::new();
+
+    app.insert_resource(Msaa { samples: 4 })
         .insert_resource(WindowDescriptor {
             title: "Hexacell".to_string(),
             ..Default::default()
@@ -43,21 +43,24 @@ fn main() {
         .insert_resource(ClearColor(Color::rgb(0.75, 0.75, 0.75)))
         .add_plugins(DefaultPlugins)
         .add_plugin(EasingsPlugin)
-        .add_plugin(WorldInspectorPlugin::new())
         // .add_plugin(LogDiagnosticsPlugin::default())
         // .add_plugin(FrameTimeDiagnosticsPlugin::default())
+        .add_event::<MouseOverEvent>()
+        .add_event::<MouseEnterEvent>()
+        .add_event::<MouseExitEvent>()
         .add_startup_system(setup)
         .add_system(helpers::camera::movement)
         .add_system(helpers::texture::set_texture_filters_to_nearest)
-        .add_system(hover_system)
-        .add_system(hovering)
-        .add_system(just_hovered1.before(hovering))
-        .add_system(just_hovered2.after(just_hovered1))
-        .add_system(stop_hovering1.before(hovering))
-        .add_system(stop_hovering2.after(stop_hovering1))
-        // .add_system(wiggle)
-        .register_inspectable::<Cell>()
-        .run();
+        .add_system(mouse_over_cell)
+        .add_system(mouse_enter_cell.before(mouse_over_cell))
+        .add_system(mouse_exit_cell.before(mouse_over_cell))
+        .add_system(hover_system);
+
+    #[cfg(feature = "debug")]
+    app.add_plugin(WorldInspectorPlugin::new())
+        .register_inspectable::<Cell>();
+
+    app.run();
 }
 
 fn setup(
@@ -140,21 +143,34 @@ fn setup(
                     ..default()
                 })
                 .with_children(|parent| {
-                    parent.spawn_bundle(ColorMesh2dBundle {
-                        mesh: medium_hexagon.clone().into(),
-                        material: colors.0.into(),
-                        transform: medium_transform,
-                        ..default()
-                    });
-                    parent.spawn_bundle(ColorMesh2dBundle {
-                        mesh: small_hexagon.clone().into(),
-                        material: colors.1.into(),
-                        transform: small_transform,
-                        ..default()
-                    });
+                    parent
+                        .spawn_bundle(ColorMesh2dBundle {
+                            mesh: medium_hexagon.clone().into(),
+                            material: colors.0.into(),
+                            transform: medium_transform,
+                            ..default()
+                        })
+                        .insert(CellOuter);
+                    parent
+                        .spawn_bundle(ColorMesh2dBundle {
+                            mesh: small_hexagon.clone().into(),
+                            material: colors.1.into(),
+                            transform: small_transform,
+                            ..default()
+                        })
+                        .insert(CellInner);
                 })
                 .insert(Cell { x, y })
                 .id();
+            match rand {
+                1 => {
+                    commands.entity(cell).insert(NumberCell { count: 0 });
+                }
+                2 => {
+                    commands.entity(cell).insert(EmptyCell);
+                }
+                _ => (),
+            }
             if rand == 0 {
                 commands.entity(cell).insert(Hoverable {
                     ignore_scale: true,
@@ -163,15 +179,23 @@ fn setup(
                         radius: RADIUS,
                         point_up: false,
                     }),
-
-                    // on_hover: Some(|mut c, e, t| println!("hov")),
-                    // on_enter: Some(|mut c, e, t| println!("enter")),
-                    // on_exit: Some(|mut c, e, t| println!("stop")),
-                    on_enter: Some(|mut c, e, t| hover(&mut c, e, t)),
-                    on_exit: Some(|mut c, e, t| unhover(&mut c, e, t)),
                     ..default()
                 });
             }
         }
     }
+
+    commands.insert_resource(CellColors {
+        white: white.clone(),
+        yellow_dark: materials.add(ColorMaterial {
+            color: Color::hex("aa8800").unwrap(),
+            ..default()
+        }),
+        yellow_medium: yellow.0.clone(),
+        yellow_light: yellow.1.clone(),
+        gray_dark: gray.0.clone(),
+        gray_light: gray.1.clone(),
+        blue_dark: blue.0.clone(),
+        blue_light: blue.1.clone(),
+    });
 }

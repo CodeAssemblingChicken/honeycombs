@@ -42,7 +42,7 @@ pub struct Circle {
 impl ContainsPoint for Circle {
     fn contains_point(&self, p: Vec2, tl: Vec2, s: Option<Vec2>) -> bool {
         // TODO: Handle non uniform scaling (sx != sy)
-        let (sx, sy) = scale_to_pair(s);
+        let (sx, _sy) = scale_to_pair(s);
         // let c = tl
         //     - Vec2 {
         //         x: self.radius / 2.,
@@ -61,7 +61,7 @@ impl ContainsPoint for Hexagon {
     fn contains_point(&self, p: Vec2, tl: Vec2, s: Option<Vec2>) -> bool {
         // TODO: Handle scaling
         // TODO: handle orientation
-        let (sx, sy) = scale_to_pair(s);
+        let (_sx, _sy) = scale_to_pair(s);
 
         let dist = p.distance(tl);
 

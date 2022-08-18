@@ -1,29 +1,26 @@
+use super::shapes::{ContainsPoint, Quad, Shape};
+use crate::components::MainCamera;
 use bevy::{
     math::Vec2,
-    prelude::{Camera, Commands, Component, Entity, Query, Res, Transform, With, Without},
+    prelude::{
+        Camera, Commands, Component, Entity, EventWriter, Query, Res, Transform, With, Without,
+    },
     render::camera::RenderTarget,
     window::Windows,
 };
 
-use crate::components::MainCamera;
-
-use super::shapes::{ContainsPoint, Quad, Shape};
+pub struct MouseOverEvent(pub Entity);
+pub struct MouseEnterEvent(pub Entity);
+pub struct MouseExitEvent(pub Entity);
 
 #[derive(Debug, Component)]
 pub struct Hovering;
-#[derive(Debug, Component)]
-pub struct JustHovered;
-#[derive(Debug, Component)]
-pub struct StopHovering;
 
 #[derive(Component)]
 pub struct Hoverable {
     pub ignore_scale: bool,
     pub pass_through: bool,
     pub shape: Shape,
-    pub on_hover: Option<fn(&mut Commands, Entity, &Transform)>,
-    pub on_enter: Option<fn(&mut Commands, Entity, &Transform)>,
-    pub on_exit: Option<fn(&mut Commands, Entity, &Transform)>,
 }
 
 impl Hoverable {
@@ -46,90 +43,48 @@ impl Default for Hoverable {
                 width: 1.,
                 height: 1.,
             }),
-            on_hover: None,
-            on_enter: None,
-            on_exit: None,
         }
     }
 }
 
 pub fn hover_system(
     mut commands: Commands,
-    mut hoverable_query: Query<(Entity, &Transform, &mut Hoverable)>,
-
+    hovering_query: Query<(Entity, &Transform, &mut Hoverable), With<Hovering>>,
+    not_hovering_query: Query<(Entity, &Transform, &mut Hoverable), Without<Hovering>>,
     wnds: Res<Windows>,
     q_camera: Query<(&Camera, &Transform), With<MainCamera>>,
+    mut ev_mouse_over: EventWriter<MouseOverEvent>,
+    mut ev_mouse_enter: EventWriter<MouseEnterEvent>,
+    mut ev_mouse_exit: EventWriter<MouseExitEvent>,
 ) {
     if let Some(pos) = mouse_to_world_pos(wnds, q_camera) {
         let mut hovers = Vec::new();
-        for (e, t, h) in hoverable_query.iter_mut() {
+
+        for (e, t, h) in hovering_query.iter() {
             if h.contains_point(pos, t) {
                 hovers.push((e, h, t.translation.z));
             } else {
-                commands.entity(e).insert(StopHovering);
+                ev_mouse_exit.send(MouseExitEvent(e));
+                commands.entity(e).remove::<Hovering>();
+            }
+        }
+        for (e, t, h) in not_hovering_query.iter() {
+            if h.contains_point(pos, t) {
+                hovers.push((e, h, t.translation.z));
             }
         }
         hovers.sort_by(|(_, _, z1), (_, _, z2)| z2.partial_cmp(z1).unwrap());
 
         for (e, h, _) in hovers {
-            commands.entity(e).insert(JustHovered);
+            if not_hovering_query.get(e).is_ok() {
+                ev_mouse_enter.send(MouseEnterEvent(e));
+                commands.entity(e).insert(Hovering);
+            }
+            ev_mouse_over.send(MouseOverEvent(e));
             if !h.pass_through {
                 break;
             }
         }
-    }
-}
-
-pub fn hovering(
-    mut commands: Commands,
-    mut hoverable_query: Query<
-        (Entity, &Transform, &mut Hoverable),
-        (With<Hovering>, Without<JustHovered>, Without<StopHovering>),
-    >,
-) {
-    for (e, t, h) in hoverable_query.iter_mut() {
-        h.on_hover.and_then(|f| Some(f(&mut commands, e, t)));
-    }
-}
-pub fn just_hovered1(
-    mut commands: Commands,
-    mut hoverable_query: Query<
-        (Entity, &Transform, &mut Hoverable),
-        (With<JustHovered>, Without<Hovering>),
-    >,
-) {
-    for (e, t, h) in hoverable_query.iter_mut() {
-        h.on_enter.and_then(|f| Some(f(&mut commands, e, t)));
-        commands.entity(e).remove::<JustHovered>();
-        commands.entity(e).insert(Hovering);
-    }
-}
-pub fn just_hovered2(
-    mut commands: Commands,
-    mut hoverable_query: Query<Entity, (With<Hoverable>, With<JustHovered>, With<Hovering>)>,
-) {
-    for e in hoverable_query.iter_mut() {
-        commands.entity(e).remove::<JustHovered>();
-    }
-}
-pub fn stop_hovering1(
-    mut commands: Commands,
-    mut hoverable_query: Query<
-        (Entity, &Transform, &Hoverable),
-        (With<StopHovering>, With<Hovering>),
-    >,
-) {
-    for (e, t, h) in hoverable_query.iter_mut() {
-        h.on_exit.and_then(|f| Some(f(&mut commands, e, t)));
-        commands.entity(e).remove::<Hovering>();
-    }
-}
-pub fn stop_hovering2(
-    mut commands: Commands,
-    mut hoverable_query: Query<Entity, (With<Hoverable>, With<StopHovering>)>,
-) {
-    for e in hoverable_query.iter_mut() {
-        commands.entity(e).remove::<StopHovering>();
     }
 }
 
