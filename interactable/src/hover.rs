@@ -1,8 +1,8 @@
-use super::{
+use crate::{
     common::{mouse_to_world_pos, Interactable},
     shapes::{ContainsPoint, Quad, Shape},
+    InteractableCamera,
 };
-use crate::components::MainCamera;
 use bevy::{
     math::Vec2,
     prelude::{
@@ -54,7 +54,7 @@ pub fn hover_system(
     hovering_query: Query<(Entity, &Transform, &mut Hoverable), With<Hovering>>,
     not_hovering_query: Query<(Entity, &Transform, &mut Hoverable), Without<Hovering>>,
     wnds: Res<Windows>,
-    q_camera: Query<(&Camera, &Transform), With<MainCamera>>,
+    q_camera: Query<(&Camera, &Transform), With<InteractableCamera>>,
     mut ev_mouse_over: EventWriter<MouseOverEvent>,
     mut ev_mouse_enter: EventWriter<MouseEnterEvent>,
     mut ev_mouse_exit: EventWriter<MouseExitEvent>,

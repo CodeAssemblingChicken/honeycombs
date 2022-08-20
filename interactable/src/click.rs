@@ -1,3 +1,8 @@
+use crate::{
+    common::{mouse_to_world_pos, Interactable},
+    shapes::{ContainsPoint, Quad, Shape},
+    InteractableCamera,
+};
 use bevy::{
     input::{mouse::MouseButtonInput, Input},
     math::Vec2,
@@ -6,13 +11,6 @@ use bevy::{
         With,
     },
     window::Windows,
-};
-
-use crate::components::MainCamera;
-
-use super::{
-    common::{mouse_to_world_pos, Interactable},
-    shapes::{ContainsPoint, Quad, Shape},
 };
 
 pub struct MouseLeftJustEvent(pub Entity);
@@ -71,7 +69,7 @@ pub fn click_system(
     // hovering_query: Query<(Entity, &Transform, &mut Hoverable), With<Hovering>>,
     // not_hovering_query: Query<(Entity, &Transform, &mut Hoverable), Without<Hovering>>,
     wnds: Res<Windows>,
-    q_camera: Query<(&Camera, &Transform), With<MainCamera>>,
+    q_camera: Query<(&Camera, &Transform), With<InteractableCamera>>,
     mouse_button_input: Res<Input<MouseButton>>,
     mouse_button_input_events: EventReader<MouseButtonInput>,
     (mut lj, mut lp, mut lr, mut rj, mut rp, mut rr): (

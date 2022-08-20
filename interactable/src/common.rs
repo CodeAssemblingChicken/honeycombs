@@ -1,11 +1,10 @@
+use crate::InteractableCamera;
 use bevy::{
     math::Vec2,
     prelude::{Camera, Query, Res, Transform, With},
     render::camera::RenderTarget,
     window::Windows,
 };
-
-use crate::components::MainCamera;
 
 pub trait Interactable {
     fn contains_point(&self, point: Vec2, tf: &Transform) -> bool;
@@ -15,7 +14,7 @@ pub fn mouse_to_world_pos(
     // need to get window dimensions
     wnds: Res<Windows>,
     // query to get camera transform
-    q_camera: Query<(&Camera, &Transform), With<MainCamera>>,
+    q_camera: Query<(&Camera, &Transform), With<InteractableCamera>>,
 ) -> Option<Vec2> {
     // get the camera info and transform
     // assuming there is exactly one main camera entity, so query::single() is OK

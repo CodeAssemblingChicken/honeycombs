@@ -1,8 +1,4 @@
-use crate::{
-    functions::spawn_cell_text,
-    interactable::{click::Clickable, hover::Hoverable},
-    RADIUS, SCALE_ENLARGED, SCALE_NORMAL,
-};
+use crate::{functions::spawn_cell_text, RADIUS, SCALE_ENLARGED, SCALE_NORMAL};
 use bevy::{
     asset::HandleId,
     audio::AudioSource,
@@ -13,10 +9,8 @@ use bevy::{
     text::{TextAlignment, TextStyle},
 };
 use bevy_easings::{Ease, EaseFunction, EasingType};
+use interactable::{click::Clickable, hover::Hoverable};
 use std::time::Duration;
-
-#[derive(Component)]
-pub struct MainCamera;
 
 #[cfg_attr(feature = "debug", derive(bevy_inspector_egui::Inspectable))]
 #[derive(Component, Clone)]

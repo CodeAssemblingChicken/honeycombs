@@ -1560,6 +1560,7 @@ dependencies = [
  "bevy",
  "bevy-inspector-egui",
  "bevy_easings",
+ "interactable",
  "rand",
 ]
 
@@ -1649,6 +1650,13 @@ dependencies = [
  "js-sys",
  "wasm-bindgen",
  "web-sys",
+]
+
+[[package]]
+name = "interactable"
+version = "0.1.0"
+dependencies = [
+ "bevy",
 ]
 
 [[package]]

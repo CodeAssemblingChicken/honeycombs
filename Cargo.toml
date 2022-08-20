@@ -17,6 +17,7 @@ debug = ["bevy/dynamic", "bevy-inspector-egui"]
 bevy_easings = "0.8"
 # chrono = "0.4"
 rand = "0.8"
+interactable = { path = "interactable" }
 
 [dependencies.bevy]
 version = "0.8"

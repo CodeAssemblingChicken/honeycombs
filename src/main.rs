@@ -2,7 +2,6 @@ mod components;
 mod constants;
 mod functions;
 mod helpers;
-mod interactable;
 mod systems;
 
 use bevy::{
@@ -26,21 +25,18 @@ use bevy_easings::EasingsPlugin;
 use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
 // use chrono::Utc;
 use components::{
-    Cell, CellColors, CellInner, CellOuter, EmptyCell, HiddenCell, MainCamera, NumberCell,
-    SfxHover, TextSettings,
+    Cell, CellColors, CellInner, CellOuter, EmptyCell, HiddenCell, NumberCell, SfxHover,
+    TextSettings,
 };
 use constants::*;
 use functions::spawn_cell_text;
 use interactable::{
-    click::{
-        click_system, Clickable, MouseLeftJustEvent, MouseLeftPressedEvent, MouseLeftReleasedEvent,
-        MouseRightJustEvent, MouseRightPressedEvent, MouseRightReleasedEvent,
-    },
-    hover::{hover_system, Hoverable, MouseEnterEvent, MouseExitEvent, MouseOverEvent},
-    shapes::*,
+    click::Clickable, hover::Hoverable, shapes::*, InteractableCamera, InteractablePlugin,
 };
 use rand::{thread_rng, Rng};
-use systems::{mouse_click_cell, mouse_enter_cell, mouse_exit_cell, mouse_over_cell};
+use systems::{
+    mouse_click_cell, mouse_enter_cell, mouse_exit_cell, mouse_over_cell, window_resize_system,
+};
 
 fn main() {
     let mut app = App::new();
@@ -52,26 +48,17 @@ fn main() {
         })
         .insert_resource(ClearColor(Color::rgb(0.25, 0.25, 0.25)))
         .add_plugins(DefaultPlugins)
+        .add_plugin(InteractablePlugin)
         .add_plugin(EasingsPlugin)
         // .add_plugin(LogDiagnosticsPlugin::default())
         // .add_plugin(FrameTimeDiagnosticsPlugin::default())
-        .add_event::<MouseOverEvent>()
-        .add_event::<MouseEnterEvent>()
-        .add_event::<MouseExitEvent>()
-        .add_event::<MouseLeftJustEvent>()
-        .add_event::<MouseLeftPressedEvent>()
-        .add_event::<MouseLeftReleasedEvent>()
-        .add_event::<MouseRightJustEvent>()
-        .add_event::<MouseRightPressedEvent>()
-        .add_event::<MouseRightReleasedEvent>()
         .add_startup_system(setup)
         .add_system(helpers::camera::movement)
         .add_system(mouse_over_cell)
         .add_system(mouse_enter_cell.before(mouse_over_cell))
         .add_system(mouse_exit_cell.before(mouse_enter_cell))
         .add_system(mouse_click_cell)
-        .add_system(hover_system)
-        .add_system(click_system);
+        .add_system(window_resize_system);
 
     #[cfg(feature = "debug")]
     app.add_plugin(WorldInspectorPlugin::new())
@@ -92,7 +79,7 @@ fn setup(
                 .with_translation(Vec3::new(0., 0., 999.9)),
             ..default()
         })
-        .insert(MainCamera);
+        .insert(InteractableCamera);
     // commands
     //     .spawn_bundle(Camera2dBundle::default())
     //     .insert(MainCamera);
@@ -158,10 +145,10 @@ fn setup(
     let sfx_hover: Handle<AudioSource> = asset_server.load("sfx/hover.ogg");
     commands.insert_resource(SfxHover(sfx_hover));
 
-    let font = asset_server.load("fonts/DejaVuSansMono.ttf");
+    let font = asset_server.load("fonts/Purisa-Bold.otf");
     let text_style = TextStyle {
         font,
-        font_size: RADIUS.round(),
+        font_size: (RADIUS * 1.3).round(),
         color: Color::WHITE,
     };
     let text_settings = TextSettings {

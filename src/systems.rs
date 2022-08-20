@@ -1,15 +1,14 @@
-use crate::{
-    components::{Cell, CellColors, EmptyCell, NumberCell, SfxHover, TextSettings},
-    interactable::{
-        click::{MouseLeftReleasedEvent, MouseRightReleasedEvent},
-        hover::{MouseEnterEvent, MouseExitEvent, MouseOverEvent},
-    },
-};
+use crate::components::{Cell, CellColors, EmptyCell, NumberCell, SfxHover, TextSettings};
 use bevy::{
     audio::{Audio, PlaybackSettings},
     prelude::{
         ColorMaterial, Commands, EventReader, Handle, Query, Res, ResMut, Transform, With, Without,
     },
+    window::WindowResized,
+};
+use interactable::{
+    click::{MouseLeftReleasedEvent, MouseRightReleasedEvent},
+    hover::{MouseEnterEvent, MouseExitEvent, MouseOverEvent},
 };
 
 pub fn mouse_click_cell(
@@ -57,7 +56,7 @@ pub fn mouse_enter_cell(
 ) {
     for ev in ev_mouse_enter.iter() {
         if let Ok(mut cell) = cell_query.get_mut(ev.0) {
-            audio.play_with_settings(clip.0.clone(), PlaybackSettings::ONCE.with_volume(0.1));
+            audio.play_with_settings(clip.0.clone(), PlaybackSettings::ONCE.with_volume(0.05));
             cell.hover(&mut commands, &mut color_query, &cell_colors);
         }
     }
@@ -75,6 +74,8 @@ pub fn mouse_exit_cell(
         }
     }
 }
+
+#[allow(unused_mut, unused_variables)]
 pub fn mouse_over_cell(
     mut commands: Commands,
     cell_query: Query<&Transform, With<Cell>>,
@@ -85,42 +86,8 @@ pub fn mouse_over_cell(
     }
 }
 
-// pub fn wiggle(
-//     mut commands: Commands,
-//     hovered_cell: Res<HoveredCell>,
-//     cell_query: Query<(Entity, &mut Transform), With<Cell>>,
-// ) {
-//     if hovered_cell.is_changed() && hovered_cell.entity.is_some() {
-//         if let Ok((entity, t)) = cell_query.get(hovered_cell.entity.unwrap()) {
-//             let mut t0 = t.clone();
-//             t0.scale = Vec3::new(1.0, 1.0, 1.);
-//             let mut t1 = t.clone();
-//             t1.scale = Vec3::new(1.03, 1.03, 1.);
-//             let mut t2 = t.clone();
-//             t2.scale = Vec3::new(0.98, 0.98, 1.);
-//             commands.entity(entity).insert(
-//                 t.ease_to(
-//                     t1,
-//                     EaseFunction::SineInOut,
-//                     EasingType::Once {
-//                         duration: Duration::from_millis(30),
-//                     },
-//                 )
-//                 .ease_to(
-//                     t2,
-//                     EaseFunction::SineInOut,
-//                     EasingType::Once {
-//                         duration: Duration::from_millis(60),
-//                     },
-//                 )
-//                 .ease_to(
-//                     t1,
-//                     EaseFunction::SineInOut,
-//                     EasingType::Once {
-//                         duration: Duration::from_millis(30),
-//                     },
-//                 ),
-//             );
-//         }
-//     }
-// }
+pub fn window_resize_system(mut ev_window_resize: EventReader<WindowResized>) {
+    for ev in ev_window_resize.iter() {
+        println!("{}×{}", ev.width, ev.height);
+    }
+}
