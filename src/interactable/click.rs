@@ -2,8 +2,8 @@ use bevy::{
     input::{mouse::MouseButtonInput, Input},
     math::Vec2,
     prelude::{
-        default, Camera, Component, Entity, EventReader, EventWriter, MouseButton, Query, Res,
-        Transform, With,
+        Camera, Component, Entity, EventReader, EventWriter, MouseButton, Query, Res, Transform,
+        With,
     },
     window::Windows,
 };
@@ -27,12 +27,12 @@ pub struct Clickable {
     pub ignore_scale: bool,
     pub pass_through: bool,
     pub shape: Shape,
-    // pub left_just: bool,
-    // pub left_pressed: bool,
-    // pub left_released: bool,
-    // pub right_just: bool,
-    // pub right_pressed: bool,
-    // pub right_released: bool,
+    pub left_just: bool,
+    pub left_pressed: bool,
+    pub left_released: bool,
+    pub right_just: bool,
+    pub right_pressed: bool,
+    pub right_released: bool,
 }
 
 impl Interactable for Clickable {
@@ -49,11 +49,18 @@ impl Interactable for Clickable {
 impl Default for Clickable {
     fn default() -> Self {
         Self {
+            ignore_scale: false,
+            pass_through: false,
             shape: Shape::Quad(Quad {
                 width: 1.,
                 height: 1.,
             }),
-            ..default()
+            left_just: false,
+            left_pressed: false,
+            left_released: false,
+            right_just: false,
+            right_pressed: false,
+            right_released: false,
         }
     }
 }
@@ -90,24 +97,24 @@ pub fn click_system(
         clicks.sort_by(|(_, _, z1), (_, _, z2)| z2.partial_cmp(z1).unwrap());
 
         for (e, c, _) in clicks {
-            // if c.left_just && mouse_button_input.just_pressed(MouseButton::Left) {
-            //     lj.send(MouseLeftJustEvent(e))
-            // }
-            // if c.left_pressed && mouse_button_input.pressed(MouseButton::Left) {
-            //     lp.send(MouseLeftPressedEvent(e))
-            // }
-            // if c.left_released && mouse_button_input.just_released(MouseButton::Left) {
-            //     lr.send(MouseLeftReleasedEvent(e))
-            // }
-            // if c.right_just && mouse_button_input.just_pressed(MouseButton::Right) {
-            //     rj.send(MouseRightJustEvent(e))
-            // }
-            // if c.right_pressed && mouse_button_input.pressed(MouseButton::Right) {
-            //     rp.send(MouseRightPressedEvent(e))
-            // }
-            // if c.right_released && mouse_button_input.just_released(MouseButton::Right) {
-            //     rr.send(MouseRightReleasedEvent(e))
-            // }
+            if c.left_just && mouse_button_input.just_pressed(MouseButton::Left) {
+                lj.send(MouseLeftJustEvent(e))
+            }
+            if c.left_pressed && mouse_button_input.pressed(MouseButton::Left) {
+                lp.send(MouseLeftPressedEvent(e))
+            }
+            if c.left_released && mouse_button_input.just_released(MouseButton::Left) {
+                lr.send(MouseLeftReleasedEvent(e))
+            }
+            if c.right_just && mouse_button_input.just_pressed(MouseButton::Right) {
+                rj.send(MouseRightJustEvent(e))
+            }
+            if c.right_pressed && mouse_button_input.pressed(MouseButton::Right) {
+                rp.send(MouseRightPressedEvent(e))
+            }
+            if c.right_released && mouse_button_input.just_released(MouseButton::Right) {
+                rr.send(MouseRightReleasedEvent(e))
+            }
 
             if !c.pass_through {
                 break;

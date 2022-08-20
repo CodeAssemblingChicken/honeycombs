@@ -1,55 +1,54 @@
 use crate::{
-    components::{Cell, CellColors, EmptyCell, NumberCell, SfxHover},
+    components::{Cell, CellColors, EmptyCell, NumberCell, SfxHover, TextSettings},
     interactable::{
-        click::{
-            MouseLeftJustEvent, MouseLeftPressedEvent, MouseLeftReleasedEvent, MouseRightJustEvent,
-            MouseRightPressedEvent, MouseRightReleasedEvent,
-        },
+        click::{MouseLeftReleasedEvent, MouseRightReleasedEvent},
         hover::{MouseEnterEvent, MouseExitEvent, MouseOverEvent},
     },
 };
 use bevy::{
-    audio::{Audio, AudioSink},
+    audio::{Audio, PlaybackSettings},
     prelude::{
-        Assets, ColorMaterial, Commands, EventReader, Handle, Query, Res, ResMut, Transform, With,
+        ColorMaterial, Commands, EventReader, Handle, Query, Res, ResMut, Transform, With, Without,
     },
 };
 
 pub fn mouse_click_cell(
     mut commands: Commands,
-    number_cell_query: Query<(&Transform, &Cell, &NumberCell)>,
-    empty_cell_query: Query<(&Transform, &Cell, &EmptyCell)>,
+    mut number_cell_query: Query<(&mut Cell, &NumberCell), Without<EmptyCell>>,
+    mut empty_cell_query: Query<&mut Cell, With<EmptyCell>>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     cell_colors: ResMut<CellColors>,
-    mut ev_mouse_click: EventReader<MouseLeftJustEvent>,
+    text_settings: Res<TextSettings>,
+    mut ev_mouse_left_click: EventReader<MouseLeftReleasedEvent>,
+    mut ev_mouse_right_click: EventReader<MouseRightReleasedEvent>,
 ) {
-    for ev in ev_mouse_click.iter() {
-        println!("Click");
-        if let Ok((t, cell, nc)) = number_cell_query.get(ev.0) {
+    for ev in ev_mouse_left_click.iter() {
+        if let Ok((cell, _nc)) = number_cell_query.get(ev.0) {
+            cell.uncover_fail(&mut commands);
+        }
+        if let Ok(mut cell) = empty_cell_query.get_mut(ev.0) {
+            cell.uncover_empty(&mut commands, &mut color_query, cell_colors.as_ref());
+        }
+    }
+    for ev in ev_mouse_right_click.iter() {
+        if let Ok((mut cell, nc)) = number_cell_query.get_mut(ev.0) {
             cell.uncover_number(
                 &mut commands,
-                ev.0,
-                t,
                 &mut color_query,
                 cell_colors.as_ref(),
                 nc,
+                text_settings.as_ref(),
             );
         }
-        if let Ok((t, cell, _ec)) = empty_cell_query.get(ev.0) {
-            cell.uncover_empty(
-                &mut commands,
-                ev.0,
-                t,
-                &mut color_query,
-                cell_colors.as_ref(),
-            );
+        if let Ok(cell) = empty_cell_query.get(ev.0) {
+            cell.uncover_fail(&mut commands);
         }
     }
 }
 
 pub fn mouse_enter_cell(
     mut commands: Commands,
-    cell_query: Query<(&Transform, &mut Cell)>,
+    mut cell_query: Query<&mut Cell>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     cell_colors: ResMut<CellColors>,
     mut ev_mouse_enter: EventReader<MouseEnterEvent>,
@@ -57,22 +56,22 @@ pub fn mouse_enter_cell(
     clip: Res<SfxHover>,
 ) {
     for ev in ev_mouse_enter.iter() {
-        if let Ok((t, cell)) = cell_query.get(ev.0) {
-            audio.play(clip.0.clone());
-            cell.hover(&mut commands, t, &mut color_query, &cell_colors);
+        if let Ok(mut cell) = cell_query.get_mut(ev.0) {
+            audio.play_with_settings(clip.0.clone(), PlaybackSettings::ONCE.with_volume(0.1));
+            cell.hover(&mut commands, &mut color_query, &cell_colors);
         }
     }
 }
 pub fn mouse_exit_cell(
     mut commands: Commands,
-    cell_query: Query<(&Transform, &Cell)>,
+    mut cell_query: Query<&mut Cell>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     cell_colors: ResMut<CellColors>,
     mut ev_mouse_exit: EventReader<MouseExitEvent>,
 ) {
     for ev in ev_mouse_exit.iter() {
-        if let Ok((t, cell)) = cell_query.get(ev.0) {
-            cell.unhover(&mut commands, t, &mut color_query, &cell_colors);
+        if let Ok(mut cell) = cell_query.get_mut(ev.0) {
+            cell.unhover(&mut commands, &mut color_query, &cell_colors);
         }
     }
 }

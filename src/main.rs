@@ -1,11 +1,13 @@
 mod components;
+mod constants;
+mod functions;
 mod helpers;
 mod interactable;
 mod systems;
 
 use bevy::{
     app::App,
-    audio::{Audio, AudioSink, AudioSource},
+    audio::AudioSource,
     // diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
     hierarchy::BuildChildren,
     math::Vec3,
@@ -14,6 +16,7 @@ use bevy::{
         Commands, Handle, Mesh, Msaa, ParallelSystemDescriptorCoercion, Res, ResMut, Transform,
     },
     sprite::{ColorMaterial, ColorMesh2dBundle},
+    text::{TextAlignment, TextStyle},
     window::WindowDescriptor,
     DefaultPlugins,
 };
@@ -23,8 +26,11 @@ use bevy_easings::EasingsPlugin;
 use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
 // use chrono::Utc;
 use components::{
-    Cell, CellColors, CellInner, CellOuter, EmptyCell, HiddenCell, MainCamera, NumberCell, SfxHover,
+    Cell, CellColors, CellInner, CellOuter, EmptyCell, HiddenCell, MainCamera, NumberCell,
+    SfxHover, TextSettings,
 };
+use constants::*;
+use functions::spawn_cell_text;
 use interactable::{
     click::{
         click_system, Clickable, MouseLeftJustEvent, MouseLeftPressedEvent, MouseLeftReleasedEvent,
@@ -36,8 +42,6 @@ use interactable::{
 use rand::{thread_rng, Rng};
 use systems::{mouse_click_cell, mouse_enter_cell, mouse_exit_cell, mouse_over_cell};
 
-pub const RADIUS: f32 = 25.0;
-
 fn main() {
     let mut app = App::new();
 
@@ -46,7 +50,7 @@ fn main() {
             title: "Hexacell".to_string(),
             ..Default::default()
         })
-        .insert_resource(ClearColor(Color::rgb(0.75, 0.75, 0.75)))
+        .insert_resource(ClearColor(Color::rgb(0.25, 0.25, 0.25)))
         .add_plugins(DefaultPlugins)
         .add_plugin(EasingsPlugin)
         // .add_plugin(LogDiagnosticsPlugin::default())
@@ -62,13 +66,12 @@ fn main() {
         .add_event::<MouseRightReleasedEvent>()
         .add_startup_system(setup)
         .add_system(helpers::camera::movement)
-        .add_system(helpers::texture::set_texture_filters_to_nearest)
         .add_system(mouse_over_cell)
         .add_system(mouse_enter_cell.before(mouse_over_cell))
         .add_system(mouse_exit_cell.before(mouse_enter_cell))
-        // .add_system(mouse_click_cell)
-        .add_system(hover_system);
-    // .add_system(click_system);
+        .add_system(mouse_click_cell)
+        .add_system(hover_system)
+        .add_system(click_system);
 
     #[cfg(feature = "debug")]
     app.add_plugin(WorldInspectorPlugin::new())
@@ -82,21 +85,26 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     asset_server: Res<AssetServer>,
-    audio: Res<Audio>,
-    audio_sinks: Res<Assets<AudioSink>>,
 ) {
     commands
-        .spawn_bundle(Camera2dBundle::default())
+        .spawn_bundle(Camera2dBundle {
+            transform: Transform::from_scale(Vec3::new(3.0, 3.0, 1.0))
+                .with_translation(Vec3::new(0., 0., 999.9)),
+            ..default()
+        })
         .insert(MainCamera);
+    // commands
+    //     .spawn_bundle(Camera2dBundle::default())
+    //     .insert(MainCamera);
 
     let mut rng = thread_rng();
 
-    let medium_transform = Transform::from_translation(Vec3::new(0.0, 0.0, 3.0));
-    let small_transform = Transform::from_translation(Vec3::new(0.0, 0.0, 4.0));
+    let medium_transform = Transform::from_translation(Vec3::new(0.0, 0.0, Z_INDEX_CELL_OUTER));
+    let small_transform = Transform::from_translation(Vec3::new(0.0, 0.0, Z_INDEX_CELL_INNER));
 
     let big_hexagon = meshes.add(Mesh::from(RegularPolygon::new(RADIUS, 6)));
     let medium_hexagon = meshes.add(Mesh::from(RegularPolygon::new(RADIUS * 0.94, 6)));
-    let small_hexagon = meshes.add(Mesh::from(RegularPolygon::new(RADIUS * 0.76, 6)));
+    let small_hexagon = meshes.add(Mesh::from(RegularPolygon::new(RADIUS * 0.8, 6)));
 
     let white = materials.add(ColorMaterial {
         color: Color::WHITE,
@@ -104,21 +112,21 @@ fn setup(
     });
     let yellow = (
         materials.add(ColorMaterial {
-            color: Color::hex("d4aa00").unwrap(),
+            color: Color::hex("dc8c10").unwrap(),
             ..default()
         }),
         materials.add(ColorMaterial {
-            color: Color::hex("ffcc00").unwrap(),
+            color: Color::hex("e4a020").unwrap(),
             ..default()
         }),
     );
     let blue = (
         materials.add(ColorMaterial {
-            color: Color::hex("0088aa").unwrap(),
+            color: Color::hex("0088e8").unwrap(),
             ..default()
         }),
         materials.add(ColorMaterial {
-            color: Color::hex("00aad4").unwrap(),
+            color: Color::hex("00a0f0").unwrap(),
             ..default()
         }),
     );
@@ -133,22 +141,56 @@ fn setup(
         }),
     );
 
+    commands.insert_resource(CellColors {
+        white: white.clone(),
+        yellow_dark: materials.add(ColorMaterial {
+            color: Color::hex("d87408").unwrap(),
+            ..default()
+        }),
+        yellow_medium: yellow.0.clone(),
+        yellow_light: yellow.1.clone(),
+        gray_dark: gray.0.clone(),
+        gray_light: gray.1.clone(),
+        blue_dark: blue.0.clone(),
+        blue_light: blue.1.clone(),
+    });
+
+    let sfx_hover: Handle<AudioSource> = asset_server.load("sfx/hover.ogg");
+    commands.insert_resource(SfxHover(sfx_hover));
+
+    let font = asset_server.load("fonts/DejaVuSansMono.ttf");
+    let text_style = TextStyle {
+        font,
+        font_size: RADIUS.round(),
+        color: Color::WHITE,
+    };
+    let text_settings = TextSettings {
+        style: text_style,
+        alignment: TextAlignment::CENTER,
+    };
+    commands.insert_resource(text_settings.clone());
+
     for x in 0..20 {
         for y in 0..20 {
-            let tx = x as f32 * RADIUS * 1.8;
-            let ty = (y + 1) as f32 * RADIUS * 2.0
+            let tx = x as f32 * RADIUS * 1.56;
+            let ty = (y + 1) as f32 * RADIUS * 1.8
                 - match x % 2 {
-                    0 => RADIUS,
+                    0 => RADIUS * 0.9,
                     _ => 0.,
                 };
-            let rand = rng.gen_range(0..3);
-            let colors = match rand {
-                0 => yellow.clone(),
-                1 => blue.clone(),
-                _ => gray.clone(),
+            let rand_type = rng.gen_range(0..2);
+            let rand_hidden = rng.gen_range(0..3);
+            let colors = if rand_hidden == 0 {
+                match rand_type {
+                    0 => gray.clone(),
+                    _ => blue.clone(),
+                }
+            } else {
+                yellow.clone()
             };
 
-            let mut big_transform = Transform::from_translation(Vec3::new(tx, ty, 2.0));
+            let mut big_transform =
+                Transform::from_translation(Vec3::new(tx, ty, Z_INDEX_CELL_BACK));
             big_transform.rotate_z(f32::to_radians(90.0));
 
             let b1 = ColorMesh2dBundle {
@@ -184,56 +226,49 @@ fn setup(
                 entity: cell,
                 outer_hexagon: child1,
                 inner_hexagon: child2,
+                orig: big_transform,
+                hovering: false,
             });
             commands.entity(cell).push_children(&[child1, child2]);
 
-            match rand {
-                1 => {
-                    commands.entity(cell).insert(NumberCell { count: 0 });
+            match rand_type {
+                0 => {
+                    let nc = NumberCell {
+                        count: rng.gen_range(0..=6),
+                    };
+                    if rand_hidden == 0 {
+                        spawn_cell_text(big_transform, &mut commands, &nc, &text_settings);
+                    }
+                    commands.entity(cell).insert(nc);
                 }
-                2 => {
+                _ => {
                     commands.entity(cell).insert(EmptyCell);
                 }
-                _ => (),
             }
-            if rand == 0 {
-                let shape = commands.entity(cell).insert_bundle(HiddenCell {
-                    // hoverable: Hoverable {
-                    //     ignore_scale: true,
-                    //     pass_through: false,
-                    //     shape: Shape::Hexagon(Hexagon {
-                    //         radius: RADIUS,
-                    //         point_up: false,
-                    //     }),
-                    //     ..default()
-                    // },
-                    clickable: Clickable {
+            if rand_hidden > 0 {
+                commands.entity(cell).insert_bundle(HiddenCell {
+                    hoverable: Hoverable {
                         ignore_scale: true,
+                        pass_through: false,
                         shape: Shape::Hexagon(Hexagon {
                             radius: RADIUS,
                             point_up: false,
                         }),
                         ..default()
                     },
+                    clickable: Clickable {
+                        ignore_scale: true,
+                        shape: Shape::Hexagon(Hexagon {
+                            radius: RADIUS,
+                            point_up: false,
+                        }),
+                        left_released: true,
+                        right_released: true,
+
+                        ..default()
+                    },
                 });
             }
         }
     }
-
-    commands.insert_resource(CellColors {
-        white: white.clone(),
-        yellow_dark: materials.add(ColorMaterial {
-            color: Color::hex("aa8800").unwrap(),
-            ..default()
-        }),
-        yellow_medium: yellow.0.clone(),
-        yellow_light: yellow.1.clone(),
-        gray_dark: gray.0.clone(),
-        gray_light: gray.1.clone(),
-        blue_dark: blue.0.clone(),
-        blue_light: blue.1.clone(),
-    });
-
-    let sfx_hover: Handle<AudioSource> = asset_server.load("sfx/hover.ogg");
-    commands.insert_resource(SfxHover(sfx_hover));
 }

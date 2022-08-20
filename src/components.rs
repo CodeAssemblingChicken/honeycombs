@@ -1,17 +1,19 @@
-use crate::interactable::{click::Clickable, hover::Hoverable};
+use crate::{
+    functions::spawn_cell_text,
+    interactable::{click::Clickable, hover::Hoverable},
+    RADIUS, SCALE_ENLARGED, SCALE_NORMAL,
+};
 use bevy::{
     asset::HandleId,
-    audio::{AudioSink, AudioSource},
+    audio::AudioSource,
     math::Vec3,
     prelude::{
         Bundle, ColorMaterial, Commands, Component, Entity, Handle, Query, ResMut, Transform,
     },
+    text::{TextAlignment, TextStyle},
 };
 use bevy_easings::{Ease, EaseFunction, EasingType};
 use std::time::Duration;
-
-const SCALE_NORMAL: Vec3 = Vec3::new(1., 1., 1.);
-const SCALE_ENLARGED: Vec3 = Vec3::new(1.06, 1.06, 1.);
 
 #[derive(Component)]
 pub struct MainCamera;
@@ -24,18 +26,23 @@ pub struct Cell {
     pub entity: Entity,
     pub outer_hexagon: Entity,
     pub inner_hexagon: Entity,
+    pub orig: Transform,
+    pub hovering: bool,
 }
 
 impl Cell {
     pub fn hover(
-        &self,
+        &mut self,
         commands: &mut Commands,
-        t: &Transform,
         child_query: &mut Query<&mut Handle<ColorMaterial>>,
         cell_colors: &ResMut<CellColors>,
     ) {
+        if self.hovering {
+            return;
+        }
+        self.hovering = true;
         // Enlarge
-        self.rescale(commands, t, SCALE_ENLARGED);
+        self.rescale(commands, SCALE_ENLARGED);
         // Set colors to hovering
         self.set_colors(
             cell_colors.yellow_medium.id,
@@ -45,14 +52,17 @@ impl Cell {
     }
 
     pub fn unhover(
-        &self,
+        &mut self,
         commands: &mut Commands,
-        t: &Transform,
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
         cell_colors: &ResMut<CellColors>,
     ) {
+        if !self.hovering {
+            return;
+        }
+        self.hovering = false;
         // Normal scale
-        self.rescale(commands, t, SCALE_NORMAL);
+        self.rescale(commands, SCALE_NORMAL);
         // Set colors to normal
         self.set_colors(
             cell_colors.yellow_light.id,
@@ -62,62 +72,88 @@ impl Cell {
     }
 
     pub fn uncover_number(
-        &self,
+        &mut self,
         commands: &mut Commands,
-        entity: Entity,
-        t: &Transform,
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
         cell_colors: &CellColors,
         number_cell: &NumberCell,
+        text_settings: &TextSettings,
     ) {
-        println!("Number");
         self.uncover(
             commands,
-            entity,
-            t,
             color_query,
             (cell_colors.gray_dark.id, cell_colors.gray_light.id),
         );
+        spawn_cell_text(self.orig, commands, number_cell, text_settings);
+        // TODO: Uncover animation/particles
+        // TODO: display number
     }
 
     pub fn uncover_empty(
-        &self,
+        &mut self,
         commands: &mut Commands,
-        entity: Entity,
-        t: &Transform,
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
         cell_colors: &CellColors,
     ) {
-        println!("Empty");
         self.uncover(
             commands,
-            entity,
-            t,
             color_query,
             (cell_colors.blue_dark.id, cell_colors.blue_light.id),
         );
+        // TODO: Uncover animation/particles
     }
 
     fn uncover(
-        &self,
+        &mut self,
         commands: &mut Commands,
-        entity: Entity,
-        t: &Transform,
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
         (dark, light): (HandleId, HandleId),
     ) {
-        commands.entity(entity).remove_bundle::<HiddenCell>();
-        // TODO: Uncover animation/particles
+        if self.hovering {
+            self.hovering = false;
+        }
+        commands.entity(self.entity).remove_bundle::<HiddenCell>();
         // Normal scale
-        self.rescale(commands, t, SCALE_NORMAL);
+        self.rescale(commands, SCALE_NORMAL);
         self.set_colors(light, dark, color_query);
     }
 
-    fn rescale(&self, commands: &mut Commands, orig: &Transform, scale: Vec3) {
+    pub fn uncover_fail(&self, commands: &mut Commands) {
+        let mut t1 = self.orig.clone();
+        let mut t2 = self.orig.clone();
+        t1.translation += Vec3::new(-RADIUS / 10., -RADIUS / 20., 0.0);
+        t2.translation += Vec3::new(RADIUS / 15., RADIUS / 25., 0.0);
+        commands.entity(self.entity).insert(
+            self.orig
+                .ease_to(
+                    t1,
+                    EaseFunction::BounceInOut,
+                    EasingType::Once {
+                        duration: Duration::from_millis(30),
+                    },
+                )
+                .ease_to(
+                    t2,
+                    EaseFunction::BounceInOut,
+                    EasingType::Once {
+                        duration: Duration::from_millis(60),
+                    },
+                )
+                .ease_to(
+                    self.orig,
+                    EaseFunction::BounceInOut,
+                    EasingType::Once {
+                        duration: Duration::from_millis(40),
+                    },
+                ),
+        );
+    }
+
+    fn rescale(&self, commands: &mut Commands, scale: Vec3) {
         // Rescale hexagon to desired scale by easing
-        let mut t1 = orig.clone();
+        let mut t1 = self.orig.clone();
         t1.scale = scale;
-        commands.entity(self.entity).insert(orig.ease_to(
+        commands.entity(self.entity).insert(self.orig.ease_to(
             t1,
             EaseFunction::ElasticOut,
             EasingType::Once {
@@ -147,7 +183,7 @@ impl Cell {
 
 #[derive(Bundle)]
 pub struct HiddenCell {
-    // pub hoverable: Hoverable,
+    pub hoverable: Hoverable,
     pub clickable: Clickable,
 }
 
@@ -176,3 +212,9 @@ pub struct CellColors {
 }
 
 pub struct SfxHover(pub Handle<AudioSource>);
+
+#[derive(Clone)]
+pub struct TextSettings {
+    pub style: TextStyle,
+    pub alignment: TextAlignment,
+}

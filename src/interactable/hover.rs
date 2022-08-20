@@ -87,5 +87,10 @@ pub fn hover_system(
                 break;
             }
         }
+    } else {
+        for (e, _t, _h) in hovering_query.iter() {
+            ev_mouse_exit.send(MouseExitEvent(e));
+            commands.entity(e).remove::<Hovering>();
+        }
     }
 }
