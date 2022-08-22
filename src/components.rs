@@ -15,8 +15,9 @@ use std::time::Duration;
 #[cfg_attr(feature = "debug", derive(bevy_inspector_egui::Inspectable))]
 #[derive(Component, Clone)]
 pub struct Cell {
-    pub x: u32,
-    pub y: u32,
+    pub x: usize,
+    pub y: usize,
+    pub cell_type: CellType,
     pub entity: Entity,
     pub outer_hexagon: Entity,
     pub inner_hexagon: Entity,
@@ -65,47 +66,26 @@ impl Cell {
         );
     }
 
-    pub fn uncover_number(
+    pub fn uncover(
         &mut self,
         commands: &mut Commands,
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
         cell_colors: &CellColors,
-        number_cell: &NumberCell,
+        number_cell: Option<&NumberCell>,
         text_settings: &TextSettings,
     ) {
-        self.uncover(
-            commands,
-            color_query,
-            (cell_colors.gray_dark.id, cell_colors.gray_light.id),
-        );
-        spawn_cell_text(self.orig, commands, number_cell, text_settings);
         // TODO: Uncover animation/particles
-        // TODO: display number
-    }
-
-    pub fn uncover_empty(
-        &mut self,
-        commands: &mut Commands,
-        color_query: &mut Query<&mut Handle<ColorMaterial>>,
-        cell_colors: &CellColors,
-    ) {
-        self.uncover(
-            commands,
-            color_query,
-            (cell_colors.blue_dark.id, cell_colors.blue_light.id),
-        );
-        // TODO: Uncover animation/particles
-    }
-
-    fn uncover(
-        &mut self,
-        commands: &mut Commands,
-        color_query: &mut Query<&mut Handle<ColorMaterial>>,
-        (dark, light): (HandleId, HandleId),
-    ) {
         if self.hovering {
             self.hovering = false;
         }
+        let (dark, light) = match self.cell_type {
+            CellType::NumberCell => {
+                spawn_cell_text(self.orig, commands, number_cell.unwrap(), text_settings);
+                (cell_colors.gray_dark.id, cell_colors.gray_light.id)
+            }
+            CellType::EmptyCell => (cell_colors.blue_dark.id, cell_colors.blue_light.id),
+        };
+
         commands.entity(self.entity).remove_bundle::<HiddenCell>();
         // Normal scale
         self.rescale(commands, SCALE_NORMAL);
@@ -211,4 +191,11 @@ pub struct SfxHover(pub Handle<AudioSource>);
 pub struct TextSettings {
     pub style: TextStyle,
     pub alignment: TextAlignment,
+}
+
+#[cfg_attr(feature = "debug", derive(bevy_inspector_egui::Inspectable))]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum CellType {
+    NumberCell,
+    EmptyCell,
 }

@@ -1,8 +1,14 @@
-use crate::components::{Cell, CellColors, EmptyCell, NumberCell, SfxHover, TextSettings};
+use crate::{
+    board::Board,
+    components::{Cell, CellColors, EmptyCell, NumberCell, SfxHover, TextSettings},
+    constants::RADIUS,
+};
 use bevy::{
     audio::{Audio, PlaybackSettings},
+    math::Vec3,
     prelude::{
-        ColorMaterial, Commands, EventReader, Handle, Query, Res, ResMut, Transform, With, Without,
+        Camera, ColorMaterial, Commands, EventReader, Handle, Query, Res, ResMut, Transform, With,
+        Without,
     },
     window::WindowResized,
 };
@@ -26,16 +32,22 @@ pub fn mouse_click_cell(
             cell.uncover_fail(&mut commands);
         }
         if let Ok(mut cell) = empty_cell_query.get_mut(ev.0) {
-            cell.uncover_empty(&mut commands, &mut color_query, cell_colors.as_ref());
+            cell.uncover(
+                &mut commands,
+                &mut color_query,
+                cell_colors.as_ref(),
+                None,
+                text_settings.as_ref(),
+            );
         }
     }
     for ev in ev_mouse_right_click.iter() {
         if let Ok((mut cell, nc)) = number_cell_query.get_mut(ev.0) {
-            cell.uncover_number(
+            cell.uncover(
                 &mut commands,
                 &mut color_query,
                 cell_colors.as_ref(),
-                nc,
+                Some(nc),
                 text_settings.as_ref(),
             );
         }
@@ -86,8 +98,19 @@ pub fn mouse_over_cell(
     }
 }
 
-pub fn window_resize_system(mut ev_window_resize: EventReader<WindowResized>) {
-    for ev in ev_window_resize.iter() {
-        println!("{}×{}", ev.width, ev.height);
+pub fn window_resize_system(
+    mut ev_window_resize: EventReader<WindowResized>,
+    mut camera_query: Query<&mut Transform, With<Camera>>,
+    board: Query<&Board>,
+) {
+    if let Ok(b) = board.get_single() {
+        for ev in ev_window_resize.iter() {
+            let w = ((b.width + 4) as f32 * RADIUS * 1.56) / ev.width;
+            let h = ((b.height + 4) as f32 * RADIUS * 1.8) / ev.height;
+            let s = w.max(h);
+            for mut t in camera_query.iter_mut() {
+                t.scale = Vec3::new(s, s, 1.0);
+            }
+        }
     }
 }
