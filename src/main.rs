@@ -9,8 +9,8 @@ use bevy::{
     app::App,
     audio::AudioSource,
     prelude::{
-        default, AssetServer, Assets, Camera2dBundle, ClearColor, Color, Commands, Handle, Mesh,
-        Msaa, ParallelSystemDescriptorCoercion, Res, ResMut,
+        AssetServer, Assets, Camera2dBundle, ClearColor, Color, Commands, Handle, Mesh, Msaa,
+        ParallelSystemDescriptorCoercion, Res, ResMut,
     },
     sprite::ColorMaterial,
     text::{TextAlignment, TextStyle},
@@ -52,7 +52,7 @@ fn main() {
         .add_system(mouse_over_cell)
         .add_system(mouse_enter_cell.before(mouse_over_cell))
         .add_system(mouse_exit_cell.before(mouse_enter_cell))
-        .add_system(mouse_click_cell)
+        .add_system(mouse_click_cell.after(mouse_exit_cell))
         .add_system(window_resize_system);
 
     #[cfg(feature = "debug")]
@@ -72,47 +72,23 @@ fn setup(
         .spawn_bundle(Camera2dBundle::default())
         .insert(InteractableCamera);
 
-    let white = materials.add(ColorMaterial {
-        color: Color::WHITE,
-        ..default()
-    });
+    let white = materials.add(ColorMaterial::from(Color::WHITE));
     let yellow = (
-        materials.add(ColorMaterial {
-            color: Color::hex("dc8c10").unwrap(),
-            ..default()
-        }),
-        materials.add(ColorMaterial {
-            color: Color::hex("e4a020").unwrap(),
-            ..default()
-        }),
+        materials.add(ColorMaterial::from(Color::hex("dc8c10").unwrap())),
+        materials.add(ColorMaterial::from(Color::hex("e4a020").unwrap())),
     );
     let gray = (
-        materials.add(ColorMaterial {
-            color: Color::hex("24221c").unwrap(),
-            ..default()
-        }),
-        materials.add(ColorMaterial {
-            color: Color::hex("484537").unwrap(),
-            ..default()
-        }),
+        materials.add(ColorMaterial::from(Color::hex("24221c").unwrap())),
+        materials.add(ColorMaterial::from(Color::hex("484537").unwrap())),
     );
     let blue = (
-        materials.add(ColorMaterial {
-            color: Color::hex("0088e8").unwrap(),
-            ..default()
-        }),
-        materials.add(ColorMaterial {
-            color: Color::hex("00a0f0").unwrap(),
-            ..default()
-        }),
+        materials.add(ColorMaterial::from(Color::hex("0088e8").unwrap())),
+        materials.add(ColorMaterial::from(Color::hex("00a0f0").unwrap())),
     );
 
     commands.insert_resource(CellColors {
         white: white.clone(),
-        yellow_dark: materials.add(ColorMaterial {
-            color: Color::hex("d87408").unwrap(),
-            ..default()
-        }),
+        yellow_dark: materials.add(ColorMaterial::from(Color::hex("d87408").unwrap())),
         yellow_medium: yellow.0.clone(),
         yellow_light: yellow.1.clone(),
         gray_dark: gray.0.clone(),
@@ -124,10 +100,10 @@ fn setup(
     let sfx_hover: Handle<AudioSource> = asset_server.load("sfx/hover.ogg");
     commands.insert_resource(SfxHover(sfx_hover));
 
-    let font = asset_server.load("fonts/Purisa-Bold.otf");
+    let font = asset_server.load("fonts/GFSTheokritos.otf");
     let text_style = TextStyle {
         font,
-        font_size: (RADIUS * 1.3).round(),
+        font_size: (RADIUS * 0.75).round(),
         color: Color::WHITE,
     };
     let text_settings = TextSettings {

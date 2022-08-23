@@ -1,11 +1,12 @@
 use bevy::{
     hierarchy::BuildChildren,
-    math::Vec3,
+    math::{Quat, Vec3},
     prelude::{
-        default, shape::RegularPolygon, Assets, Commands, Component, Handle, Mesh, ResMut,
+        default, shape::RegularPolygon, Assets, Color, Commands, Component, Handle, Mesh, ResMut,
         Transform,
     },
     sprite::{ColorMaterial, ColorMesh2dBundle},
+    text::{Text, Text2dBundle},
 };
 use interactable::{
     click::Clickable,
@@ -15,11 +16,17 @@ use interactable::{
 
 use crate::{
     components::{
-        Cell, CellInner, CellOuter, CellType, EmptyCell, HiddenCell, NumberCell, TextSettings,
+        Cell, CellInner, CellOuter, CellType, ColumnHint, EmptyCell, HiddenCell, HintDirection,
+        HintType, NumberCell, TextSettings,
     },
-    constants::{RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_CELL_INNER, Z_INDEX_CELL_OUTER},
+    constants::{RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_CELL_INNER, Z_INDEX_CELL_OUTER, Z_INDEX_TEXT},
     functions::spawn_cell_text,
 };
+
+pub struct BoardConfig {
+    pub cells: Vec<Vec<(Option<CellType>, bool)>>,
+    pub hints: Vec<ColumnHint>,
+}
 
 #[derive(Component)]
 pub struct Board {
@@ -32,13 +39,16 @@ impl Board {
     pub fn new(
         commands: &mut Commands,
         mut meshes: ResMut<Assets<Mesh>>,
-        cells: Vec<Vec<(Option<CellType>, bool)>>,
+        config: BoardConfig,
         text_settings: &TextSettings,
         white: Handle<ColorMaterial>,
         yellow: (Handle<ColorMaterial>, Handle<ColorMaterial>),
         gray: (Handle<ColorMaterial>, Handle<ColorMaterial>),
         blue: (Handle<ColorMaterial>, Handle<ColorMaterial>),
     ) -> Self {
+        let cells = config.cells;
+        let hints = config.hints;
+
         let medium_transform = Transform::from_translation(Vec3::new(0.0, 0.0, Z_INDEX_CELL_OUTER));
         let small_transform = Transform::from_translation(Vec3::new(0.0, 0.0, Z_INDEX_CELL_INNER));
 
@@ -54,6 +64,7 @@ impl Board {
         let w = ((width - 1) as f32 * RADIUS * 1.56) / 2.;
         let h = ((height - 1) as f32 * RADIUS * 1.8) / 2.;
 
+        // TODO: currently file and board are reversed
         for y in 0..height {
             assert!(
                 cells[y].len() == width,
@@ -69,15 +80,15 @@ impl Board {
                 let cell_type = cell_type.unwrap();
 
                 let tx = x as f32 * RADIUS * 1.56 - w;
-                let ty = y as f32 * RADIUS * 1.8
+                let ty = y as f32 * RADIUS * -1.8
                     + match x % 2 {
                         0 => 0.,
                         _ => RADIUS * 0.9,
                     }
-                    - h;
+                    + h;
                 let colors = if !hidden {
                     match cell_type {
-                        CellType::NumberCell => gray.clone(),
+                        CellType::NumberCell(_) => gray.clone(),
                         CellType::EmptyCell => blue.clone(),
                     }
                 } else {
@@ -118,11 +129,24 @@ impl Board {
                 commands.entity(cell).push_children(&[child1, child2]);
 
                 match cell_type {
-                    CellType::NumberCell => {
-                        let count = get_empty_neighbours(x as i32, y as i32, &cells, width, height);
-                        let nc = NumberCell { count };
+                    CellType::NumberCell(mut ht) => {
+                        if ht == HintType::SOME {
+                            ht = HintType::CONNECTED;
+                        }
+                        let count =
+                            count_empty_cells(get_empty_neighbours(x, y, &cells, width, height));
+                        let nc = NumberCell {
+                            count,
+                            hint_type: ht,
+                        };
                         if !hidden {
-                            spawn_cell_text(big_transform, commands, &nc, &text_settings);
+                            let mut ts = text_settings.clone();
+                            match ht {
+                                HintType::CONNECTED => ts.style.color = Color::GREEN,
+                                HintType::SEPERATED => ts.style.color = Color::RED,
+                                _ => (),
+                            }
+                            spawn_cell_text(big_transform, commands, &nc, &ts);
                         }
                         commands.entity(cell).insert(nc);
                     }
@@ -170,6 +194,39 @@ impl Board {
                 commands.entity(cell).insert(cell_component);
             }
         }
+        for hint in hints {
+            let mut tx = hint.x as f32 * RADIUS * 1.56 - w;
+            let mut ty = hint.y as f32 * RADIUS * -1.8
+                + match hint.x % 2 {
+                    0 => 0.,
+                    _ => RADIUS * 0.9,
+                }
+                + h;
+            let mut t = Transform::from_translation(Vec3::new(0., 0., Z_INDEX_TEXT));
+            match hint.dir {
+                HintDirection::TOP => (ty += 1.3 * RADIUS),
+                HintDirection::LEFT => {
+                    ty += RADIUS * 0.62;
+                    tx -= RADIUS * 1.12;
+                    t.rotate_z(1.047);
+                }
+                HintDirection::RIGHT => {
+                    ty += RADIUS * 0.62;
+                    tx += RADIUS * 1.12;
+                    t.rotate_z(-1.047);
+                }
+            }
+            t.translation.x = tx;
+            t.translation.y = ty;
+            let c = get_empty_in_column(hint.x, hint.y, width, height, &cells, hint.dir);
+            let count = count_empty_cells(c);
+            commands.spawn_bundle(Text2dBundle {
+                text: Text::from_section(format!("{}", count), text_settings.style.clone())
+                    .with_alignment(text_settings.alignment),
+                transform: t,
+                ..default()
+            });
+        }
         Self {
             cells: cell_components,
             width,
@@ -179,22 +236,15 @@ impl Board {
 }
 
 fn get_empty_neighbours(
-    x: i32,
-    y: i32,
+    x: usize,
+    y: usize,
     cells: &Vec<Vec<(Option<CellType>, bool)>>,
     w: usize,
     h: usize,
-) -> u8 {
+) -> Vec<(Option<CellType>, bool)> {
+    let x = x as i32;
+    let y = y as i32;
     let pos = if x % 2 == 0 {
-        [
-            (x - 1, y - 1),
-            (x - 1, y),
-            (x, y - 1),
-            (x, y + 1),
-            (x + 1, y - 1),
-            (x + 1, y),
-        ]
-    } else {
         [
             (x - 1, y),
             (x - 1, y + 1),
@@ -203,22 +253,93 @@ fn get_empty_neighbours(
             (x + 1, y),
             (x + 1, y + 1),
         ]
+    } else {
+        [
+            (x - 1, y - 1),
+            (x - 1, y),
+            (x, y - 1),
+            (x, y + 1),
+            (x + 1, y - 1),
+            (x + 1, y),
+        ]
     };
-
     pos.iter()
-        .map(|(x, y)| {
-            if x < &0 || x >= &(w as i32) || y < &0 || y >= &(h as i32) {
-                0
-            } else {
-                if let Some(ct) = cells[*y as usize][*x as usize].0 {
-                    if ct == CellType::EmptyCell {
-                        1
-                    } else {
-                        0
-                    }
+        .filter(|(x, y)| !(*x < 0 || *x >= w as i32 || *y < 0 || *y >= h as i32))
+        .map(|(x, y)| cells[*y as usize][*x as usize])
+        .collect()
+}
+
+fn get_empty_in_column(
+    x: usize,
+    y: usize,
+    w: usize,
+    h: usize,
+    cells: &Vec<Vec<(Option<CellType>, bool)>>,
+    dir: HintDirection,
+) -> Vec<(Option<CellType>, bool)> {
+    match dir {
+        HintDirection::TOP => (0..h).into_iter().map(|dy| cells[dy][x]).collect(),
+        HintDirection::LEFT => {
+            let mut pts = Vec::new();
+            pts.push(cells[y][x]);
+            let mut dx = x;
+            let mut dy = y;
+            while dx > 0 && (dy > 0 || dx % 2 == 0) {
+                if dx % 2 == 1 {
+                    dy -= 1;
+                }
+                dx -= 1;
+                pts.push(cells[dy][dx]);
+            }
+            let mut dx = x;
+            let mut dy = y;
+            while dx < w - 1 && (dy < h - 1 || dx % 2 == 1) {
+                if dx % 2 == 0 {
+                    dy += 1;
+                }
+                dx += 1;
+                pts.push(cells[dy][dx]);
+            }
+            pts
+        }
+        HintDirection::RIGHT => {
+            let mut pts = Vec::new();
+            pts.push(cells[y][x]);
+            let mut dx = x;
+            let mut dy = y;
+            while dx > 0 && (dy < h - 1 || dx % 2 == 1) {
+                if dx % 2 == 0 {
+                    dy += 1;
+                }
+                dx -= 1;
+                pts.push(cells[dy][dx]);
+            }
+            let mut dx = x;
+            let mut dy = y;
+            while dx < w - 1 && (dy > 0 || dx % 2 == 0) {
+                if dx % 2 == 1 {
+                    dy -= 1;
+                }
+                dx += 1;
+                pts.push(cells[dy][dx]);
+            }
+            pts
+        }
+    }
+}
+
+fn count_empty_cells(cells: Vec<(Option<CellType>, bool)>) -> u8 {
+    cells
+        .iter()
+        .map(|c| {
+            if let Some(ct) = c.0 {
+                if ct == CellType::EmptyCell {
+                    1
                 } else {
                     0
                 }
+            } else {
+                0
             }
         })
         .sum()

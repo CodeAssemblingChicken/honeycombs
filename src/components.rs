@@ -4,7 +4,7 @@ use bevy::{
     audio::AudioSource,
     math::Vec3,
     prelude::{
-        Bundle, ColorMaterial, Commands, Component, Entity, Handle, Query, ResMut, Transform,
+        Bundle, Color, ColorMaterial, Commands, Component, Entity, Handle, Query, ResMut, Transform,
     },
     text::{TextAlignment, TextStyle},
 };
@@ -79,8 +79,14 @@ impl Cell {
             self.hovering = false;
         }
         let (dark, light) = match self.cell_type {
-            CellType::NumberCell => {
-                spawn_cell_text(self.orig, commands, number_cell.unwrap(), text_settings);
+            CellType::NumberCell(ht) => {
+                let mut ts = text_settings.clone();
+                match ht {
+                    HintType::CONNECTED => ts.style.color = Color::GREEN,
+                    HintType::SEPERATED => ts.style.color = Color::RED,
+                    _ => (),
+                }
+                spawn_cell_text(self.orig, commands, number_cell.unwrap(), &ts);
                 (cell_colors.gray_dark.id, cell_colors.gray_light.id)
             }
             CellType::EmptyCell => (cell_colors.blue_dark.id, cell_colors.blue_light.id),
@@ -164,6 +170,7 @@ pub struct HiddenCell {
 #[derive(Debug, Component)]
 pub struct NumberCell {
     pub count: u8,
+    pub hint_type: HintType,
 }
 
 #[derive(Debug, Component)]
@@ -173,6 +180,13 @@ pub struct EmptyCell;
 pub struct CellInner;
 #[derive(Debug, Component)]
 pub struct CellOuter;
+
+#[derive(Debug, Component)]
+pub struct ColumnHint {
+    pub x: usize,
+    pub y: usize,
+    pub dir: HintDirection,
+}
 
 pub struct CellColors {
     pub white: Handle<ColorMaterial>,
@@ -196,6 +210,28 @@ pub struct TextSettings {
 #[cfg_attr(feature = "debug", derive(bevy_inspector_egui::Inspectable))]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum CellType {
-    NumberCell,
+    NumberCell(HintType),
     EmptyCell,
+}
+
+#[derive(Debug)]
+pub enum HintDirection {
+    TOP,
+    LEFT,
+    RIGHT,
+}
+
+#[cfg_attr(feature = "debug", derive(bevy_inspector_egui::Inspectable))]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum HintType {
+    NONE,
+    SOME,
+    CONNECTED,
+    SEPERATED,
+}
+
+impl Default for HintType {
+    fn default() -> Self {
+        Self::NONE
+    }
 }
