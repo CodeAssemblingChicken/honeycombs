@@ -8,6 +8,8 @@ use bevy::{
 };
 use bevy_easings::{Ease, EaseFunction, EasingType};
 
+use crate::constants::{SCALE_ENLARGED, SCALE_NORMAL};
+
 // TODO: This is probably way to big
 /// Cell component storing everythin cell related
 #[cfg_attr(feature = "debug", derive(bevy_inspector_egui::Inspectable))]
@@ -21,7 +23,55 @@ pub struct Cell {
     pub orig: Transform,
     pub hovering: bool,
 }
+
+// TODO: Maybe use systems and events instead
+// e.g. CellHoverEvent(entity)
 impl Cell {
+    pub fn hover(
+        &mut self,
+        commands: &mut Commands,
+        light: HandleId,
+        dark: HandleId,
+        color_query: &mut Query<&mut Handle<ColorMaterial>>,
+    ) {
+        if self.hovering {
+            return;
+        }
+        self.hovering = true;
+        // Enlarge
+        self.rescale(commands, SCALE_ENLARGED);
+        // Set colors to hovering
+        self.set_colors(light, dark, color_query);
+    }
+
+    pub fn unhover(
+        &mut self,
+        commands: &mut Commands,
+        light: HandleId,
+        dark: HandleId,
+        color_query: &mut Query<&mut Handle<ColorMaterial>>,
+    ) {
+        if !self.hovering {
+            return;
+        }
+        self.hovering = false;
+        // Normal scale
+        self.rescale(commands, SCALE_NORMAL);
+        // Set colors to normal
+        self.set_colors(light, dark, color_query);
+    }
+
+    pub fn click(
+        &mut self,
+        commands: &mut Commands,
+        light: HandleId,
+        dark: HandleId,
+        color_query: &mut Query<&mut Handle<ColorMaterial>>,
+    ) {
+        self.rescale(commands, SCALE_NORMAL);
+        self.set_colors(light, dark, color_query);
+    }
+
     /// Common function for easing the scale to a given value
     pub fn rescale(&self, commands: &mut Commands, scale: Vec3) {
         // Rescale hexagon to desired scale by easing

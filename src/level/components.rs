@@ -1,10 +1,8 @@
-use crate::{components::Cell, level::resources::CellColors, RADIUS, SCALE_ENLARGED, SCALE_NORMAL};
+use crate::{components::Cell, level::resources::CellColors, RADIUS};
 use bevy::{
-    asset::HandleId,
     math::Vec3,
     prelude::{
-        Bundle, ColorMaterial, Commands, Component, Entity, Handle, Query, ResMut, Transform,
-        Visibility,
+        Bundle, ColorMaterial, Commands, Component, Entity, Handle, Query, ResMut, Visibility,
     },
 };
 use bevy_easings::{Ease, EaseFunction, EasingType};
@@ -22,20 +20,15 @@ impl LevelCell {
         &self,
         cell: &mut Cell,
         commands: &mut Commands,
-        child_query: &mut Query<&mut Handle<ColorMaterial>>,
+        color_query: &mut Query<&mut Handle<ColorMaterial>>,
         cell_colors: &ResMut<CellColors>,
     ) {
-        if cell.hovering {
-            return;
-        }
-        cell.hovering = true;
-        // Enlarge
-        cell.rescale(commands, SCALE_ENLARGED);
-        // Set colors to hovering
-        cell.set_colors(
+        // Pass event to Cell component with yellow colors
+        cell.hover(
+            commands,
             cell_colors.yellow_medium.id,
             cell_colors.yellow_dark.id,
-            child_query,
+            color_query,
         );
     }
 
@@ -47,14 +40,8 @@ impl LevelCell {
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
         cell_colors: &ResMut<CellColors>,
     ) {
-        if !cell.hovering {
-            return;
-        }
-        cell.hovering = false;
-        // Normal scale
-        cell.rescale(commands, SCALE_NORMAL);
-        // Set colors to normal
-        cell.set_colors(
+        cell.unhover(
+            commands,
             cell_colors.yellow_light.id,
             cell_colors.yellow_medium.id,
             color_query,
@@ -87,8 +74,7 @@ impl LevelCell {
 
         commands.entity(cell.entity).remove_bundle::<HiddenCell>();
         // Normal scale
-        cell.rescale(commands, SCALE_NORMAL);
-        cell.set_colors(light, dark, color_query);
+        cell.click(commands, light, dark, color_query);
     }
 
     /// Called when cell is hidden and clicked on with the wrong mouse button
