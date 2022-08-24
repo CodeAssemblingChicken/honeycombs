@@ -97,6 +97,13 @@ fn parse_hint(line: &str, line_no: usize) -> ColumnHint {
         .trim()
         .parse()
         .expect(&format!("{} in line {}", EXPECTED_NO, line_no));
+    let s = split
+        .next()
+        .expect(&format!("{} in line {}", TOO_FEW_ARGS, line_no));
+    let hint_type = s
+        .trim()
+        .parse()
+        .expect(&format!("{} in line {}", EXPECTED_NO, line_no));
     ColumnHint {
         x,
         y,
@@ -104,6 +111,10 @@ fn parse_hint(line: &str, line_no: usize) -> ColumnHint {
             -1 => HintDirection::LEFT,
             1 => HintDirection::RIGHT,
             _ => HintDirection::TOP,
+        },
+        hint_type: match hint_type {
+            0 => HintType::NONE,
+            _ => HintType::SOME,
         },
     }
 }

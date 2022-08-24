@@ -1,9 +1,11 @@
+use std::collections::VecDeque;
+
 use bevy::{
     hierarchy::BuildChildren,
     math::Vec3,
     prelude::{
         default, shape::RegularPolygon, Assets, Color, Commands, Component, Handle, Mesh, ResMut,
-        Transform,
+        Transform, Visibility,
     },
     sprite::{ColorMaterial, ColorMesh2dBundle},
     text::{Text, Text2dBundle},
@@ -135,23 +137,30 @@ impl Board {
 
                 match cell_type {
                     CellType::NumberCell(mut ht) => {
+                        let neighbours = get_neighbours(x, y, &cells, width, height);
+                        let count = count_empty_cells(&neighbours);
                         if ht == HintType::SOME {
-                            ht = HintType::CONNECTED;
+                            ht = match empty_connected(&neighbours, count, true) {
+                                true => HintType::CONNECTED,
+                                false => HintType::SEPERATED,
+                            };
                         }
-                        let count = count_empty_cells(get_neighbours(x, y, &cells, width, height));
+                        let mut ts = text_settings.clone();
+                        match ht {
+                            HintType::CONNECTED => ts.style.color = Color::GREEN,
+                            HintType::SEPERATED => ts.style.color = Color::RED,
+                            _ => (),
+                        }
+                        let text_entity = spawn_cell_text(big_transform, commands, count, &ts);
+                        if hidden {
+                            commands
+                                .entity(text_entity)
+                                .insert(Visibility { is_visible: false });
+                        }
                         let nc = NumberCell {
                             count,
-                            hint_type: ht,
+                            label: text_entity,
                         };
-                        if !hidden {
-                            let mut ts = text_settings.clone();
-                            match ht {
-                                HintType::CONNECTED => ts.style.color = Color::GREEN,
-                                HintType::SEPERATED => ts.style.color = Color::RED,
-                                _ => (),
-                            }
-                            spawn_cell_text(big_transform, commands, &nc, &ts);
-                        }
                         commands.entity(cell).insert(nc);
                     }
                     CellType::EmptyCell => {
@@ -198,7 +207,7 @@ impl Board {
                 commands.entity(cell).insert(cell_component);
             }
         }
-        for hint in hints {
+        for mut hint in hints {
             let mut tx = hint.x as f32 * RADIUS * 1.56 - w;
             let mut ty = hint.y as f32 * RADIUS * -1.8
                 + match hint.x % 2 {
@@ -222,11 +231,25 @@ impl Board {
             }
             t.translation.x = tx;
             t.translation.y = ty;
-            let c = get_column(hint.x, hint.y, width, height, &cells, hint.dir);
-            let count = count_empty_cells(c);
+            let column = get_column(hint.x, hint.y, width, height, &cells, hint.dir);
+            let count = count_empty_cells(&column);
+            // TODO: Setting hint type and only reading it for style is unneccesary
+            if hint.hint_type == HintType::SOME {
+                hint.hint_type = match empty_connected(&column, count, false) {
+                    true => HintType::CONNECTED,
+                    false => HintType::SEPERATED,
+                };
+            }
+            let mut ts = text_settings.clone();
+            match hint.hint_type {
+                HintType::CONNECTED => ts.style.color = Color::GREEN,
+                HintType::SEPERATED => ts.style.color = Color::RED,
+                _ => (),
+            }
+
             commands.spawn_bundle(Text2dBundle {
-                text: Text::from_section(format!("{}", count), text_settings.style.clone())
-                    .with_alignment(text_settings.alignment),
+                text: Text::from_section(format!("{}", count), ts.style)
+                    .with_alignment(ts.alignment),
                 transform: t,
                 ..default()
             });
@@ -239,7 +262,7 @@ impl Board {
     }
 }
 
-/// Get a list of neighbouring cells
+/// Get a (ordered?) list of neighbouring cells
 fn get_neighbours(
     x: usize,
     y: usize,
@@ -251,30 +274,30 @@ fn get_neighbours(
     let y = y as i32;
     let pos = if x % 2 == 0 {
         [
-            (x - 1, y),
-            (x - 1, y + 1),
             (x, y - 1),
-            (x, y + 1),
             (x + 1, y),
             (x + 1, y + 1),
+            (x, y + 1),
+            (x - 1, y + 1),
+            (x - 1, y),
         ]
     } else {
         [
-            (x - 1, y - 1),
-            (x - 1, y),
             (x, y - 1),
-            (x, y + 1),
             (x + 1, y - 1),
             (x + 1, y),
+            (x, y + 1),
+            (x - 1, y),
+            (x - 1, y - 1),
         ]
     };
     pos.iter()
         .filter(|(x, y)| !(*x < 0 || *x >= w as i32 || *y < 0 || *y >= h as i32))
-        .map(|(x, y)| cells[*y as usize][*x as usize])
+        .map(|(x, y)| (cells[*y as usize][*x as usize]))
         .collect()
 }
 
-/// Get a list of cells in same column (or diagonal)
+/// Get a (ordered?) list of cells in same column (or diagonal)
 fn get_column(
     x: usize,
     y: usize,
@@ -286,8 +309,7 @@ fn get_column(
     match dir {
         HintDirection::TOP => (0..h).into_iter().map(|dy| cells[dy][x]).collect(),
         HintDirection::LEFT => {
-            let mut pts = Vec::new();
-            pts.push(cells[y][x]);
+            let mut pts = VecDeque::new();
             let mut dx = x;
             let mut dy = y;
             while dx > 0 && (dy > 0 || dx % 2 == 0) {
@@ -295,8 +317,9 @@ fn get_column(
                     dy -= 1;
                 }
                 dx -= 1;
-                pts.push(cells[dy][dx]);
+                pts.push_front(cells[dy][dx]);
             }
+            pts.push_back(cells[y][x]);
             let mut dx = x;
             let mut dy = y;
             while dx < w - 1 && (dy < h - 1 || dx % 2 == 1) {
@@ -304,13 +327,12 @@ fn get_column(
                     dy += 1;
                 }
                 dx += 1;
-                pts.push(cells[dy][dx]);
+                pts.push_back(cells[dy][dx]);
             }
-            pts
+            pts.into()
         }
         HintDirection::RIGHT => {
-            let mut pts = Vec::new();
-            pts.push(cells[y][x]);
+            let mut pts = VecDeque::new();
             let mut dx = x;
             let mut dy = y;
             while dx > 0 && (dy < h - 1 || dx % 2 == 1) {
@@ -318,8 +340,9 @@ fn get_column(
                     dy += 1;
                 }
                 dx -= 1;
-                pts.push(cells[dy][dx]);
+                pts.push_front(cells[dy][dx]);
             }
+            pts.push_back(cells[y][x]);
             let mut dx = x;
             let mut dy = y;
             while dx < w - 1 && (dy > 0 || dx % 2 == 0) {
@@ -327,15 +350,15 @@ fn get_column(
                     dy -= 1;
                 }
                 dx += 1;
-                pts.push(cells[dy][dx]);
+                pts.push_back(cells[dy][dx]);
             }
-            pts
+            pts.into()
         }
     }
 }
 
 /// Count how many cells in a list are empty
-fn count_empty_cells(cells: Vec<(Option<CellType>, bool)>) -> u8 {
+fn count_empty_cells(cells: &Vec<(Option<CellType>, bool)>) -> u8 {
     cells
         .iter()
         .map(|c| {
@@ -350,4 +373,45 @@ fn count_empty_cells(cells: Vec<(Option<CellType>, bool)>) -> u8 {
             }
         })
         .sum()
+}
+
+// TODO: So many clones...
+/// Check if the empty cells are connected or seperated
+fn empty_connected(cells: &Vec<(Option<CellType>, bool)>, count: u8, circular: bool) -> bool {
+    if count == 0 {
+        return true;
+    }
+    let mut cells = cells.clone();
+    if circular {
+        cells.extend(cells.clone());
+    }
+    let mut second_chance = circular;
+    let mut remaining = count;
+    let mut begun = false;
+    for (ct, _h) in cells {
+        if remaining == 0 {
+            return true;
+        }
+        if begun {
+            if let Some(ct) = ct {
+                if ct == CellType::EmptyCell {
+                    remaining -= 1;
+                } else if second_chance {
+                    second_chance = false;
+                    remaining = count;
+                    begun = false;
+                } else {
+                    break;
+                }
+            }
+        } else {
+            if let Some(ct) = ct {
+                if ct == CellType::EmptyCell {
+                    begun = true;
+                    remaining -= 1;
+                }
+            }
+        }
+    }
+    false
 }

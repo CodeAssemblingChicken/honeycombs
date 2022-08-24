@@ -54,7 +54,11 @@ fn main() {
         .add_system(mouse_over_cell)
         .add_system(mouse_enter_cell.before(mouse_over_cell))
         .add_system(mouse_exit_cell.before(mouse_enter_cell))
-        .add_system(mouse_click_cell.after(mouse_exit_cell))
+        .add_system(
+            mouse_click_cell
+                .after(mouse_enter_cell)
+                .after(mouse_exit_cell),
+        )
         .add_system(window_resize_system);
 
     #[cfg(feature = "debug")]

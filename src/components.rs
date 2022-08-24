@@ -7,7 +7,8 @@ use bevy::{
     asset::HandleId,
     math::Vec3,
     prelude::{
-        Bundle, Color, ColorMaterial, Commands, Component, Entity, Handle, Query, ResMut, Transform,
+        Bundle, Color, ColorMaterial, Commands, Component, Entity, Handle, Query, ResMut,
+        Transform, Visibility,
     },
 };
 use bevy_easings::{Ease, EaseFunction, EasingType};
@@ -86,14 +87,11 @@ impl Cell {
             self.hovering = false;
         }
         let (dark, light) = match self.cell_type {
-            CellType::NumberCell(ht) => {
-                let mut ts = text_settings.clone();
-                match ht {
-                    HintType::CONNECTED => ts.style.color = Color::GREEN,
-                    HintType::SEPERATED => ts.style.color = Color::RED,
-                    _ => (),
-                }
-                spawn_cell_text(self.orig, commands, number_cell.unwrap(), &ts);
+            CellType::NumberCell(_) => {
+                commands
+                    .entity(number_cell.unwrap().label)
+                    .remove::<Visibility>()
+                    .insert(Visibility { is_visible: true });
                 (cell_colors.gray_dark.id, cell_colors.gray_light.id)
             }
             CellType::EmptyCell => (cell_colors.blue_dark.id, cell_colors.blue_light.id),
@@ -182,7 +180,7 @@ pub struct HiddenCell {
 #[derive(Debug, Component)]
 pub struct NumberCell {
     pub count: u8,
-    pub hint_type: HintType,
+    pub label: Entity,
 }
 
 /// Component for the EmptyCell type
@@ -202,6 +200,7 @@ pub struct ColumnHint {
     pub x: usize,
     pub y: usize,
     pub dir: HintDirection,
+    pub hint_type: HintType,
 }
 
 /// The type of cell.
