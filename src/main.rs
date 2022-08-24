@@ -1,17 +1,18 @@
-mod board;
 mod components;
 mod constants;
-mod functions;
 mod helpers;
-mod resources;
-mod systems;
+mod level;
+mod main_menu;
+mod states;
+
+use std::{io, panic};
 
 use bevy::{
     app::App,
     audio::AudioSource,
     prelude::{
         AssetServer, Assets, Camera2dBundle, ClearColor, Color, Commands, Handle, Mesh, Msaa,
-        ParallelSystemDescriptorCoercion, Res, ResMut,
+        ParallelSystemDescriptorCoercion, Res, ResMut, SystemSet,
     },
     sprite::ColorMaterial,
     text::{TextAlignment, TextStyle},
@@ -22,22 +23,26 @@ use bevy_easings::EasingsPlugin;
 
 #[cfg(feature = "debug")]
 use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
-use board::Board;
-// use chrono::Utc;
 use components::Cell;
+// use chrono::Utc;
 use constants::*;
 
-use helpers::parser::board_from_file;
 use interactable::{InteractableCamera, InteractablePlugin};
 
-use resources::{CellColors, SfxHover, TextSettings};
-use systems::{
-    mouse_click_cell, mouse_enter_cell, mouse_exit_cell, mouse_over_cell, window_resize_system,
+use level::{
+    board::Board,
+    parser::board_from_file,
+    resources::{CellColors, SfxHover, TextSettings},
+    systems::{
+        mouse_click_cell, mouse_enter_cell, mouse_exit_cell, mouse_over_cell, window_resize_system,
+    },
 };
-
+use native_dialog::MessageDialog;
+use states::AppState;
+use std::io::Write;
 fn main() {
+    set_panic_hook();
     let mut app = App::new();
-
     app.insert_resource(Msaa { samples: 4 })
         .insert_resource(WindowDescriptor {
             title: "Hexacell".to_string(),
@@ -49,17 +54,25 @@ fn main() {
         .add_plugin(EasingsPlugin)
         // .add_plugin(LogDiagnosticsPlugin::default())
         // .add_plugin(FrameTimeDiagnosticsPlugin::default())
-        .add_startup_system(setup)
-        .add_system(helpers::camera::movement)
-        .add_system(mouse_over_cell)
-        .add_system(mouse_enter_cell.before(mouse_over_cell))
-        .add_system(mouse_exit_cell.before(mouse_enter_cell))
-        .add_system(
-            mouse_click_cell
-                .after(mouse_enter_cell)
-                .after(mouse_exit_cell),
+        .add_state(AppState::Level)
+        .add_system_set(SystemSet::on_enter(AppState::MainMenu))
+        .add_system_set(SystemSet::on_update(AppState::MainMenu))
+        .add_system_set(SystemSet::on_exit(AppState::MainMenu))
+        .add_system_set(SystemSet::on_enter(AppState::Level).with_system(setup_level))
+        .add_system_set(
+            SystemSet::on_update(AppState::Level)
+                .with_system(mouse_over_cell)
+                .with_system(mouse_enter_cell.before(mouse_over_cell))
+                .with_system(mouse_exit_cell.before(mouse_enter_cell))
+                .with_system(
+                    mouse_click_cell
+                        .after(mouse_enter_cell)
+                        .after(mouse_exit_cell),
+                )
+                .with_system(window_resize_system),
         )
-        .add_system(window_resize_system);
+        .add_system_set(SystemSet::on_exit(AppState::Level))
+        .add_startup_system(setup);
 
     #[cfg(feature = "debug")]
     app.add_plugin(WorldInspectorPlugin::new())
@@ -68,16 +81,18 @@ fn main() {
     app.run();
 }
 
-fn setup(
+fn setup(mut commands: Commands) {
+    commands
+        .spawn_bundle(Camera2dBundle::default())
+        .insert(InteractableCamera);
+}
+
+fn setup_level(
     mut commands: Commands,
     meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     asset_server: Res<AssetServer>,
 ) {
-    commands
-        .spawn_bundle(Camera2dBundle::default())
-        .insert(InteractableCamera);
-
     let white = materials.add(ColorMaterial::from(Color::WHITE));
     let yellow = (
         materials.add(ColorMaterial::from(Color::hex("dc8c10").unwrap())),
@@ -131,4 +146,21 @@ fn setup(
         blue,
     );
     commands.spawn().insert(b);
+}
+
+fn set_panic_hook() {
+    panic::set_hook(Box::new(|info| {
+        let mut w = Vec::new();
+        let _ = writeln!(&mut w, "{}", info);
+        MessageDialog::new()
+            .set_type(native_dialog::MessageType::Error)
+            .set_title("Error")
+            .set_text(&format!(
+                "An error occurred, please report it to the developer:\n{}",
+                String::from_utf8(w).unwrap()
+            ))
+            .show_alert()
+            .unwrap();
+        let _ = writeln!(io::stderr(), "{}", info);
+    }));
 }

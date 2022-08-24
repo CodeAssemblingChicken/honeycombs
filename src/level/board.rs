@@ -17,12 +17,18 @@ use interactable::{
 };
 
 use crate::{
-    components::{
-        Cell, CellInner, CellOuter, CellType, ColumnHint, EmptyCell, HiddenCell, HintDirection,
-        HintType, NumberCell,
-    },
+    components::Cell,
     constants::{RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_CELL_INNER, Z_INDEX_CELL_OUTER, Z_INDEX_TEXT},
-    functions::spawn_cell_text,
+    level::{
+        components::{
+            CellInner, CellOuter, EmptyCell, HiddenCell, HintType, LevelCell, NumberCell,
+        },
+        functions::spawn_cell_text,
+    },
+};
+
+use super::{
+    components::{CellType, ColumnHint, HintDirection},
     resources::TextSettings,
 };
 
@@ -195,7 +201,6 @@ impl Board {
                 let cell_component = Cell {
                     x,
                     y,
-                    cell_type,
                     entity: cell,
                     outer_hexagon: child1,
                     inner_hexagon: child2,
@@ -204,7 +209,10 @@ impl Board {
                 };
                 // TODO: Rethink Cell type
                 cell_components.push(Some(cell_component.clone()));
-                commands.entity(cell).insert(cell_component);
+                commands
+                    .entity(cell)
+                    .insert(cell_component)
+                    .insert(LevelCell { cell_type });
             }
         }
         for mut hint in hints {

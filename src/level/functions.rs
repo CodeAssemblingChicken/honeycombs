@@ -3,7 +3,9 @@ use bevy::{
     text::{Text, Text2dBundle},
 };
 
-use crate::{components::NumberCell, resources::TextSettings, Z_INDEX_TEXT};
+use crate::Z_INDEX_TEXT;
+
+use super::resources::TextSettings;
 
 /// Spawns the text in a number cell
 pub fn spawn_cell_text(

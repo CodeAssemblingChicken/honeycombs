@@ -1,6 +1,6 @@
 use std::fs::{self};
 
-use crate::{
+use super::{
     board::BoardConfig,
     components::{CellType, ColumnHint, HintDirection, HintType},
 };
