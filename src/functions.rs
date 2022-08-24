@@ -3,11 +3,10 @@ use bevy::{
     text::{Text, Text2dBundle},
 };
 
-use crate::{
-    components::{NumberCell, TextSettings},
-    Z_INDEX_TEXT,
-};
+use crate::{components::NumberCell, resources::TextSettings, Z_INDEX_TEXT};
 
+// TODO: Maybe spawn at creation and only set visibility to false
+/// Spawns the text in a number cell
 pub fn spawn_cell_text(
     orig: Transform,
     commands: &mut Commands,

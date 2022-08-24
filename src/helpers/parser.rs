@@ -9,6 +9,7 @@ const DONT_MESS: &str = "Please don't mess with my files";
 const EXPECTED_NO: &str = "Expected a number";
 const TOO_FEW_ARGS: &str = "Expected more arguments";
 
+/// Receives a file and creates a BoardConfig from it
 pub fn board_from_file(filename: &str) -> BoardConfig {
     let mut cells = Vec::new();
     let file = fs::read_to_string(filename).expect(&format!("File \"{}\" not found!", filename));
@@ -29,7 +30,7 @@ pub fn board_from_file(filename: &str) -> BoardConfig {
             .next()
             .expect(&format!("{} in line {}", DONT_MESS, line_no));
         assert!(l.len() == w, "Lines must have specified width: {}", w,);
-        cells.push(parse_grid(&l));
+        cells.push(parse_grid_row(&l));
         line_no += 1;
     });
 
@@ -52,6 +53,7 @@ pub fn board_from_file(filename: &str) -> BoardConfig {
     return BoardConfig { cells, hints };
 }
 
+/// Function to parse a numeric tuple in a file
 fn parse_tuple(line: &str, line_no: usize) -> (usize, usize) {
     let mut split = line.split(',');
     let s = split
@@ -71,6 +73,7 @@ fn parse_tuple(line: &str, line_no: usize) -> (usize, usize) {
     (x, y)
 }
 
+/// Function to parse a column-hint in a file
 fn parse_hint(line: &str, line_no: usize) -> ColumnHint {
     let mut split = line.split(',');
     let s = split
@@ -105,14 +108,11 @@ fn parse_hint(line: &str, line_no: usize) -> ColumnHint {
     }
 }
 
-fn parse_grid(line: &str) -> Vec<(Option<CellType>, bool)> {
+/// Function to parse a line of a file to a row in the grid
+fn parse_grid_row(line: &str) -> Vec<(Option<CellType>, bool)> {
     let mut cells = Vec::new();
     for c in line.chars() {
         match c {
-            // '0' => cells.push((Some(CellType::NumberCell(default())), true)),
-            // '1' => cells.push((Some(CellType::EmptyCell), true)),
-            // '2' => cells.push((Some(CellType::NumberCell(default())), false)),
-            // '3' => cells.push((Some(CellType::EmptyCell), false)),
             '0' => cells.push((Some(CellType::EmptyCell), true)),
             '1' => cells.push((Some(CellType::EmptyCell), false)),
             '2' => cells.push((Some(CellType::NumberCell(HintType::NONE)), true)),

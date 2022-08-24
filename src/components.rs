@@ -1,17 +1,21 @@
-use crate::{functions::spawn_cell_text, RADIUS, SCALE_ENLARGED, SCALE_NORMAL};
+use crate::{
+    functions::spawn_cell_text,
+    resources::{CellColors, TextSettings},
+    RADIUS, SCALE_ENLARGED, SCALE_NORMAL,
+};
 use bevy::{
     asset::HandleId,
-    audio::AudioSource,
     math::Vec3,
     prelude::{
         Bundle, Color, ColorMaterial, Commands, Component, Entity, Handle, Query, ResMut, Transform,
     },
-    text::{TextAlignment, TextStyle},
 };
 use bevy_easings::{Ease, EaseFunction, EasingType};
 use interactable::{click::Clickable, hover::Hoverable};
 use std::time::Duration;
 
+// TODO: This is probably way to big
+/// Cell component storing everythin cell related
 #[cfg_attr(feature = "debug", derive(bevy_inspector_egui::Inspectable))]
 #[derive(Component, Clone)]
 pub struct Cell {
@@ -26,6 +30,7 @@ pub struct Cell {
 }
 
 impl Cell {
+    /// Called when cell is hidden and the mouse enters it
     pub fn hover(
         &mut self,
         commands: &mut Commands,
@@ -46,6 +51,7 @@ impl Cell {
         );
     }
 
+    /// Called when cell is hidden and the mouse exits it
     pub fn unhover(
         &mut self,
         commands: &mut Commands,
@@ -66,6 +72,7 @@ impl Cell {
         );
     }
 
+    /// Called when cell is hidden and clicked on with the correct mouse button
     pub fn uncover(
         &mut self,
         commands: &mut Commands,
@@ -98,6 +105,7 @@ impl Cell {
         self.set_colors(light, dark, color_query);
     }
 
+    /// Called when cell is hidden and clicked on with the wrong mouse button
     pub fn uncover_fail(&self, commands: &mut Commands) {
         let mut t1 = self.orig.clone();
         let mut t2 = self.orig.clone();
@@ -129,6 +137,7 @@ impl Cell {
         );
     }
 
+    /// Common function for easing the scale to a given value
     fn rescale(&self, commands: &mut Commands, scale: Vec3) {
         // Rescale hexagon to desired scale by easing
         let mut t1 = self.orig.clone();
@@ -142,6 +151,7 @@ impl Cell {
         ));
     }
 
+    /// Common function for setting the color of the inner hexes
     fn set_colors(
         &self,
         light: HandleId,
@@ -161,26 +171,32 @@ impl Cell {
     }
 }
 
+/// Only hidden cells are Hoverable and Clickable
 #[derive(Bundle)]
 pub struct HiddenCell {
     pub hoverable: Hoverable,
     pub clickable: Clickable,
 }
 
+/// Component for the NumberCell type
 #[derive(Debug, Component)]
 pub struct NumberCell {
     pub count: u8,
     pub hint_type: HintType,
 }
 
+/// Component for the EmptyCell type
 #[derive(Debug, Component)]
 pub struct EmptyCell;
 
+/// Used for querying only the inner hexes
 #[derive(Debug, Component)]
 pub struct CellInner;
+/// Used for querying only the outer hexes
 #[derive(Debug, Component)]
 pub struct CellOuter;
 
+/// Component for column hints
 #[derive(Debug, Component)]
 pub struct ColumnHint {
     pub x: usize,
@@ -188,25 +204,8 @@ pub struct ColumnHint {
     pub dir: HintDirection,
 }
 
-pub struct CellColors {
-    pub white: Handle<ColorMaterial>,
-    pub yellow_dark: Handle<ColorMaterial>,
-    pub yellow_medium: Handle<ColorMaterial>,
-    pub yellow_light: Handle<ColorMaterial>,
-    pub gray_dark: Handle<ColorMaterial>,
-    pub gray_light: Handle<ColorMaterial>,
-    pub blue_dark: Handle<ColorMaterial>,
-    pub blue_light: Handle<ColorMaterial>,
-}
-
-pub struct SfxHover(pub Handle<AudioSource>);
-
-#[derive(Clone)]
-pub struct TextSettings {
-    pub style: TextStyle,
-    pub alignment: TextAlignment,
-}
-
+/// The type of cell.
+/// Used in cell component for uncover-handling
 #[cfg_attr(feature = "debug", derive(bevy_inspector_egui::Inspectable))]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum CellType {
@@ -214,6 +213,8 @@ pub enum CellType {
     EmptyCell,
 }
 
+/// Direction of the column/row hints.
+/// Straight down (TOP), down-right (RIGHT) and down-left (LEFT)
 #[derive(Debug)]
 pub enum HintDirection {
     TOP,
@@ -221,15 +222,21 @@ pub enum HintDirection {
     RIGHT,
 }
 
+/// Indicator for special hints (connected or seperated cells)
 #[cfg_attr(feature = "debug", derive(bevy_inspector_egui::Inspectable))]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum HintType {
     NONE,
+    // SOME is quite ugly, it is used in parsing to indicate that the hint
+    // is special and the concrete specialization (CONNECTED or SEPERATED)
+    // must first be calculated
+    // TODO: Think of something better
     SOME,
     CONNECTED,
     SEPERATED,
 }
 
+/// Required because of bevy_inspector_egui::Inspectable
 impl Default for HintType {
     fn default() -> Self {
         Self::NONE

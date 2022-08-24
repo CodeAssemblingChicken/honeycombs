@@ -3,6 +3,7 @@ mod components;
 mod constants;
 mod functions;
 mod helpers;
+mod resources;
 mod systems;
 
 use bevy::{
@@ -23,12 +24,13 @@ use bevy_easings::EasingsPlugin;
 use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
 use board::Board;
 // use chrono::Utc;
-use components::{Cell, CellColors, SfxHover, TextSettings};
+use components::Cell;
 use constants::*;
 
 use helpers::parser::board_from_file;
 use interactable::{InteractableCamera, InteractablePlugin};
 
+use resources::{CellColors, SfxHover, TextSettings};
 use systems::{
     mouse_click_cell, mouse_enter_cell, mouse_exit_cell, mouse_over_cell, window_resize_system,
 };
@@ -100,7 +102,7 @@ fn setup(
     let sfx_hover: Handle<AudioSource> = asset_server.load("sfx/hover.ogg");
     commands.insert_resource(SfxHover(sfx_hover));
 
-    let font = asset_server.load("fonts/GFSTheokritos.otf");
+    let font = asset_server.load("fonts/Harabara.ttf");
     let text_style = TextStyle {
         font,
         font_size: (RADIUS * 0.75).round(),

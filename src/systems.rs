@@ -1,7 +1,8 @@
 use crate::{
     board::Board,
-    components::{Cell, CellColors, EmptyCell, NumberCell, SfxHover, TextSettings},
+    components::{Cell, EmptyCell, NumberCell},
     constants::RADIUS,
+    resources::{CellColors, SfxHover, TextSettings},
 };
 use bevy::{
     audio::{Audio, PlaybackSettings},
@@ -17,6 +18,7 @@ use interactable::{
     hover::{MouseEnterEvent, MouseExitEvent, MouseOverEvent},
 };
 
+/// Calls uncover on a cell that is clicked by the mouse
 pub fn mouse_click_cell(
     mut commands: Commands,
     mut number_cell_query: Query<(&mut Cell, &NumberCell), Without<EmptyCell>>,
@@ -57,6 +59,7 @@ pub fn mouse_click_cell(
     }
 }
 
+/// Calls hover on a cell that is entered by the mouse
 pub fn mouse_enter_cell(
     mut commands: Commands,
     mut cell_query: Query<&mut Cell>,
@@ -73,6 +76,8 @@ pub fn mouse_enter_cell(
         }
     }
 }
+
+/// Calls unhover on a cell that is exited by the mouse
 pub fn mouse_exit_cell(
     mut commands: Commands,
     mut cell_query: Query<&mut Cell>,
@@ -87,6 +92,8 @@ pub fn mouse_exit_cell(
     }
 }
 
+// TODO: Not used
+/// Could call a function on the currently hovered cell, but doesn't right now
 #[allow(unused_mut, unused_variables)]
 pub fn mouse_over_cell(
     mut commands: Commands,
@@ -98,6 +105,8 @@ pub fn mouse_over_cell(
     }
 }
 
+/// On resizing the window, the board is resized too
+/// i.e. the camera zoom (scale) is recalculated
 pub fn window_resize_system(
     mut ev_window_resize: EventReader<WindowResized>,
     mut camera_query: Query<&mut Transform, With<Camera>>,

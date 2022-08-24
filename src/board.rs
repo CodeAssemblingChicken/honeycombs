@@ -1,6 +1,6 @@
 use bevy::{
     hierarchy::BuildChildren,
-    math::{Quat, Vec3},
+    math::Vec3,
     prelude::{
         default, shape::RegularPolygon, Assets, Color, Commands, Component, Handle, Mesh, ResMut,
         Transform,
@@ -17,17 +17,21 @@ use interactable::{
 use crate::{
     components::{
         Cell, CellInner, CellOuter, CellType, ColumnHint, EmptyCell, HiddenCell, HintDirection,
-        HintType, NumberCell, TextSettings,
+        HintType, NumberCell,
     },
     constants::{RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_CELL_INNER, Z_INDEX_CELL_OUTER, Z_INDEX_TEXT},
     functions::spawn_cell_text,
+    resources::TextSettings,
 };
 
+/// Used to pass configuration from parser to board
 pub struct BoardConfig {
     pub cells: Vec<Vec<(Option<CellType>, bool)>>,
     pub hints: Vec<ColumnHint>,
 }
 
+// TODO: Actually use this
+/// Board component storing common variables
 #[derive(Component)]
 pub struct Board {
     pub cells: Vec<Option<Cell>>,
@@ -36,6 +40,8 @@ pub struct Board {
 }
 
 impl Board {
+    // TODO: make nicer
+    /// An absolute monster of setup.
     pub fn new(
         commands: &mut Commands,
         mut meshes: ResMut<Assets<Mesh>>,
@@ -64,7 +70,6 @@ impl Board {
         let w = ((width - 1) as f32 * RADIUS * 1.56) / 2.;
         let h = ((height - 1) as f32 * RADIUS * 1.8) / 2.;
 
-        // TODO: currently file and board are reversed
         for y in 0..height {
             assert!(
                 cells[y].len() == width,
@@ -133,8 +138,7 @@ impl Board {
                         if ht == HintType::SOME {
                             ht = HintType::CONNECTED;
                         }
-                        let count =
-                            count_empty_cells(get_empty_neighbours(x, y, &cells, width, height));
+                        let count = count_empty_cells(get_neighbours(x, y, &cells, width, height));
                         let nc = NumberCell {
                             count,
                             hint_type: ht,
@@ -218,7 +222,7 @@ impl Board {
             }
             t.translation.x = tx;
             t.translation.y = ty;
-            let c = get_empty_in_column(hint.x, hint.y, width, height, &cells, hint.dir);
+            let c = get_column(hint.x, hint.y, width, height, &cells, hint.dir);
             let count = count_empty_cells(c);
             commands.spawn_bundle(Text2dBundle {
                 text: Text::from_section(format!("{}", count), text_settings.style.clone())
@@ -235,7 +239,8 @@ impl Board {
     }
 }
 
-fn get_empty_neighbours(
+/// Get a list of neighbouring cells
+fn get_neighbours(
     x: usize,
     y: usize,
     cells: &Vec<Vec<(Option<CellType>, bool)>>,
@@ -269,7 +274,8 @@ fn get_empty_neighbours(
         .collect()
 }
 
-fn get_empty_in_column(
+/// Get a list of cells in same column (or diagonal)
+fn get_column(
     x: usize,
     y: usize,
     w: usize,
@@ -328,6 +334,7 @@ fn get_empty_in_column(
     }
 }
 
+/// Count how many cells in a list are empty
 fn count_empty_cells(cells: Vec<(Option<CellType>, bool)>) -> u8 {
     cells
         .iter()
