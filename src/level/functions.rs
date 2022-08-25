@@ -1,11 +1,8 @@
+use crate::{resources::TextSettings, Z_INDEX_TEXT};
 use bevy::{
     prelude::{default, Commands, Entity, Transform},
     text::{Text, Text2dBundle},
 };
-
-use crate::Z_INDEX_TEXT;
-
-use super::resources::TextSettings;
 
 /// Spawns the text in a number cell
 pub fn spawn_cell_text(

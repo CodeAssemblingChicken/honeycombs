@@ -4,4 +4,5 @@ pub enum AppState {
     Level,
     Editor,
     Settings,
+    Loading,
 }

@@ -1,5 +1,15 @@
-use std::collections::VecDeque;
-
+use super::components::{CellType, ColumnHint, HintDirection};
+use crate::{
+    components::Cell,
+    constants::{RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_CELL_INNER, Z_INDEX_CELL_OUTER, Z_INDEX_TEXT},
+    level::{
+        components::{
+            CellInner, CellOuter, EmptyCell, HiddenCell, HintType, LevelCell, NumberCell,
+        },
+        functions::spawn_cell_text,
+    },
+    resources::TextSettings,
+};
 use bevy::{
     hierarchy::BuildChildren,
     math::Vec3,
@@ -15,22 +25,7 @@ use interactable::{
     hover::Hoverable,
     shapes::{Hexagon, Shape},
 };
-
-use crate::{
-    components::Cell,
-    constants::{RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_CELL_INNER, Z_INDEX_CELL_OUTER, Z_INDEX_TEXT},
-    level::{
-        components::{
-            CellInner, CellOuter, EmptyCell, HiddenCell, HintType, LevelCell, NumberCell,
-        },
-        functions::spawn_cell_text,
-    },
-};
-
-use super::{
-    components::{CellType, ColumnHint, HintDirection},
-    resources::TextSettings,
-};
+use std::collections::VecDeque;
 
 /// Used to pass configuration from parser to board
 pub struct BoardConfig {
@@ -177,7 +172,6 @@ impl Board {
                     commands.entity(cell).insert_bundle(HiddenCell {
                         hoverable: Hoverable {
                             ignore_scale: true,
-                            pass_through: false,
                             shape: Shape::Hexagon(Hexagon {
                                 radius: RADIUS,
                                 point_up: false,

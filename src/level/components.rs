@@ -1,4 +1,4 @@
-use crate::{components::Cell, level::resources::CellColors, RADIUS};
+use crate::{components::Cell, resources::CellColors, RADIUS};
 use bevy::{
     math::Vec3,
     prelude::{
@@ -67,9 +67,9 @@ impl LevelCell {
                     .entity(number_cell.unwrap().label)
                     .remove::<Visibility>()
                     .insert(Visibility { is_visible: true });
-                (cell_colors.gray_dark.id, cell_colors.gray_light.id)
+                (cell_colors.gray_medium.id, cell_colors.gray_light.id)
             }
-            CellType::EmptyCell => (cell_colors.blue_dark.id, cell_colors.blue_light.id),
+            CellType::EmptyCell => (cell_colors.blue_medium.id, cell_colors.blue_light.id),
         };
 
         commands.entity(cell.entity).remove_bundle::<HiddenCell>();

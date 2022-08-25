@@ -1,8 +1,10 @@
-use crate::{components::Cell, constants::RADIUS};
-
 use super::{
     board::Board,
     components::{EmptyCell, LevelCell, NumberCell},
+};
+use crate::{
+    components::Cell,
+    constants::RADIUS,
     resources::{CellColors, SfxHover},
 };
 use bevy::{

@@ -24,7 +24,7 @@ pub struct Cell {
     pub hovering: bool,
 }
 
-// TODO: Maybe use systems and events instead
+// TODO: Maybe use systems and events instead?
 // e.g. CellHoverEvent(entity)
 impl Cell {
     pub fn hover(
