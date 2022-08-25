@@ -1,12 +1,11 @@
 mod components;
 mod constants;
+mod end_screen;
 mod helpers;
 mod level;
 mod main_menu;
 mod resources;
 mod states;
-
-use std::{io, panic};
 
 use bevy::{
     app::App,
@@ -21,20 +20,19 @@ use bevy::{
     DefaultPlugins,
 };
 use bevy_easings::EasingsPlugin;
-
+use components::Cell;
+use constants::RADIUS;
+use std::{io, panic};
+// use chrono::Utc;
 #[cfg(feature = "debug")]
 use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
-use components::Cell;
-// use chrono::Utc;
-use constants::*;
-
 use interactable::{InteractableCamera, InteractablePlugin};
-
+use level::resources::LevelFile;
 use native_dialog::MessageDialog;
-
 use resources::{CellColors, SfxHover, TextSettings};
 use states::AppState;
 use std::io::Write;
+
 fn main() {
     set_panic_hook();
     let mut app = App::new();
@@ -44,6 +42,7 @@ fn main() {
             ..Default::default()
         })
         .insert_resource(ClearColor(Color::rgb(0.25, 0.25, 0.25)))
+        .insert_resource(LevelFile::default())
         .add_plugins(DefaultPlugins)
         .add_plugin(InteractablePlugin)
         .add_plugin(EasingsPlugin)
@@ -87,6 +86,7 @@ fn setup(
     };
 
     commands.insert_resource(text_settings.clone());
+
     commands.insert_resource(CellColors {
         white: materials.add(ColorMaterial::from(Color::WHITE)),
         yellow_dark: materials.add(ColorMaterial::from(Color::hex("d87408").unwrap())),
@@ -101,8 +101,12 @@ fn setup(
     });
 }
 
-fn show_menu_after_load(mut app_state: ResMut<State<AppState>>) {
-    app_state.set(AppState::MainMenu).unwrap();
+fn show_menu_after_load(mut app_state: ResMut<State<AppState>>, level_file: Res<LevelFile>) {
+    if level_file.filename.is_some() {
+        app_state.set(AppState::Level).unwrap();
+    } else {
+        app_state.set(AppState::MainMenu).unwrap();
+    }
 }
 
 fn set_panic_hook() {

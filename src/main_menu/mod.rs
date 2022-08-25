@@ -1,7 +1,11 @@
-pub mod menu;
-pub mod systems;
+mod components;
+mod menu;
+mod systems;
 
-use self::{menu::setup, systems::*};
+use self::{
+    menu::{cleanup, setup},
+    systems::*,
+};
 use crate::states::AppState;
 use bevy::prelude::{App, ParallelSystemDescriptorCoercion, SystemSet};
 
@@ -21,5 +25,5 @@ pub fn prepare_main_menu(app: &mut App) {
                 )
                 .with_system(window_resize_system),
         )
-        .add_system_set(SystemSet::on_exit(STATE));
+        .add_system_set(SystemSet::on_exit(STATE).with_system(cleanup));
 }

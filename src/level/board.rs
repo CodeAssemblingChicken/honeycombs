@@ -1,21 +1,19 @@
 use super::components::{CellType, ColumnHint, HintDirection};
 use crate::{
-    components::Cell,
+    components::{Cell, CellInner, CellOuter},
     constants::{RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_CELL_INNER, Z_INDEX_CELL_OUTER, Z_INDEX_TEXT},
     level::{
-        components::{
-            CellInner, CellOuter, EmptyCell, HiddenCell, HintType, LevelCell, NumberCell,
-        },
+        components::{EmptyCell, GameCell, HiddenCell, HintType, NumberCell},
         functions::spawn_cell_text,
     },
     resources::TextSettings,
 };
 use bevy::{
-    hierarchy::BuildChildren,
+    hierarchy::{BuildChildren, DespawnRecursiveExt},
     math::Vec3,
     prelude::{
-        default, shape::RegularPolygon, Assets, Color, Commands, Component, Handle, Mesh, ResMut,
-        Transform, Visibility,
+        default, shape::RegularPolygon, Assets, Color, Commands, Handle, Mesh, ResMut, Transform,
+        Visibility,
     },
     sprite::{ColorMaterial, ColorMesh2dBundle},
     text::{Text, Text2dBundle},
@@ -35,11 +33,11 @@ pub struct BoardConfig {
 
 // TODO: Actually use this
 /// Board component storing common variables
-#[derive(Component)]
 pub struct Board {
     pub cells: Vec<Option<Cell>>,
     pub width: usize,
     pub height: usize,
+    pub remaining: usize,
 }
 
 impl Board {
@@ -72,6 +70,8 @@ impl Board {
 
         let w = ((width - 1) as f32 * RADIUS * 1.56) / 2.;
         let h = ((height - 1) as f32 * RADIUS * 1.8) / 2.;
+
+        let mut blues_remaining = 0;
 
         for y in 0..height {
             assert!(
@@ -165,6 +165,9 @@ impl Board {
                         commands.entity(cell).insert(nc);
                     }
                     CellType::EmptyCell => {
+                        if hidden {
+                            blues_remaining += 1;
+                        }
                         commands.entity(cell).insert(EmptyCell);
                     }
                 }
@@ -206,7 +209,7 @@ impl Board {
                 commands
                     .entity(cell)
                     .insert(cell_component)
-                    .insert(LevelCell { cell_type });
+                    .insert(GameCell { cell_type });
             }
         }
         for mut hint in hints {
@@ -260,6 +263,15 @@ impl Board {
             cells: cell_components,
             width,
             height,
+            remaining: blues_remaining,
+        }
+    }
+
+    pub fn despawn_all(&self, commands: &mut Commands) {
+        for c in &self.cells {
+            if let Some(c) = c {
+                commands.entity(c.entity).despawn_recursive();
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
-use crate::{components::Cell, resources::CellColors, RADIUS};
+use super::board::Board;
+use crate::{components::Cell, constants::RADIUS, resources::CellColors};
 use bevy::{
     math::Vec3,
     prelude::{
@@ -10,11 +11,11 @@ use interactable::{click::Clickable, hover::Hoverable};
 use std::time::Duration;
 
 #[derive(Component)]
-pub struct LevelCell {
+pub struct GameCell {
     pub cell_type: CellType,
 }
 
-impl LevelCell {
+impl GameCell {
     /// Called when cell is hidden and the mouse enters it
     pub fn hover(
         &self,
@@ -56,6 +57,7 @@ impl LevelCell {
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
         cell_colors: &CellColors,
         number_cell: Option<&NumberCell>,
+        board: &mut ResMut<Board>,
     ) {
         // TODO: Uncover animation/particles
         if cell.hovering {
@@ -69,7 +71,10 @@ impl LevelCell {
                     .insert(Visibility { is_visible: true });
                 (cell_colors.gray_medium.id, cell_colors.gray_light.id)
             }
-            CellType::EmptyCell => (cell_colors.blue_medium.id, cell_colors.blue_light.id),
+            CellType::EmptyCell => {
+                board.remaining -= 1;
+                (cell_colors.blue_medium.id, cell_colors.blue_light.id)
+            }
         };
 
         commands.entity(cell.entity).remove_bundle::<HiddenCell>();
@@ -127,13 +132,6 @@ pub struct NumberCell {
 /// Component for the EmptyCell type
 #[derive(Debug, Component)]
 pub struct EmptyCell;
-
-/// Used for querying only the inner hexes
-#[derive(Debug, Component)]
-pub struct CellInner;
-/// Used for querying only the outer hexes
-#[derive(Debug, Component)]
-pub struct CellOuter;
 
 /// Component for column hints
 #[derive(Debug, Component)]

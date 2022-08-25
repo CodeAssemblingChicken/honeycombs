@@ -1,18 +1,22 @@
-pub mod board;
-pub mod components;
-pub mod functions;
-pub mod parser;
+mod board;
+mod components;
+mod functions;
+mod parser;
 pub mod resources;
-pub mod systems;
+mod systems;
 
-use self::{board::Board, systems::*};
+use self::{board::Board, functions::rescale_board, resources::LevelFile, systems::*};
 use crate::{
     resources::{CellColors, TextSettings},
     states::AppState,
 };
 use bevy::{
     app::App,
-    prelude::{Assets, Commands, Mesh, ParallelSystemDescriptorCoercion, ResMut, SystemSet},
+    prelude::{
+        Assets, Camera, Commands, Mesh, ParallelSystemDescriptorCoercion, Query, Res, ResMut,
+        SystemSet, Transform, With,
+    },
+    window::Windows,
 };
 
 const STATE: AppState = AppState::Level;
@@ -29,9 +33,10 @@ pub fn prepare_level(app: &mut App) {
                         .after(mouse_enter_cell)
                         .after(mouse_exit_cell),
                 )
-                .with_system(window_resize_system),
+                .with_system(window_resize_system)
+                .with_system(check_solved),
         )
-        .add_system_set(SystemSet::on_exit(STATE));
+        .add_system_set(SystemSet::on_exit(STATE).with_system(cleanup));
 }
 
 fn setup(
@@ -39,35 +44,15 @@ fn setup(
     meshes: ResMut<Assets<Mesh>>,
     cell_colors: ResMut<CellColors>,
     text_settings: ResMut<TextSettings>,
+    mut level_file: ResMut<LevelFile>,
+    wnds: Res<Windows>,
+    mut camera_query: Query<&mut Transform, With<Camera>>,
 ) {
-    // let white = materials.add(ColorMaterial::from(Color::WHITE));
-    // let yellow = (
-    //     materials.add(ColorMaterial::from(Color::hex("dc8c10").unwrap())),
-    //     materials.add(ColorMaterial::from(Color::hex("e4a020").unwrap())),
-    // );
-    // let gray = (
-    //     materials.add(ColorMaterial::from(Color::hex("37352a").unwrap())),
-    //     materials.add(ColorMaterial::from(Color::hex("484537").unwrap())),
-    // );
-    // let blue = (
-    //     materials.add(ColorMaterial::from(Color::hex("0088e8").unwrap())),
-    //     materials.add(ColorMaterial::from(Color::hex("00a0f0").unwrap())),
-    // );
-
-    // commands.insert_resource(CellColors {
-    //     white: white.clone(),
-    //     yellow_dark: materials.add(ColorMaterial::from(Color::hex("d87408").unwrap())),
-    //     yellow_medium: yellow.0.clone(),
-    //     yellow_light: yellow.1.clone(),
-    //     gray_dark: materials.add(ColorMaterial::from(Color::hex("24221c").unwrap())),
-    //     gray_medium: gray.0.clone(),
-    //     gray_light: gray.1.clone(),
-    //     blue_dark: materials.add(ColorMaterial::from(Color::hex("0070e4").unwrap())),
-    //     blue_medium: blue.0.clone(),
-    //     blue_light: blue.1.clone(),
-    // });
-
-    let cells = parser::board_from_file("assets/levels/1/1.lvl");
+    if level_file.filename.is_none() {
+        panic!("No level specified.");
+    }
+    let cells = parser::board_from_file(level_file.filename.as_ref().unwrap());
+    level_file.filename = None;
 
     let b = Board::new(
         &mut commands,
@@ -88,5 +73,12 @@ fn setup(
             cell_colors.blue_light.clone(),
         ),
     );
-    commands.spawn().insert(b);
+    for w in wnds.iter() {
+        rescale_board(&b, w.width(), w.height(), &mut camera_query);
+    }
+    commands.insert_resource(b);
+}
+
+fn cleanup(mut commands: Commands, board: Res<Board>) {
+    board.despawn_all(&mut commands);
 }

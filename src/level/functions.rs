@@ -1,6 +1,11 @@
-use crate::{resources::TextSettings, Z_INDEX_TEXT};
+use super::board::Board;
+use crate::{
+    constants::{RADIUS, Z_INDEX_TEXT},
+    resources::TextSettings,
+};
 use bevy::{
-    prelude::{default, Commands, Entity, Transform},
+    math::Vec3,
+    prelude::{default, Camera, Commands, Entity, Query, Transform, With},
     text::{Text, Text2dBundle},
 };
 
@@ -22,4 +27,18 @@ pub fn spawn_cell_text(
             ..default()
         })
         .id()
+}
+
+pub fn rescale_board(
+    board: &Board,
+    wd_width: f32,
+    wd_height: f32,
+    camera_query: &mut Query<&mut Transform, With<Camera>>,
+) {
+    let w = ((board.width + 4) as f32 * RADIUS * 1.56) / wd_width;
+    let h = ((board.height + 4) as f32 * RADIUS * 1.8) / wd_height;
+    let s = w.max(h);
+    for mut t in camera_query.iter_mut() {
+        t.scale = Vec3::new(s, s, 1.0);
+    }
 }

@@ -1,5 +1,4 @@
-use std::time::Duration;
-
+use crate::constants::{SCALE_ENLARGED, SCALE_NORMAL};
 use bevy::{
     asset::HandleId,
     math::Vec3,
@@ -7,8 +6,7 @@ use bevy::{
     sprite::ColorMaterial,
 };
 use bevy_easings::{Ease, EaseFunction, EasingType};
-
-use crate::constants::{SCALE_ENLARGED, SCALE_NORMAL};
+use std::time::Duration;
 
 // TODO: This is probably way to big
 /// Cell component storing everythin cell related
@@ -105,3 +103,10 @@ impl Cell {
         // unwrap should be fine, because if the children exist they're also in the query
     }
 }
+
+/// Used for querying only the inner hexes
+#[derive(Debug, Component)]
+pub struct CellInner;
+/// Used for querying only the outer hexes
+#[derive(Debug, Component)]
+pub struct CellOuter;
