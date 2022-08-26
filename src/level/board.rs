@@ -6,16 +6,13 @@ use crate::{
         components::{EmptyCell, GameCell, HiddenCell, HintType, NumberCell},
         functions::spawn_cell_text,
     },
-    resources::TextSettings,
+    resources::{CellColors, CellMeshes, TextSettings},
 };
 use bevy::{
-    hierarchy::{BuildChildren, DespawnRecursiveExt},
+    hierarchy::BuildChildren,
     math::Vec3,
-    prelude::{
-        default, shape::RegularPolygon, Assets, Color, Commands, Handle, Mesh, ResMut, Transform,
-        Visibility,
-    },
-    sprite::{ColorMaterial, ColorMesh2dBundle},
+    prelude::{default, Assets, Color, Commands, Entity, Mesh, Res, ResMut, Transform, Visibility},
+    sprite::ColorMesh2dBundle,
     text::{Text, Text2dBundle},
 };
 use interactable::{
@@ -34,7 +31,8 @@ pub struct BoardConfig {
 // TODO: Actually use this
 /// Board component storing common variables
 pub struct Board {
-    pub cells: Vec<Option<Cell>>,
+    pub cells: Vec<Entity>,
+    pub texts: Vec<Entity>,
     pub width: usize,
     pub height: usize,
     pub remaining: usize,
@@ -48,10 +46,8 @@ impl Board {
         mut meshes: ResMut<Assets<Mesh>>,
         config: BoardConfig,
         text_settings: &TextSettings,
-        white: Handle<ColorMaterial>,
-        yellow: (Handle<ColorMaterial>, Handle<ColorMaterial>),
-        gray: (Handle<ColorMaterial>, Handle<ColorMaterial>),
-        blue: (Handle<ColorMaterial>, Handle<ColorMaterial>),
+        cell_meshes: Res<CellMeshes>,
+        cell_colors: Res<CellColors>,
     ) -> Self {
         let cells = config.cells;
         let hints = config.hints;
@@ -59,11 +55,8 @@ impl Board {
         let medium_transform = Transform::from_translation(Vec3::new(0.0, 0.0, Z_INDEX_CELL_OUTER));
         let small_transform = Transform::from_translation(Vec3::new(0.0, 0.0, Z_INDEX_CELL_INNER));
 
-        let big_hexagon = meshes.add(Mesh::from(RegularPolygon::new(RADIUS, 6)));
-        let medium_hexagon = meshes.add(Mesh::from(RegularPolygon::new(RADIUS * 0.94, 6)));
-        let small_hexagon = meshes.add(Mesh::from(RegularPolygon::new(RADIUS * 0.8, 6)));
-
-        let mut cell_components = Vec::new();
+        let mut cell_entities = Vec::new();
+        let mut text_entities = Vec::new();
 
         let height = cells.len();
         let width = cells[0].len();
@@ -82,7 +75,6 @@ impl Board {
                 let (cell_type, hidden) = cells[y][x];
 
                 if cell_type.is_none() {
-                    cell_components.push(None);
                     continue;
                 }
                 let cell_type = cell_type.unwrap();
@@ -96,11 +88,20 @@ impl Board {
                     + h;
                 let colors = if !hidden {
                     match cell_type {
-                        CellType::NumberCell(_) => gray.clone(),
-                        CellType::EmptyCell => blue.clone(),
+                        CellType::NumberCell(_) => (
+                            cell_colors.gray_medium.clone(),
+                            cell_colors.gray_light.clone(),
+                        ),
+                        CellType::EmptyCell => (
+                            cell_colors.blue_medium.clone(),
+                            cell_colors.blue_light.clone(),
+                        ),
                     }
                 } else {
-                    yellow.clone()
+                    (
+                        cell_colors.yellow_medium.clone(),
+                        cell_colors.yellow_light.clone(),
+                    )
                 };
 
                 let mut big_transform =
@@ -108,14 +109,14 @@ impl Board {
                 big_transform.rotate_z(f32::to_radians(90.0));
 
                 let b1 = ColorMesh2dBundle {
-                    mesh: medium_hexagon.clone().into(),
-                    material: colors.0.into(),
+                    mesh: cell_meshes.medium_hexagon.clone().into(),
+                    material: colors.0,
                     transform: medium_transform,
                     ..default()
                 };
                 let b2 = ColorMesh2dBundle {
-                    mesh: small_hexagon.clone().into(),
-                    material: colors.1.into(),
+                    mesh: cell_meshes.small_hexagon.clone().into(),
+                    material: colors.1,
                     transform: small_transform,
                     ..default()
                 };
@@ -127,8 +128,8 @@ impl Board {
                 let cell = commands
                     .spawn()
                     .insert_bundle(ColorMesh2dBundle {
-                        mesh: big_hexagon.clone().into(),
-                        material: white.clone().into(),
+                        mesh: cell_meshes.big_hexagon.clone().into(),
+                        material: cell_colors.white.clone(),
                         transform: big_transform,
                         ..default()
                     })
@@ -152,7 +153,8 @@ impl Board {
                             HintType::SEPERATED => ts.style.color = Color::RED,
                             _ => (),
                         }
-                        let text_entity = spawn_cell_text(big_transform, commands, count, &ts);
+                        let text_entity = spawn_cell_text(commands, count, &ts);
+                        commands.entity(cell).add_child(text_entity);
                         if hidden {
                             commands
                                 .entity(text_entity)
@@ -166,7 +168,7 @@ impl Board {
                     }
                     CellType::EmptyCell => {
                         if hidden {
-                            blues_remaining += 1;
+                            blues_remaining = 1;
                         }
                         commands.entity(cell).insert(EmptyCell);
                     }
@@ -205,11 +207,11 @@ impl Board {
                     hovering: false,
                 };
                 // TODO: Rethink Cell type
-                cell_components.push(Some(cell_component.clone()));
                 commands
                     .entity(cell)
                     .insert(cell_component)
                     .insert(GameCell { cell_type });
+                cell_entities.push(cell);
             }
         }
         for mut hint in hints {
@@ -252,26 +254,22 @@ impl Board {
                 _ => (),
             }
 
-            commands.spawn_bundle(Text2dBundle {
-                text: Text::from_section(format!("{}", count), ts.style)
-                    .with_alignment(ts.alignment),
-                transform: t,
-                ..default()
-            });
+            let te = commands
+                .spawn_bundle(Text2dBundle {
+                    text: Text::from_section(format!("{}", count), ts.style)
+                        .with_alignment(ts.alignment),
+                    transform: t,
+                    ..default()
+                })
+                .id();
+            text_entities.push(te)
         }
         Self {
-            cells: cell_components,
+            cells: cell_entities,
+            texts: text_entities,
             width,
             height,
             remaining: blues_remaining,
-        }
-    }
-
-    pub fn despawn_all(&self, commands: &mut Commands) {
-        for c in &self.cells {
-            if let Some(c) = c {
-                commands.entity(c.entity).despawn_recursive();
-            }
         }
     }
 }

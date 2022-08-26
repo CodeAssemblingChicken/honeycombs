@@ -22,7 +22,7 @@ impl GameCell {
         cell: &mut Cell,
         commands: &mut Commands,
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
-        cell_colors: &ResMut<CellColors>,
+        cell_colors: &CellColors,
     ) {
         // Pass event to Cell component with yellow colors
         cell.hover(
@@ -39,7 +39,7 @@ impl GameCell {
         cell: &mut Cell,
         commands: &mut Commands,
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
-        cell_colors: &ResMut<CellColors>,
+        cell_colors: &CellColors,
     ) {
         cell.unhover(
             commands,

@@ -20,7 +20,7 @@ pub fn mouse_click_cell(
     mut commands: Commands,
     mut cell_query: Query<(&LevelSelectionCell, &mut Cell)>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
-    cell_colors: ResMut<CellColors>,
+    cell_colors: Res<CellColors>,
     mut ev_mouse_left_click: EventReader<MouseLeftReleasedEvent>,
     mut app_state: ResMut<State<AppState>>,
     mut level_file: ResMut<LevelFile>,
@@ -44,7 +44,7 @@ pub fn mouse_enter_cell(
     mut commands: Commands,
     mut cell_query: Query<(&LevelSelectionCell, &mut Cell)>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
-    cell_colors: ResMut<CellColors>,
+    cell_colors: Res<CellColors>,
     mut ev_mouse_enter: EventReader<MouseEnterEvent>,
     audio: Res<Audio>,
     clip: Res<SfxHover>,
@@ -61,7 +61,7 @@ pub fn mouse_exit_cell(
     mut commands: Commands,
     mut cell_query: Query<(&LevelSelectionCell, &mut Cell)>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
-    cell_colors: ResMut<CellColors>,
+    cell_colors: Res<CellColors>,
     mut ev_mouse_exit: EventReader<MouseExitEvent>,
 ) {
     for ev in ev_mouse_exit.iter() {

@@ -7,14 +7,15 @@ mod systems;
 
 use self::{board::Board, functions::rescale_board, resources::LevelFile, systems::*};
 use crate::{
-    resources::{CellColors, TextSettings},
+    resources::{CellColors, CellMeshes, TextSettings},
     states::AppState,
 };
 use bevy::{
     app::App,
+    hierarchy::DespawnRecursiveExt,
     prelude::{
-        Assets, Camera, Commands, Mesh, ParallelSystemDescriptorCoercion, Query, Res, ResMut,
-        SystemSet, Transform, With,
+        Assets, Camera, Commands, Entity, Mesh, ParallelSystemDescriptorCoercion, Query, Res,
+        ResMut, SystemSet, Transform, With, Without,
     },
     window::Windows,
 };
@@ -42,7 +43,8 @@ pub fn prepare_level(app: &mut App) {
 fn setup(
     mut commands: Commands,
     meshes: ResMut<Assets<Mesh>>,
-    cell_colors: ResMut<CellColors>,
+    cell_meshes: Res<CellMeshes>,
+    cell_colors: Res<CellColors>,
     text_settings: ResMut<TextSettings>,
     mut level_file: ResMut<LevelFile>,
     wnds: Res<Windows>,
@@ -59,19 +61,8 @@ fn setup(
         meshes,
         cells,
         &text_settings,
-        cell_colors.white.clone(),
-        (
-            cell_colors.yellow_medium.clone(),
-            cell_colors.yellow_light.clone(),
-        ),
-        (
-            cell_colors.gray_medium.clone(),
-            cell_colors.gray_light.clone(),
-        ),
-        (
-            cell_colors.blue_medium.clone(),
-            cell_colors.blue_light.clone(),
-        ),
+        cell_meshes,
+        cell_colors,
     );
     for w in wnds.iter() {
         rescale_board(&b, w.width(), w.height(), &mut camera_query);
@@ -79,6 +70,8 @@ fn setup(
     commands.insert_resource(b);
 }
 
-fn cleanup(mut commands: Commands, board: Res<Board>) {
-    board.despawn_all(&mut commands);
+fn cleanup(mut commands: Commands, entities: Query<Entity, Without<Camera>>) {
+    for entity in &entities {
+        commands.entity(entity).despawn_recursive();
+    }
 }

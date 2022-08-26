@@ -2,21 +2,9 @@ use crate::{
     components::Cell, level::resources::LevelFile, resources::CellColors, states::AppState,
 };
 use bevy::{
-    prelude::{Commands, Component, DespawnRecursiveExt, Entity, Handle, Query, ResMut, State},
+    prelude::{Commands, Component, Handle, Query, Res, ResMut, State},
     sprite::ColorMaterial,
 };
-
-pub struct MenuEntities {
-    pub lscs: Vec<Entity>,
-}
-
-impl MenuEntities {
-    pub fn despawn_all(&self, commands: &mut Commands) {
-        for lsc in &self.lscs {
-            commands.entity(*lsc).despawn_recursive();
-        }
-    }
-}
 
 #[derive(Component)]
 pub struct LevelSelectionCell {
@@ -30,7 +18,7 @@ impl LevelSelectionCell {
         cell: &mut Cell,
         commands: &mut Commands,
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
-        cell_colors: &ResMut<CellColors>,
+        cell_colors: &CellColors,
     ) {
         cell.hover(
             commands,
@@ -45,7 +33,7 @@ impl LevelSelectionCell {
         cell: &mut Cell,
         commands: &mut Commands,
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
-        cell_colors: &ResMut<CellColors>,
+        cell_colors: &CellColors,
     ) {
         cell.unhover(
             commands,
@@ -60,7 +48,7 @@ impl LevelSelectionCell {
         cell: &mut Cell,
         commands: &mut Commands,
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
-        cell_colors: &ResMut<CellColors>,
+        cell_colors: &CellColors,
         app_state: &mut ResMut<State<AppState>>,
         level_file: &mut ResMut<LevelFile>,
     ) {

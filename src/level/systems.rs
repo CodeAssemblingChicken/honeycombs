@@ -6,12 +6,13 @@ use super::{
 use crate::{
     components::Cell,
     resources::{CellColors, SfxHover},
+    states::AppState,
 };
 use bevy::{
     audio::{Audio, PlaybackSettings},
     prelude::{
-        Camera, ColorMaterial, Commands, EventReader, Handle, Query, Res, ResMut, Transform, With,
-        Without,
+        Camera, ColorMaterial, Commands, EventReader, Handle, Query, Res, ResMut, State, Transform,
+        With, Without,
     },
     window::WindowResized,
 };
@@ -26,7 +27,7 @@ pub fn mouse_click_cell(
     mut number_cell_query: Query<(&GameCell, &mut Cell, &NumberCell), Without<EmptyCell>>,
     mut empty_cell_query: Query<(&GameCell, &mut Cell), With<EmptyCell>>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
-    cell_colors: ResMut<CellColors>,
+    cell_colors: Res<CellColors>,
     mut ev_mouse_left_click: EventReader<MouseLeftReleasedEvent>,
     mut ev_mouse_right_click: EventReader<MouseRightReleasedEvent>,
     mut board: ResMut<Board>,
@@ -68,7 +69,7 @@ pub fn mouse_enter_cell(
     mut commands: Commands,
     mut cell_query: Query<(&GameCell, &mut Cell)>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
-    cell_colors: ResMut<CellColors>,
+    cell_colors: Res<CellColors>,
     mut ev_mouse_enter: EventReader<MouseEnterEvent>,
     audio: Res<Audio>,
     clip: Res<SfxHover>,
@@ -86,7 +87,7 @@ pub fn mouse_exit_cell(
     mut commands: Commands,
     mut cell_query: Query<(&GameCell, &mut Cell)>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
-    cell_colors: ResMut<CellColors>,
+    cell_colors: Res<CellColors>,
     mut ev_mouse_exit: EventReader<MouseExitEvent>,
 ) {
     for ev in ev_mouse_exit.iter() {
@@ -119,6 +120,8 @@ pub fn window_resize_system(
     }
 }
 
-pub fn check_solved(board: Res<Board>) {
-    if board.is_changed() && board.remaining == 0 {}
+pub fn check_solved(board: Res<Board>, mut app_state: ResMut<State<AppState>>) {
+    if board.is_changed() && board.remaining == 0 {
+        app_state.set(AppState::Loading).unwrap();
+    }
 }

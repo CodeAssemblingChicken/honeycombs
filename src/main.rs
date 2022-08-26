@@ -9,19 +9,13 @@ mod states;
 
 use bevy::{
     app::App,
-    audio::AudioSource,
-    prelude::{
-        AssetServer, Assets, Camera2dBundle, ClearColor, Color, Commands, Handle, Msaa, Res,
-        ResMut, State, SystemSet,
-    },
-    sprite::ColorMaterial,
-    text::{TextAlignment, TextStyle},
+    prelude::{Camera2dBundle, ClearColor, Color, Commands, Msaa, Res, ResMut, State, SystemSet},
     window::WindowDescriptor,
     DefaultPlugins,
 };
 use bevy_easings::EasingsPlugin;
 use components::Cell;
-use constants::RADIUS;
+
 use std::{io, panic};
 // use chrono::Utc;
 #[cfg(feature = "debug")]
@@ -29,7 +23,7 @@ use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
 use interactable::{InteractableCamera, InteractablePlugin};
 use level::resources::LevelFile;
 use native_dialog::MessageDialog;
-use resources::{CellColors, SfxHover, TextSettings};
+use resources::{CellColors, CellMeshes, SfxHover, TextSettings};
 use states::AppState;
 use std::io::Write;
 
@@ -59,46 +53,17 @@ fn main() {
     app.add_plugin(WorldInspectorPlugin::new())
         .register_inspectable::<Cell>();
 
-    app.run();
+    app.init_resource::<CellMeshes>()
+        .init_resource::<CellColors>()
+        .init_resource::<SfxHover>()
+        .init_resource::<TextSettings>()
+        .run();
 }
 
-fn setup(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-) {
+fn setup(mut commands: Commands) {
     commands
         .spawn_bundle(Camera2dBundle::default())
         .insert(InteractableCamera);
-
-    let sfx_hover: Handle<AudioSource> = asset_server.load("sfx/hover.ogg");
-    commands.insert_resource(SfxHover(sfx_hover));
-
-    let font = asset_server.load("fonts/Harabara.ttf");
-    let text_style = TextStyle {
-        font,
-        font_size: (RADIUS * 0.75).round(),
-        color: Color::WHITE,
-    };
-    let text_settings = TextSettings {
-        style: text_style,
-        alignment: TextAlignment::CENTER,
-    };
-
-    commands.insert_resource(text_settings.clone());
-
-    commands.insert_resource(CellColors {
-        white: materials.add(ColorMaterial::from(Color::WHITE)),
-        yellow_dark: materials.add(ColorMaterial::from(Color::hex("d87408").unwrap())),
-        yellow_medium: materials.add(ColorMaterial::from(Color::hex("dc8c10").unwrap())),
-        yellow_light: materials.add(ColorMaterial::from(Color::hex("e4a020").unwrap())),
-        gray_dark: materials.add(ColorMaterial::from(Color::hex("24221c").unwrap())),
-        gray_medium: materials.add(ColorMaterial::from(Color::hex("37352a").unwrap())),
-        gray_light: materials.add(ColorMaterial::from(Color::hex("484537").unwrap())),
-        blue_dark: materials.add(ColorMaterial::from(Color::hex("0070e4").unwrap())),
-        blue_medium: materials.add(ColorMaterial::from(Color::hex("0088e8").unwrap())),
-        blue_light: materials.add(ColorMaterial::from(Color::hex("00a0f0").unwrap())),
-    });
 }
 
 fn show_menu_after_load(mut app_state: ResMut<State<AppState>>, level_file: Res<LevelFile>) {
