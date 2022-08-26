@@ -43,11 +43,10 @@ impl Board {
     /// An absolute monster of setup.
     pub fn new(
         commands: &mut Commands,
-        mut meshes: ResMut<Assets<Mesh>>,
         config: BoardConfig,
         text_settings: &TextSettings,
-        cell_meshes: Res<CellMeshes>,
-        cell_colors: Res<CellColors>,
+        cell_meshes: &CellMeshes,
+        cell_colors: &CellColors,
     ) -> Self {
         let cells = config.cells;
         let hints = config.hints;

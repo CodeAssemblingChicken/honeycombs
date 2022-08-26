@@ -21,14 +21,14 @@ impl GameCell {
         &self,
         cell: &mut Cell,
         commands: &mut Commands,
-        color_query: &mut Query<&mut Handle<ColorMaterial>>,
+        color_query: &mut Query<(Entity, &mut Handle<ColorMaterial>)>,
         cell_colors: &CellColors,
     ) {
         // Pass event to Cell component with yellow colors
         cell.hover(
             commands,
-            cell_colors.yellow_medium.id,
-            cell_colors.yellow_dark.id,
+            cell_colors.yellow_medium.clone(),
+            cell_colors.yellow_dark.clone(),
             color_query,
         );
     }
@@ -38,13 +38,13 @@ impl GameCell {
         &self,
         cell: &mut Cell,
         commands: &mut Commands,
-        color_query: &mut Query<&mut Handle<ColorMaterial>>,
+        color_query: &mut Query<(Entity, &mut Handle<ColorMaterial>)>,
         cell_colors: &CellColors,
     ) {
         cell.unhover(
             commands,
-            cell_colors.yellow_light.id,
-            cell_colors.yellow_medium.id,
+            cell_colors.yellow_light.clone(),
+            cell_colors.yellow_medium.clone(),
             color_query,
         );
     }
@@ -54,7 +54,7 @@ impl GameCell {
         &self,
         cell: &mut Cell,
         commands: &mut Commands,
-        color_query: &mut Query<&mut Handle<ColorMaterial>>,
+        color_query: &mut Query<(Entity, &mut Handle<ColorMaterial>)>,
         cell_colors: &CellColors,
         number_cell: Option<&NumberCell>,
         board: &mut ResMut<Board>,
@@ -69,11 +69,17 @@ impl GameCell {
                     .entity(number_cell.unwrap().label)
                     .remove::<Visibility>()
                     .insert(Visibility { is_visible: true });
-                (cell_colors.gray_medium.id, cell_colors.gray_light.id)
+                (
+                    cell_colors.gray_medium.clone(),
+                    cell_colors.gray_light.clone(),
+                )
             }
             CellType::EmptyCell => {
                 board.remaining -= 1;
-                (cell_colors.blue_medium.id, cell_colors.blue_light.id)
+                (
+                    cell_colors.blue_medium.clone(),
+                    cell_colors.blue_light.clone(),
+                )
             }
         };
 

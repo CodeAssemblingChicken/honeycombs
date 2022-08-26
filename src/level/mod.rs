@@ -14,8 +14,8 @@ use bevy::{
     app::App,
     hierarchy::DespawnRecursiveExt,
     prelude::{
-        Assets, Camera, Commands, Entity, Mesh, ParallelSystemDescriptorCoercion, Query, Res,
-        ResMut, SystemSet, Transform, With, Without,
+        Camera, Commands, Entity, ParallelSystemDescriptorCoercion, Query, Res, ResMut, SystemSet,
+        Transform, With, Without,
     },
     window::Windows,
 };
@@ -42,10 +42,9 @@ pub fn prepare_level(app: &mut App) {
 
 fn setup(
     mut commands: Commands,
-    meshes: ResMut<Assets<Mesh>>,
     cell_meshes: Res<CellMeshes>,
     cell_colors: Res<CellColors>,
-    text_settings: ResMut<TextSettings>,
+    text_settings: Res<TextSettings>,
     mut level_file: ResMut<LevelFile>,
     wnds: Res<Windows>,
     mut camera_query: Query<&mut Transform, With<Camera>>,
@@ -58,11 +57,10 @@ fn setup(
 
     let b = Board::new(
         &mut commands,
-        meshes,
         cells,
         &text_settings,
-        cell_meshes,
-        cell_colors,
+        &cell_meshes,
+        &cell_colors,
     );
     for w in wnds.iter() {
         rescale_board(&b, w.width(), w.height(), &mut camera_query);

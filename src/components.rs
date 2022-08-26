@@ -1,6 +1,5 @@
 use crate::constants::{SCALE_ENLARGED, SCALE_NORMAL};
 use bevy::{
-    asset::HandleId,
     math::Vec3,
     prelude::{Commands, Component, Entity, Handle, Query, Transform},
     sprite::ColorMaterial,
@@ -28,9 +27,9 @@ impl Cell {
     pub fn hover(
         &mut self,
         commands: &mut Commands,
-        light: HandleId,
-        dark: HandleId,
-        color_query: &mut Query<&mut Handle<ColorMaterial>>,
+        light: Handle<ColorMaterial>,
+        dark: Handle<ColorMaterial>,
+        color_query: &mut Query<(Entity, &mut Handle<ColorMaterial>)>,
     ) {
         if self.hovering {
             return;
@@ -45,9 +44,9 @@ impl Cell {
     pub fn unhover(
         &mut self,
         commands: &mut Commands,
-        light: HandleId,
-        dark: HandleId,
-        color_query: &mut Query<&mut Handle<ColorMaterial>>,
+        light: Handle<ColorMaterial>,
+        dark: Handle<ColorMaterial>,
+        color_query: &mut Query<(Entity, &mut Handle<ColorMaterial>)>,
     ) {
         if !self.hovering {
             return;
@@ -62,9 +61,9 @@ impl Cell {
     pub fn click(
         &mut self,
         commands: &mut Commands,
-        light: HandleId,
-        dark: HandleId,
-        color_query: &mut Query<&mut Handle<ColorMaterial>>,
+        light: Handle<ColorMaterial>,
+        dark: Handle<ColorMaterial>,
+        color_query: &mut Query<(Entity, &mut Handle<ColorMaterial>)>,
     ) {
         self.rescale(commands, SCALE_NORMAL);
         self.set_colors(light, dark, color_query);
@@ -87,18 +86,18 @@ impl Cell {
     /// Common function for setting the color of the inner hexes
     pub fn set_colors(
         &self,
-        light: HandleId,
-        dark: HandleId,
-        color_query: &mut Query<&mut Handle<ColorMaterial>>,
+        light: Handle<ColorMaterial>,
+        dark: Handle<ColorMaterial>,
+        color_query: &mut Query<(Entity, &mut Handle<ColorMaterial>)>,
     ) {
         // Get Material Handles from the children
         color_query
             .get_mut(self.outer_hexagon)
-            .and_then(|mut h| Ok(h.id = dark))
+            .and_then(|(e, mut h)| Ok(*h = dark))
             .unwrap();
         color_query
             .get_mut(self.inner_hexagon)
-            .and_then(|mut h| Ok(h.id = light))
+            .and_then(|(e, mut h)| Ok(*h = light))
             .unwrap();
         // unwrap should be fine, because if the children exist they're also in the query
     }

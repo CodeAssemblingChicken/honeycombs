@@ -2,7 +2,7 @@ use crate::{
     components::Cell, level::resources::LevelFile, resources::CellColors, states::AppState,
 };
 use bevy::{
-    prelude::{Commands, Component, Handle, Query, Res, ResMut, State},
+    prelude::{Commands, Component, Entity, Handle, Query, ResMut, State},
     sprite::ColorMaterial,
 };
 
@@ -17,13 +17,13 @@ impl LevelSelectionCell {
         &self,
         cell: &mut Cell,
         commands: &mut Commands,
-        color_query: &mut Query<&mut Handle<ColorMaterial>>,
+        color_query: &mut Query<(Entity, &mut Handle<ColorMaterial>)>,
         cell_colors: &CellColors,
     ) {
         cell.hover(
             commands,
-            cell_colors.blue_medium.id,
-            cell_colors.blue_dark.id,
+            cell_colors.blue_medium.clone(),
+            cell_colors.blue_dark.clone(),
             color_query,
         );
     }
@@ -32,13 +32,13 @@ impl LevelSelectionCell {
         &self,
         cell: &mut Cell,
         commands: &mut Commands,
-        color_query: &mut Query<&mut Handle<ColorMaterial>>,
+        color_query: &mut Query<(Entity, &mut Handle<ColorMaterial>)>,
         cell_colors: &CellColors,
     ) {
         cell.unhover(
             commands,
-            cell_colors.blue_light.id,
-            cell_colors.blue_medium.id,
+            cell_colors.blue_light.clone(),
+            cell_colors.blue_medium.clone(),
             color_query,
         );
     }
@@ -47,7 +47,7 @@ impl LevelSelectionCell {
         &self,
         cell: &mut Cell,
         commands: &mut Commands,
-        color_query: &mut Query<&mut Handle<ColorMaterial>>,
+        color_query: &mut Query<(Entity, &mut Handle<ColorMaterial>)>,
         cell_colors: &CellColors,
         app_state: &mut ResMut<State<AppState>>,
         level_file: &mut ResMut<LevelFile>,
@@ -57,8 +57,8 @@ impl LevelSelectionCell {
         }
         cell.click(
             commands,
-            cell_colors.blue_light.id,
-            cell_colors.blue_medium.id,
+            cell_colors.blue_light.clone(),
+            cell_colors.blue_medium.clone(),
             color_query,
         );
         level_file.filename = Some(format!("assets/levels/{}/{}.lvl", self.stage, self.level));

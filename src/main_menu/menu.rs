@@ -7,10 +7,7 @@ use crate::{
 use bevy::{
     hierarchy::{BuildChildren, DespawnRecursiveExt},
     math::Vec3,
-    prelude::{
-        default, shape::RegularPolygon, Assets, Camera, Commands, Entity, Mesh, Query, Res, ResMut,
-        Transform, Without,
-    },
+    prelude::{default, Camera, Commands, Entity, Query, Res, Transform, Without},
     sprite::ColorMesh2dBundle,
 };
 use interactable::{
