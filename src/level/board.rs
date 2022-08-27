@@ -2,16 +2,14 @@ use super::components::{CellType, ColumnHint, HintDirection};
 use crate::{
     components::{Cell, CellInner, CellOuter},
     constants::{RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_CELL_INNER, Z_INDEX_CELL_OUTER, Z_INDEX_TEXT},
-    level::{
-        components::{EmptyCell, GameCell, HiddenCell, HintType, NumberCell},
-        functions::spawn_cell_text,
-    },
+    functions::spawn_cell_text,
+    level::components::{EmptyCell, GameCell, HiddenCell, HintType, NumberCell},
     resources::{CellColors, CellMeshes, TextSettings},
 };
 use bevy::{
     hierarchy::BuildChildren,
     math::Vec3,
-    prelude::{default, Assets, Color, Commands, Entity, Mesh, Res, ResMut, Transform, Visibility},
+    prelude::{default, Color, Commands, Entity, Transform, Visibility},
     sprite::ColorMesh2dBundle,
     text::{Text, Text2dBundle},
 };
@@ -152,7 +150,7 @@ impl Board {
                             HintType::SEPERATED => ts.style.color = Color::RED,
                             _ => (),
                         }
-                        let text_entity = spawn_cell_text(commands, count, &ts);
+                        let text_entity = spawn_cell_text(commands, &format!("{}", count), &ts);
                         commands.entity(cell).add_child(text_entity);
                         if hidden {
                             commands
@@ -167,7 +165,7 @@ impl Board {
                     }
                     CellType::EmptyCell => {
                         if hidden {
-                            blues_remaining = 1;
+                            blues_remaining += 1;
                         }
                         commands.entity(cell).insert(EmptyCell);
                     }

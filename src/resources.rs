@@ -78,7 +78,7 @@ impl FromWorld for TextSettings {
     fn from_world(world: &mut bevy::prelude::World) -> Self {
         let asset_server = world.get_resource::<AssetServer>().unwrap();
 
-        let font = asset_server.load("fonts/Harabara.ttf");
+        let font = asset_server.load("fonts/Harabara-dash.ttf");
         let text_style = TextStyle {
             font,
             font_size: (RADIUS * 0.75).round(),

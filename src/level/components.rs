@@ -21,7 +21,7 @@ impl GameCell {
         &self,
         cell: &mut Cell,
         commands: &mut Commands,
-        color_query: &mut Query<(Entity, &mut Handle<ColorMaterial>)>,
+        color_query: &mut Query<&mut Handle<ColorMaterial>>,
         cell_colors: &CellColors,
     ) {
         // Pass event to Cell component with yellow colors
@@ -38,7 +38,7 @@ impl GameCell {
         &self,
         cell: &mut Cell,
         commands: &mut Commands,
-        color_query: &mut Query<(Entity, &mut Handle<ColorMaterial>)>,
+        color_query: &mut Query<&mut Handle<ColorMaterial>>,
         cell_colors: &CellColors,
     ) {
         cell.unhover(
@@ -54,7 +54,7 @@ impl GameCell {
         &self,
         cell: &mut Cell,
         commands: &mut Commands,
-        color_query: &mut Query<(Entity, &mut Handle<ColorMaterial>)>,
+        color_query: &mut Query<&mut Handle<ColorMaterial>>,
         cell_colors: &CellColors,
         number_cell: Option<&NumberCell>,
         board: &mut ResMut<Board>,

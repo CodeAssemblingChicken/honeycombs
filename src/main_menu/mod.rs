@@ -2,11 +2,8 @@ mod components;
 mod menu;
 mod systems;
 
-use self::{
-    menu::{cleanup, setup},
-    systems::*,
-};
-use crate::states::AppState;
+use self::{menu::setup, systems::*};
+use crate::{cleanup, states::AppState};
 use bevy::prelude::{App, ParallelSystemDescriptorCoercion, SystemSet};
 
 const STATE: AppState = AppState::MainMenu;

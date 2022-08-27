@@ -1,6 +1,8 @@
 mod components;
 mod constants;
+mod editor;
 mod end_screen;
+mod functions;
 mod helpers;
 mod level;
 mod main_menu;
@@ -9,8 +11,12 @@ mod states;
 
 use bevy::{
     app::App,
-    prelude::{Camera2dBundle, ClearColor, Color, Commands, Msaa, Res, ResMut, State, SystemSet},
-    window::WindowDescriptor,
+    hierarchy::DespawnRecursiveExt,
+    prelude::{
+        default, Camera, Camera2dBundle, ClearColor, Color, Commands, Entity, Msaa, Query, Res,
+        ResMut, State, SystemSet, Without,
+    },
+    window::{WindowDescriptor, WindowResizeConstraints},
     DefaultPlugins,
 };
 use bevy_easings::EasingsPlugin;
@@ -33,7 +39,14 @@ fn main() {
     app.insert_resource(Msaa { samples: 4 })
         .insert_resource(WindowDescriptor {
             title: "Hexacell".to_string(),
-            ..Default::default()
+            resize_constraints: WindowResizeConstraints {
+                min_width: 640.,
+                min_height: 480.,
+                max_width: f32::INFINITY,
+                max_height: f32::INFINITY,
+            },
+            // mode: WindowMode::Fullscreen,
+            ..default()
         })
         .insert_resource(ClearColor(Color::rgb(0.25, 0.25, 0.25)))
         .insert_resource(LevelFile::default())
@@ -71,6 +84,12 @@ fn show_menu_after_load(mut app_state: ResMut<State<AppState>>, level_file: Res<
         app_state.set(AppState::Level).unwrap();
     } else {
         app_state.set(AppState::MainMenu).unwrap();
+    }
+}
+
+pub fn cleanup(mut commands: Commands, entities: Query<Entity, Without<Camera>>) {
+    for entity in &entities {
+        commands.entity(entity).despawn_recursive();
     }
 }
 

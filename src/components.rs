@@ -29,7 +29,7 @@ impl Cell {
         commands: &mut Commands,
         light: Handle<ColorMaterial>,
         dark: Handle<ColorMaterial>,
-        color_query: &mut Query<(Entity, &mut Handle<ColorMaterial>)>,
+        color_query: &mut Query<&mut Handle<ColorMaterial>>,
     ) {
         if self.hovering {
             return;
@@ -46,7 +46,7 @@ impl Cell {
         commands: &mut Commands,
         light: Handle<ColorMaterial>,
         dark: Handle<ColorMaterial>,
-        color_query: &mut Query<(Entity, &mut Handle<ColorMaterial>)>,
+        color_query: &mut Query<&mut Handle<ColorMaterial>>,
     ) {
         if !self.hovering {
             return;
@@ -63,7 +63,7 @@ impl Cell {
         commands: &mut Commands,
         light: Handle<ColorMaterial>,
         dark: Handle<ColorMaterial>,
-        color_query: &mut Query<(Entity, &mut Handle<ColorMaterial>)>,
+        color_query: &mut Query<&mut Handle<ColorMaterial>>,
     ) {
         self.rescale(commands, SCALE_NORMAL);
         self.set_colors(light, dark, color_query);
@@ -88,16 +88,16 @@ impl Cell {
         &self,
         light: Handle<ColorMaterial>,
         dark: Handle<ColorMaterial>,
-        color_query: &mut Query<(Entity, &mut Handle<ColorMaterial>)>,
+        color_query: &mut Query<&mut Handle<ColorMaterial>>,
     ) {
         // Get Material Handles from the children
         color_query
             .get_mut(self.outer_hexagon)
-            .and_then(|(e, mut h)| Ok(*h = dark))
+            .and_then(|mut h| Ok(*h = dark))
             .unwrap();
         color_query
             .get_mut(self.inner_hexagon)
-            .and_then(|(e, mut h)| Ok(*h = light))
+            .and_then(|mut h| Ok(*h = light))
             .unwrap();
         // unwrap should be fine, because if the children exist they're also in the query
     }

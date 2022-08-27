@@ -1,18 +1,18 @@
 use super::{
     board::Board,
     components::{EmptyCell, GameCell, NumberCell},
-    functions::rescale_board,
 };
 use crate::{
     components::Cell,
+    functions::rescale_board,
     resources::{CellColors, SfxHover},
     states::AppState,
 };
 use bevy::{
     audio::{Audio, PlaybackSettings},
     prelude::{
-        Camera, ColorMaterial, Commands, Entity, EventReader, Handle, Query, Res, ResMut, State,
-        Transform, With, Without,
+        Camera, ColorMaterial, Commands, EventReader, Handle, Query, Res, ResMut, State, Transform,
+        With, Without,
     },
     window::WindowResized,
 };
@@ -26,7 +26,7 @@ pub fn mouse_click_cell(
     mut commands: Commands,
     mut number_cell_query: Query<(&GameCell, &mut Cell, &NumberCell), Without<EmptyCell>>,
     mut empty_cell_query: Query<(&GameCell, &mut Cell), With<EmptyCell>>,
-    mut color_query: Query<(Entity, &mut Handle<ColorMaterial>)>,
+    mut color_query: Query<&mut Handle<ColorMaterial>>,
     cell_colors: Res<CellColors>,
     mut ev_mouse_left_click: EventReader<MouseLeftReleasedEvent>,
     mut ev_mouse_right_click: EventReader<MouseRightReleasedEvent>,
@@ -68,7 +68,7 @@ pub fn mouse_click_cell(
 pub fn mouse_enter_cell(
     mut commands: Commands,
     mut cell_query: Query<(&GameCell, &mut Cell)>,
-    mut color_query: Query<(Entity, &mut Handle<ColorMaterial>)>,
+    mut color_query: Query<&mut Handle<ColorMaterial>>,
     cell_colors: Res<CellColors>,
     mut ev_mouse_enter: EventReader<MouseEnterEvent>,
     audio: Res<Audio>,
@@ -86,7 +86,7 @@ pub fn mouse_enter_cell(
 pub fn mouse_exit_cell(
     mut commands: Commands,
     mut cell_query: Query<(&GameCell, &mut Cell)>,
-    mut color_query: Query<(Entity, &mut Handle<ColorMaterial>)>,
+    mut color_query: Query<&mut Handle<ColorMaterial>>,
     cell_colors: Res<CellColors>,
     mut ev_mouse_exit: EventReader<MouseExitEvent>,
 ) {
@@ -116,7 +116,14 @@ pub fn window_resize_system(
     board: Res<Board>,
 ) {
     for ev in ev_window_resize.iter() {
-        rescale_board(&board, ev.width, ev.height, &mut camera_query);
+        rescale_board(
+            board.width,
+            board.height,
+            4,
+            ev.width,
+            ev.height,
+            &mut camera_query,
+        );
     }
 }
 

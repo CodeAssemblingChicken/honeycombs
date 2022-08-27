@@ -1,15 +1,14 @@
 use super::components::LevelSelectionCell;
 use crate::{
     components::Cell,
+    functions::rescale_board,
     level::resources::LevelFile,
     resources::{CellColors, SfxHover},
     states::AppState,
 };
 use bevy::{
     audio::Audio,
-    prelude::{
-        Camera, Commands, Entity, EventReader, Handle, Query, Res, ResMut, State, Transform, With,
-    },
+    prelude::{Camera, Commands, EventReader, Handle, Query, Res, ResMut, State, Transform, With},
     sprite::ColorMaterial,
     window::WindowResized,
 };
@@ -21,7 +20,7 @@ use interactable::{
 pub fn mouse_click_cell(
     mut commands: Commands,
     mut cell_query: Query<(&LevelSelectionCell, &mut Cell)>,
-    mut color_query: Query<(Entity, &mut Handle<ColorMaterial>)>,
+    mut color_query: Query<&mut Handle<ColorMaterial>>,
     cell_colors: Res<CellColors>,
     mut ev_mouse_left_click: EventReader<MouseLeftReleasedEvent>,
     mut app_state: ResMut<State<AppState>>,
@@ -45,7 +44,7 @@ pub fn mouse_click_cell(
 pub fn mouse_enter_cell(
     mut commands: Commands,
     mut cell_query: Query<(&LevelSelectionCell, &mut Cell)>,
-    mut color_query: Query<(Entity, &mut Handle<ColorMaterial>)>,
+    mut color_query: Query<&mut Handle<ColorMaterial>>,
     cell_colors: Res<CellColors>,
     mut ev_mouse_enter: EventReader<MouseEnterEvent>,
     audio: Res<Audio>,
@@ -62,7 +61,7 @@ pub fn mouse_enter_cell(
 pub fn mouse_exit_cell(
     mut commands: Commands,
     mut cell_query: Query<(&LevelSelectionCell, &mut Cell)>,
-    mut color_query: Query<(Entity, &mut Handle<ColorMaterial>)>,
+    mut color_query: Query<&mut Handle<ColorMaterial>>,
     cell_colors: Res<CellColors>,
     mut ev_mouse_exit: EventReader<MouseExitEvent>,
 ) {
@@ -89,14 +88,9 @@ pub fn mouse_over_cell(
 pub fn window_resize_system(
     mut ev_window_resize: EventReader<WindowResized>,
     mut camera_query: Query<&mut Transform, With<Camera>>,
-    // board: Query<&Board>,
 ) {
     for ev in ev_window_resize.iter() {
-        // let w = ((b.width + 4) as f32 * RADIUS * 1.56) / ev.width;
-        // let h = ((b.height + 4) as f32 * RADIUS * 1.8) / ev.height;
-        // let s = w.max(h);
-        // for mut t in camera_query.iter_mut() {
-        //     t.scale = Vec3::new(s, s, 1.0);
-        // }
+        // TODO: Remove hard-coded width/height
+        rescale_board(11, 11, 1, ev.width, ev.height, &mut camera_query);
     }
 }

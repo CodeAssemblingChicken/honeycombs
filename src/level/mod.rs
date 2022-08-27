@@ -1,21 +1,21 @@
 mod board;
 mod components;
-mod functions;
 mod parser;
 pub mod resources;
 mod systems;
 
-use self::{board::Board, functions::rescale_board, resources::LevelFile, systems::*};
+use self::{board::Board, resources::LevelFile, systems::*};
 use crate::{
+    cleanup,
+    functions::rescale_board,
     resources::{CellColors, CellMeshes, TextSettings},
     states::AppState,
 };
 use bevy::{
     app::App,
-    hierarchy::DespawnRecursiveExt,
     prelude::{
-        Camera, Commands, Entity, ParallelSystemDescriptorCoercion, Query, Res, ResMut, SystemSet,
-        Transform, With, Without,
+        Camera, Commands, ParallelSystemDescriptorCoercion, Query, Res, ResMut, SystemSet,
+        Transform, With,
     },
     window::Windows,
 };
@@ -42,11 +42,11 @@ pub fn prepare_level(app: &mut App) {
 
 fn setup(
     mut commands: Commands,
+    wnds: Res<Windows>,
     cell_meshes: Res<CellMeshes>,
     cell_colors: Res<CellColors>,
     text_settings: Res<TextSettings>,
     mut level_file: ResMut<LevelFile>,
-    wnds: Res<Windows>,
     mut camera_query: Query<&mut Transform, With<Camera>>,
 ) {
     if level_file.filename.is_none() {
@@ -63,13 +63,14 @@ fn setup(
         &cell_colors,
     );
     for w in wnds.iter() {
-        rescale_board(&b, w.width(), w.height(), &mut camera_query);
+        rescale_board(
+            b.width,
+            b.height,
+            4,
+            w.width(),
+            w.height(),
+            &mut camera_query,
+        );
     }
     commands.insert_resource(b);
-}
-
-fn cleanup(mut commands: Commands, entities: Query<Entity, Without<Camera>>) {
-    for entity in &entities {
-        commands.entity(entity).despawn_recursive();
-    }
 }
