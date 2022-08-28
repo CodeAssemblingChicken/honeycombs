@@ -28,6 +28,7 @@ impl Cell {
     pub fn hover(
         &mut self,
         commands: &mut Commands,
+        background: Option<Handle<ColorMaterial>>,
         light: Handle<ColorMaterial>,
         dark: Handle<ColorMaterial>,
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
@@ -39,12 +40,13 @@ impl Cell {
         // Enlarge
         self.rescale(commands, SCALE_ENLARGED);
         // Set colors to hovering
-        self.set_colors(light, dark, color_query);
+        self.set_colors(background, light, dark, color_query);
     }
 
     pub fn unhover(
         &mut self,
         commands: &mut Commands,
+        background: Option<Handle<ColorMaterial>>,
         light: Handle<ColorMaterial>,
         dark: Handle<ColorMaterial>,
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
@@ -56,18 +58,19 @@ impl Cell {
         // Normal scale
         self.rescale(commands, SCALE_NORMAL);
         // Set colors to normal
-        self.set_colors(light, dark, color_query);
+        self.set_colors(background, light, dark, color_query);
     }
 
     pub fn click(
         &mut self,
         commands: &mut Commands,
+        background: Option<Handle<ColorMaterial>>,
         light: Handle<ColorMaterial>,
         dark: Handle<ColorMaterial>,
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
     ) {
         self.rescale(commands, SCALE_NORMAL);
-        self.set_colors(light, dark, color_query);
+        self.set_colors(background, light, dark, color_query);
     }
 
     /// Common function for easing the scale to a given value
@@ -87,10 +90,12 @@ impl Cell {
     /// Common function for setting the color of the inner hexes
     pub fn set_colors(
         &self,
+        background: Option<Handle<ColorMaterial>>,
         light: Handle<ColorMaterial>,
         dark: Handle<ColorMaterial>,
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
     ) {
+        println!("Col");
         // Get Material Handles from the children
         color_query
             .get_mut(self.outer_hexagon)
@@ -100,6 +105,12 @@ impl Cell {
             .get_mut(self.inner_hexagon)
             .and_then(|mut h| Ok(*h = light))
             .unwrap();
+        if let Some(b) = background {
+            color_query
+                .get_mut(self.entity)
+                .and_then(|mut h| Ok(*h = b))
+                .unwrap();
+        }
         // unwrap should be fine, because if the children exist they're also in the query
     }
 }
@@ -149,19 +160,19 @@ pub enum HintDirection {
 #[cfg_attr(feature = "debug", derive(bevy_inspector_egui::Inspectable))]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum HintType {
-    NONE,
+    None,
     // SOME is quite ugly, it is used in parsing to indicate that the hint
     // is special and the concrete specialization (CONNECTED or SEPERATED)
     // must first be calculated
     // TODO: Think of something better
-    SOME,
-    CONNECTED,
-    SEPERATED,
+    Some,
+    Connected,
+    Seperated,
 }
 
 /// Required because of bevy_inspector_egui::Inspectable
 impl Default for HintType {
     fn default() -> Self {
-        Self::NONE
+        Self::None
     }
 }

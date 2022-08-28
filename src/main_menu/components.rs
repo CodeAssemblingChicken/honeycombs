@@ -28,6 +28,7 @@ impl LevelSelectionCell {
     ) {
         cell.hover(
             commands,
+            None,
             cell_colors.blue_medium.clone(),
             cell_colors.blue_dark.clone(),
             color_query,
@@ -43,6 +44,7 @@ impl LevelSelectionCell {
     ) {
         cell.unhover(
             commands,
+            None,
             cell_colors.blue_light.clone(),
             cell_colors.blue_medium.clone(),
             color_query,
@@ -63,6 +65,7 @@ impl LevelSelectionCell {
         }
         cell.click(
             commands,
+            None,
             cell_colors.blue_light.clone(),
             cell_colors.blue_medium.clone(),
             color_query,

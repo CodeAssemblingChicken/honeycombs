@@ -29,6 +29,7 @@ impl GameCell {
         // Pass event to Cell component with yellow colors
         cell.hover(
             commands,
+            None,
             cell_colors.yellow_medium.clone(),
             cell_colors.yellow_dark.clone(),
             color_query,
@@ -45,6 +46,7 @@ impl GameCell {
     ) {
         cell.unhover(
             commands,
+            None,
             cell_colors.yellow_light.clone(),
             cell_colors.yellow_medium.clone(),
             color_query,
@@ -89,7 +91,7 @@ impl GameCell {
             .entity(cell.entity)
             .remove_bundle::<InteractableCell>();
         // Normal scale
-        cell.click(commands, light, dark, color_query);
+        cell.click(commands, None, light, dark, color_query);
     }
 
     /// Called when cell is hidden and clicked on with the wrong mouse button

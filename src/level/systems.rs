@@ -17,7 +17,7 @@ use bevy::{
     window::WindowResized,
 };
 use interactable::{
-    click::{MouseLeftReleasedEvent, MouseRightReleasedEvent},
+    click::{ClickType, MouseLeftClickEvent, MouseRightClickEvent},
     hover::{MouseEnterEvent, MouseExitEvent, MouseOverEvent},
 };
 
@@ -28,15 +28,18 @@ pub fn mouse_click_cell(
     mut empty_cell_query: Query<(&GameCell, &mut Cell), With<EmptyCell>>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     cell_colors: Res<CellColors>,
-    mut ev_mouse_left_click: EventReader<MouseLeftReleasedEvent>,
-    mut ev_mouse_right_click: EventReader<MouseRightReleasedEvent>,
+    mut ev_mouse_left_click: EventReader<MouseLeftClickEvent>,
+    mut ev_mouse_right_click: EventReader<MouseRightClickEvent>,
     mut board: ResMut<Board>,
 ) {
-    for ev in ev_mouse_left_click.iter() {
-        if let Ok((lc, cell, _nc)) = number_cell_query.get(ev.0) {
+    for ev in ev_mouse_left_click
+        .iter()
+        .filter(|ev| ev.click_type == ClickType::Released)
+    {
+        if let Ok((lc, cell, _nc)) = number_cell_query.get(ev.entity) {
             lc.uncover_fail(cell, &mut commands);
         }
-        if let Ok((lc, mut cell)) = empty_cell_query.get_mut(ev.0) {
+        if let Ok((lc, mut cell)) = empty_cell_query.get_mut(ev.entity) {
             lc.uncover(
                 &mut cell,
                 &mut commands,
@@ -47,8 +50,11 @@ pub fn mouse_click_cell(
             );
         }
     }
-    for ev in ev_mouse_right_click.iter() {
-        if let Ok((lc, mut cell, nc)) = number_cell_query.get_mut(ev.0) {
+    for ev in ev_mouse_right_click
+        .iter()
+        .filter(|ev| ev.click_type == ClickType::Released)
+    {
+        if let Ok((lc, mut cell, nc)) = number_cell_query.get_mut(ev.entity) {
             lc.uncover(
                 &mut cell,
                 &mut commands,
@@ -58,7 +64,7 @@ pub fn mouse_click_cell(
                 &mut board,
             );
         }
-        if let Ok((lc, cell)) = empty_cell_query.get(ev.0) {
+        if let Ok((lc, cell)) = empty_cell_query.get(ev.entity) {
             lc.uncover_fail(cell, &mut commands);
         }
     }

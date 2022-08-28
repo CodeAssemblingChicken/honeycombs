@@ -100,16 +100,16 @@ impl Board {
                     CellType::NumberCell(mut ht) => {
                         let neighbours = get_neighbours(x, y, &cells, width, height);
                         let count = count_empty_cells(&neighbours);
-                        if ht == HintType::SOME {
+                        if ht == HintType::Some {
                             ht = match empty_connected(&neighbours, count, true) {
-                                true => HintType::CONNECTED,
-                                false => HintType::SEPERATED,
+                                true => HintType::Connected,
+                                false => HintType::Seperated,
                             };
                         }
                         let mut ts = text_settings.clone();
                         match ht {
-                            HintType::CONNECTED => ts.style.color = Color::GREEN,
-                            HintType::SEPERATED => ts.style.color = Color::RED,
+                            HintType::Connected => ts.style.color = Color::GREEN,
+                            HintType::Seperated => ts.style.color = Color::RED,
                             _ => (),
                         }
                         let text_entity = spawn_cell_text(commands, &format!("{}", count), &ts);

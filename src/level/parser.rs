@@ -110,8 +110,8 @@ fn parse_hint(line: &str, line_no: usize) -> ColumnHint {
             _ => HintDirection::TOP,
         },
         hint_type: match hint_type {
-            0 => HintType::NONE,
-            _ => HintType::SOME,
+            0 => HintType::None,
+            _ => HintType::Some,
         },
     }
 }
@@ -123,10 +123,10 @@ fn parse_grid_row(line: &str) -> Vec<(Option<CellType>, bool)> {
         match c {
             '0' => cells.push((Some(CellType::EmptyCell), true)),
             '1' => cells.push((Some(CellType::EmptyCell), false)),
-            '2' => cells.push((Some(CellType::NumberCell(HintType::NONE)), true)),
-            '3' => cells.push((Some(CellType::NumberCell(HintType::NONE)), false)),
-            '4' => cells.push((Some(CellType::NumberCell(HintType::SOME)), true)),
-            '5' => cells.push((Some(CellType::NumberCell(HintType::SOME)), false)),
+            '2' => cells.push((Some(CellType::NumberCell(HintType::None)), true)),
+            '3' => cells.push((Some(CellType::NumberCell(HintType::None)), false)),
+            '4' => cells.push((Some(CellType::NumberCell(HintType::Some)), true)),
+            '5' => cells.push((Some(CellType::NumberCell(HintType::Some)), false)),
             _ => cells.push((None, false)),
         }
     }

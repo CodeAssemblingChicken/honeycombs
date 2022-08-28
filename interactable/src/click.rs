@@ -13,12 +13,18 @@ use bevy::{
     window::Windows,
 };
 
-pub struct MouseLeftJustEvent(pub Entity);
-pub struct MouseLeftPressedEvent(pub Entity);
-pub struct MouseLeftReleasedEvent(pub Entity);
-pub struct MouseRightJustEvent(pub Entity);
-pub struct MouseRightPressedEvent(pub Entity);
-pub struct MouseRightReleasedEvent(pub Entity);
+pub struct MouseLeftClickEvent {
+    pub entity: Entity,
+    pub click_type: ClickType,
+}
+pub struct MouseRightClickEvent {
+    pub entity: Entity,
+    pub click_type: ClickType,
+}
+pub struct MouseMiddleClickEvent {
+    pub entity: Entity,
+    pub click_type: ClickType,
+}
 
 #[derive(Component)]
 pub struct Clickable {
@@ -72,13 +78,10 @@ pub fn click_system(
     q_camera: Query<(&Camera, &Transform), With<InteractableCamera>>,
     mouse_button_input: Res<Input<MouseButton>>,
     mouse_button_input_events: EventReader<MouseButtonInput>,
-    (mut lj, mut lp, mut lr, mut rj, mut rp, mut rr): (
-        EventWriter<MouseLeftJustEvent>,
-        EventWriter<MouseLeftPressedEvent>,
-        EventWriter<MouseLeftReleasedEvent>,
-        EventWriter<MouseRightJustEvent>,
-        EventWriter<MouseRightPressedEvent>,
-        EventWriter<MouseRightReleasedEvent>,
+    (mut left_click, mut right_click, mut middle_click): (
+        EventWriter<MouseLeftClickEvent>,
+        EventWriter<MouseRightClickEvent>,
+        EventWriter<MouseMiddleClickEvent>,
     ),
 ) {
     if mouse_button_input_events.is_empty() {
@@ -96,22 +99,58 @@ pub fn click_system(
 
         for (e, c, _) in clicks {
             if c.left_just && mouse_button_input.just_pressed(MouseButton::Left) {
-                lj.send(MouseLeftJustEvent(e))
+                left_click.send(MouseLeftClickEvent {
+                    entity: e,
+                    click_type: ClickType::Just,
+                })
             }
             if c.left_pressed && mouse_button_input.pressed(MouseButton::Left) {
-                lp.send(MouseLeftPressedEvent(e))
+                left_click.send(MouseLeftClickEvent {
+                    entity: e,
+                    click_type: ClickType::Pressed,
+                })
             }
             if c.left_released && mouse_button_input.just_released(MouseButton::Left) {
-                lr.send(MouseLeftReleasedEvent(e))
+                left_click.send(MouseLeftClickEvent {
+                    entity: e,
+                    click_type: ClickType::Released,
+                })
             }
             if c.right_just && mouse_button_input.just_pressed(MouseButton::Right) {
-                rj.send(MouseRightJustEvent(e))
+                right_click.send(MouseRightClickEvent {
+                    entity: e,
+                    click_type: ClickType::Just,
+                })
             }
             if c.right_pressed && mouse_button_input.pressed(MouseButton::Right) {
-                rp.send(MouseRightPressedEvent(e))
+                right_click.send(MouseRightClickEvent {
+                    entity: e,
+                    click_type: ClickType::Pressed,
+                })
             }
             if c.right_released && mouse_button_input.just_released(MouseButton::Right) {
-                rr.send(MouseRightReleasedEvent(e))
+                right_click.send(MouseRightClickEvent {
+                    entity: e,
+                    click_type: ClickType::Released,
+                })
+            }
+            if c.right_just && mouse_button_input.just_pressed(MouseButton::Middle) {
+                middle_click.send(MouseMiddleClickEvent {
+                    entity: e,
+                    click_type: ClickType::Just,
+                })
+            }
+            if c.right_pressed && mouse_button_input.pressed(MouseButton::Middle) {
+                middle_click.send(MouseMiddleClickEvent {
+                    entity: e,
+                    click_type: ClickType::Pressed,
+                })
+            }
+            if c.right_released && mouse_button_input.just_released(MouseButton::Middle) {
+                middle_click.send(MouseMiddleClickEvent {
+                    entity: e,
+                    click_type: ClickType::Released,
+                })
             }
 
             if !c.pass_through {
@@ -119,4 +158,11 @@ pub fn click_system(
             }
         }
     }
+}
+
+#[derive(PartialEq)]
+pub enum ClickType {
+    Just,
+    Pressed,
+    Released,
 }

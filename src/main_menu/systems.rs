@@ -11,7 +11,7 @@ use bevy::{
     window::WindowResized,
 };
 use interactable::{
-    click::MouseLeftReleasedEvent,
+    click::{ClickType, MouseLeftClickEvent},
     hover::{MouseEnterEvent, MouseExitEvent, MouseOverEvent},
 };
 
@@ -20,12 +20,15 @@ pub fn mouse_click_cell(
     mut cell_query: Query<(&LevelSelectionCell, &mut Cell)>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     cell_colors: Res<CellColors>,
-    mut ev_mouse_left_click: EventReader<MouseLeftReleasedEvent>,
+    mut ev_mouse_left_click: EventReader<MouseLeftClickEvent>,
     mut app_state: ResMut<State<AppState>>,
     mut level_file: ResMut<LevelFile>,
 ) {
-    for ev in ev_mouse_left_click.iter() {
-        if let Ok((lsc, mut cell)) = cell_query.get_mut(ev.0) {
+    for ev in ev_mouse_left_click
+        .iter()
+        .filter(|ev| ev.click_type == ClickType::Released)
+    {
+        if let Ok((lsc, mut cell)) = cell_query.get_mut(ev.entity) {
             lsc.click(
                 &mut cell,
                 &mut commands,

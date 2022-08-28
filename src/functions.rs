@@ -133,16 +133,16 @@ pub fn spawn_hint(
     let column = get_column(hint.x, hint.y, width, height, cells, hint.dir);
     let count = count_empty_cells(&column);
     // TODO: Setting hint type and only reading it for style is unneccesary
-    if hint.hint_type == HintType::SOME {
+    if hint.hint_type == HintType::Some {
         hint.hint_type = match empty_connected(&column, count, false) {
-            true => HintType::CONNECTED,
-            false => HintType::SEPERATED,
+            true => HintType::Connected,
+            false => HintType::Seperated,
         };
     }
     let mut ts = text_settings.clone();
     match hint.hint_type {
-        HintType::CONNECTED => ts.style.color = Color::GREEN,
-        HintType::SEPERATED => ts.style.color = Color::RED,
+        HintType::Connected => ts.style.color = Color::GREEN,
+        HintType::Seperated => ts.style.color = Color::RED,
         _ => (),
     }
 

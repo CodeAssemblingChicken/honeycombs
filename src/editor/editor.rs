@@ -15,6 +15,8 @@ use crate::{
     resources::{CellColors, CellMeshes},
 };
 
+use super::components::EditorCell;
+
 pub fn setup(
     mut commands: Commands,
     wnds: Res<Windows>,
@@ -45,7 +47,7 @@ pub fn setup(
     }
 }
 
-fn spawn_unset_cell(
+pub fn spawn_unset_cell(
     commands: &mut Commands,
     pos: (i32, i32),
     size: (f32, f32),
@@ -64,12 +66,67 @@ fn spawn_unset_cell(
         ),
         pos,
         size,
-        (true, false),
+        (true, true),
     );
     commands.entity(cell).insert(UnsetCell);
 }
 
-pub fn spawn_cell_common(
+// pub fn spawn_number_cell(
+//     commands: &mut Commands,
+//     pos: (i32, i32),
+//     size: (f32, f32),
+//     cell_meshes: &CellMeshes,
+//     cell_colors: &CellColors,
+//     text_settings: &TextSettings,
+// ) {
+//     let cell = commands.spawn().id();
+//     spawn_cell_common(
+//         commands,
+//         cell,
+//         cell_meshes,
+//         (
+//             cell_colors.white.clone(),
+//             cell_colors.gray_medium.clone(),
+//             cell_colors.gray_light.clone(),
+//         ),
+//         pos,
+//         size,
+//         (true, false),
+//     );
+//     let count = 1;
+//     let text_entity = spawn_cell_text(commands, &format!("{}", count), text_settings);
+//     commands.entity(cell).add_child(text_entity);
+//     commands.entity(cell).insert(NumberCell {
+//         count,
+//         label: text_entity,
+//     });
+// }
+
+// pub fn spawn_empty_cell(
+//     commands: &mut Commands,
+//     pos: (i32, i32),
+//     size: (f32, f32),
+//     cell_meshes: &CellMeshes,
+//     cell_colors: &CellColors,
+// ) {
+//     let cell = commands.spawn().id();
+//     spawn_cell_common(
+//         commands,
+//         cell,
+//         cell_meshes,
+//         (
+//             cell_colors.white.clone(),
+//             cell_colors.blue_medium.clone(),
+//             cell_colors.blue_light.clone(),
+//         ),
+//         pos,
+//         size,
+//         (true, false),
+//     );
+//     commands.entity(cell).insert(EmptyCell);
+// }
+
+fn spawn_cell_common(
     commands: &mut Commands,
     cell: Entity,
     cell_meshes: &CellMeshes,
@@ -100,5 +157,8 @@ pub fn spawn_cell_common(
         hovering: false,
     };
     // TODO: Rethink Cell type
-    commands.entity(cell).insert(cell_component);
+    commands
+        .entity(cell)
+        .insert(cell_component)
+        .insert(EditorCell { cell_type: None });
 }
