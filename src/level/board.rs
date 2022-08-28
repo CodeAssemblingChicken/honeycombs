@@ -1,21 +1,18 @@
 use crate::{
     board_functions::{count_empty_cells, empty_connected, get_neighbours},
-    components::{Cell, CellInner, CellOuter, CellType, ColumnHint, HintType},
-    constants::{INNER_TRANSFORM, OUTER_TRANSFORM, RADIUS, Z_INDEX_CELL_BACK},
-    functions::{calc_translation, spawn_cell_text, spawn_hint},
-    level::components::{EmptyCell, GameCell, HiddenCell, NumberCell},
+    components::{Cell, CellType, ColumnHint, HintType},
+    constants::Z_INDEX_CELL_BACK,
+    functions::{
+        calc_dimensions, calc_translation, make_cell_interactable, spawn_cell, spawn_cell_text,
+        spawn_hint,
+    },
+    level::components::{EmptyCell, GameCell, NumberCell},
     resources::{CellColors, CellMeshes, TextSettings},
 };
 use bevy::{
     hierarchy::BuildChildren,
     math::Vec3,
-    prelude::{default, Color, Commands, Entity, Transform, Visibility},
-    sprite::ColorMesh2dBundle,
-};
-use interactable::{
-    click::Clickable,
-    hover::Hoverable,
-    shapes::{Hexagon, Shape},
+    prelude::{Color, Commands, Entity, Transform, Visibility},
 };
 
 /// Used to pass configuration from parser to board
@@ -53,10 +50,9 @@ impl Board {
         let height = cells.len();
         let width = cells[0].len();
 
-        let w = ((width - 1) as f32 * RADIUS * 1.56) / 2.;
-        let h = ((height - 1) as f32 * RADIUS * 1.8) / 2.;
+        let (w, h) = calc_dimensions(width, height);
 
-        let mut blues_remaining = 0;
+        let mut empty_remaining = 0;
 
         for y in 0..height {
             for x in 0..width {
@@ -90,34 +86,15 @@ impl Board {
                     Transform::from_translation(Vec3::new(tx, ty, Z_INDEX_CELL_BACK));
                 big_transform.rotate_z(f32::to_radians(90.0));
 
-                let b1 = ColorMesh2dBundle {
-                    mesh: cell_meshes.medium_hexagon.clone().into(),
-                    material: colors.0,
-                    transform: OUTER_TRANSFORM,
-                    ..default()
-                };
-                let b2 = ColorMesh2dBundle {
-                    mesh: cell_meshes.small_hexagon.clone().into(),
-                    material: colors.1,
-                    transform: INNER_TRANSFORM,
-                    ..default()
-                };
+                let cell = commands.spawn().id();
 
-                // do the same for the child
-                let child1 = commands.spawn_bundle(b1).insert(CellOuter).id();
-                let child2 = commands.spawn_bundle(b2).insert(CellInner).id();
-
-                let cell = commands
-                    .spawn()
-                    .insert_bundle(ColorMesh2dBundle {
-                        mesh: cell_meshes.big_hexagon.clone().into(),
-                        material: cell_colors.white.clone(),
-                        transform: big_transform,
-                        ..default()
-                    })
-                    .id();
-
-                commands.entity(cell).push_children(&[child1, child2]);
+                let (child1, child2) = spawn_cell(
+                    commands,
+                    cell,
+                    cell_meshes,
+                    (cell_colors.white.clone(), colors.0, colors.1),
+                    big_transform,
+                );
 
                 match cell_type {
                     CellType::NumberCell(mut ht) => {
@@ -150,33 +127,13 @@ impl Board {
                     }
                     CellType::EmptyCell => {
                         if hidden {
-                            blues_remaining += 1;
+                            empty_remaining += 1;
                         }
                         commands.entity(cell).insert(EmptyCell);
                     }
                 }
                 if hidden {
-                    commands.entity(cell).insert_bundle(HiddenCell {
-                        hoverable: Hoverable {
-                            ignore_scale: true,
-                            shape: Shape::Hexagon(Hexagon {
-                                radius: RADIUS,
-                                point_up: false,
-                            }),
-                            ..default()
-                        },
-                        clickable: Clickable {
-                            ignore_scale: true,
-                            shape: Shape::Hexagon(Hexagon {
-                                radius: RADIUS,
-                                point_up: false,
-                            }),
-                            left_released: true,
-                            right_released: true,
-
-                            ..default()
-                        },
-                    });
+                    make_cell_interactable(commands, cell, (true, true));
                 }
 
                 let cell_component = Cell {
@@ -211,7 +168,7 @@ impl Board {
             texts: text_entities,
             width,
             height,
-            remaining: blues_remaining,
+            remaining: empty_remaining,
         }
     }
 }

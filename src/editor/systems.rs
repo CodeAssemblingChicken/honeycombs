@@ -14,13 +14,13 @@ use super::components::UnsetCell;
 
 pub fn mouse_click_unset_cell(
     mut commands: Commands,
-    mut cell_query: Query<(&mut Cell, &Transform), With<UnsetCell>>,
+    mut cell_query: Query<&Cell, With<UnsetCell>>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     cell_colors: Res<CellColors>,
     mut ev_mouse_left_click: EventReader<MouseLeftReleasedEvent>,
 ) {
     for ev in ev_mouse_left_click.iter() {
-        if let Ok((mut cell, t)) = cell_query.get_mut(ev.0) {
+        if let Ok(cell) = cell_query.get_mut(ev.0) {
             commands.entity(ev.0).despawn_recursive();
         }
     }

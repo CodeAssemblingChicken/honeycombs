@@ -1,6 +1,8 @@
 use crate::{
     board_functions::{count_empty_cells, empty_connected, get_column},
-    components::{CellInner, CellOuter, CellType, ColumnHint, HintDirection, HintType},
+    components::{
+        CellInner, CellOuter, CellType, ColumnHint, HintDirection, HintType, InteractableCell,
+    },
     constants::{INNER_TRANSFORM, OUTER_TRANSFORM, RADIUS, Z_INDEX_TEXT},
     resources::{CellMeshes, TextSettings},
 };
@@ -22,17 +24,16 @@ pub fn make_cell_interactable(
     cell: Entity,
     (left_released, right_released): (bool, bool),
 ) {
-    commands
-        .entity(cell)
-        .insert(Hoverable {
+    commands.entity(cell).insert_bundle(InteractableCell {
+        hoverable: Hoverable {
             ignore_scale: true,
             shape: Shape::Hexagon(Hexagon {
                 radius: RADIUS,
                 point_up: false,
             }),
             ..default()
-        })
-        .insert(Clickable {
+        },
+        clickable: Clickable {
             ignore_scale: true,
             shape: Shape::Hexagon(Hexagon {
                 radius: RADIUS,
@@ -41,7 +42,8 @@ pub fn make_cell_interactable(
             left_released,
             right_released,
             ..default()
-        });
+        },
+    });
 }
 
 pub fn spawn_cell(
@@ -178,4 +180,10 @@ pub fn calc_translation(x: i32, y: i32, w: f32, h: f32) -> (f32, f32) {
         }
         + h;
     (tx, ty)
+}
+
+pub fn calc_dimensions(width: usize, height: usize) -> (f32, f32) {
+    let w = ((width - 1) as f32 * RADIUS * 1.56) / 2.;
+    let h = ((height - 1) as f32 * RADIUS * 1.8) / 2.;
+    (w, h)
 }

@@ -1,17 +1,15 @@
 use super::board::Board;
 use crate::{
-    components::{Cell, CellType},
+    components::{Cell, CellType, InteractableCell},
     constants::RADIUS,
     resources::CellColors,
 };
 use bevy::{
     math::Vec3,
-    prelude::{
-        Bundle, ColorMaterial, Commands, Component, Entity, Handle, Query, ResMut, Visibility,
-    },
+    prelude::{ColorMaterial, Commands, Component, Entity, Handle, Query, ResMut, Visibility},
 };
 use bevy_easings::{Ease, EaseFunction, EasingType};
-use interactable::{click::Clickable, hover::Hoverable};
+
 use std::time::Duration;
 
 #[derive(Component)]
@@ -87,7 +85,9 @@ impl GameCell {
             }
         };
 
-        commands.entity(cell.entity).remove_bundle::<HiddenCell>();
+        commands
+            .entity(cell.entity)
+            .remove_bundle::<InteractableCell>();
         // Normal scale
         cell.click(commands, light, dark, color_query);
     }
@@ -123,13 +123,6 @@ impl GameCell {
                 ),
         );
     }
-}
-
-/// Only hidden cells are Hoverable and Clickable
-#[derive(Bundle)]
-pub struct HiddenCell {
-    pub hoverable: Hoverable,
-    pub clickable: Clickable,
 }
 
 /// Component for the NumberCell type

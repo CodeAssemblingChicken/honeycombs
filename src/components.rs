@@ -1,10 +1,11 @@
 use crate::constants::{SCALE_ENLARGED, SCALE_NORMAL};
 use bevy::{
     math::Vec3,
-    prelude::{Commands, Component, Entity, Handle, Query, Transform},
+    prelude::{Bundle, Commands, Component, Entity, Handle, Query, Transform},
     sprite::ColorMaterial,
 };
 use bevy_easings::{Ease, EaseFunction, EasingType};
+use interactable::{click::Clickable, hover::Hoverable};
 use std::time::Duration;
 
 // TODO: This is probably way to big
@@ -101,6 +102,13 @@ impl Cell {
             .unwrap();
         // unwrap should be fine, because if the children exist they're also in the query
     }
+}
+
+/// Only hidden cells are Hoverable and Clickable
+#[derive(Bundle)]
+pub struct InteractableCell {
+    pub hoverable: Hoverable,
+    pub clickable: Clickable,
 }
 
 /// Used for querying only the inner hexes

@@ -7,9 +7,11 @@ use bevy::{
 
 use crate::{
     components::Cell,
-    constants::{RADIUS, Z_INDEX_CELL_BACK},
+    constants::Z_INDEX_CELL_BACK,
     editor::components::UnsetCell,
-    functions::{calc_translation, make_cell_interactable, rescale_board, spawn_cell},
+    functions::{
+        calc_dimensions, calc_translation, make_cell_interactable, rescale_board, spawn_cell,
+    },
     resources::{CellColors, CellMeshes},
 };
 
@@ -23,8 +25,7 @@ pub fn setup(
     let width = 15;
     let height = 10;
 
-    let w = ((width - 1) as f32 * RADIUS * 1.56) / 2.;
-    let h = ((height - 1) as f32 * RADIUS * 1.8) / 2.;
+    let (w, h) = calc_dimensions(width, height);
 
     for y in 0..height as i32 {
         for x in 0..width as i32 {
