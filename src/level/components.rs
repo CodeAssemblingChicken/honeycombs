@@ -1,5 +1,9 @@
 use super::board::Board;
-use crate::{components::Cell, constants::RADIUS, resources::CellColors};
+use crate::{
+    components::{Cell, CellType},
+    constants::RADIUS,
+    resources::CellColors,
+};
 use bevy::{
     math::Vec3,
     prelude::{
@@ -138,51 +142,3 @@ pub struct NumberCell {
 /// Component for the EmptyCell type
 #[derive(Debug, Component)]
 pub struct EmptyCell;
-
-/// Component for column hints
-#[derive(Debug, Component)]
-pub struct ColumnHint {
-    pub x: usize,
-    pub y: usize,
-    pub dir: HintDirection,
-    pub hint_type: HintType,
-}
-
-/// The type of cell.
-/// Used in cell component for uncover-handling
-#[cfg_attr(feature = "debug", derive(bevy_inspector_egui::Inspectable))]
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum CellType {
-    NumberCell(HintType),
-    EmptyCell,
-}
-
-/// Direction of the column/row hints.
-/// Straight down (TOP), down-right (RIGHT) and down-left (LEFT)
-#[derive(Debug)]
-pub enum HintDirection {
-    TOP,
-    LEFT,
-    RIGHT,
-}
-
-/// Indicator for special hints (connected or seperated cells)
-#[cfg_attr(feature = "debug", derive(bevy_inspector_egui::Inspectable))]
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum HintType {
-    NONE,
-    // SOME is quite ugly, it is used in parsing to indicate that the hint
-    // is special and the concrete specialization (CONNECTED or SEPERATED)
-    // must first be calculated
-    // TODO: Think of something better
-    SOME,
-    CONNECTED,
-    SEPERATED,
-}
-
-/// Required because of bevy_inspector_egui::Inspectable
-impl Default for HintType {
-    fn default() -> Self {
-        Self::NONE
-    }
-}

@@ -12,8 +12,8 @@ use std::time::Duration;
 #[cfg_attr(feature = "debug", derive(bevy_inspector_egui::Inspectable))]
 #[derive(Component, Clone)]
 pub struct Cell {
-    pub x: usize,
-    pub y: usize,
+    pub x: i32,
+    pub y: i32,
     pub entity: Entity,
     pub outer_hexagon: Entity,
     pub inner_hexagon: Entity,
@@ -109,3 +109,51 @@ pub struct CellInner;
 /// Used for querying only the outer hexes
 #[derive(Debug, Component)]
 pub struct CellOuter;
+
+/// The type of cell.
+/// Used in cell component for uncover-handling
+#[cfg_attr(feature = "debug", derive(bevy_inspector_egui::Inspectable))]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum CellType {
+    NumberCell(HintType),
+    EmptyCell,
+}
+
+/// Component for column hints
+#[derive(Debug, Component)]
+pub struct ColumnHint {
+    pub x: usize,
+    pub y: usize,
+    pub dir: HintDirection,
+    pub hint_type: HintType,
+}
+
+/// Direction of the column/row hints.
+/// Straight down (TOP), down-right (RIGHT) and down-left (LEFT)
+#[derive(Debug)]
+pub enum HintDirection {
+    TOP,
+    LEFT,
+    RIGHT,
+}
+
+/// Indicator for special hints (connected or seperated cells)
+#[cfg_attr(feature = "debug", derive(bevy_inspector_egui::Inspectable))]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum HintType {
+    NONE,
+    // SOME is quite ugly, it is used in parsing to indicate that the hint
+    // is special and the concrete specialization (CONNECTED or SEPERATED)
+    // must first be calculated
+    // TODO: Think of something better
+    SOME,
+    CONNECTED,
+    SEPERATED,
+}
+
+/// Required because of bevy_inspector_egui::Inspectable
+impl Default for HintType {
+    fn default() -> Self {
+        Self::NONE
+    }
+}

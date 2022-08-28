@@ -1,7 +1,7 @@
 use crate::{
-    components::{Cell, CellInner, CellOuter},
-    constants::{INNER_TRANSFORM, OUTER_TRANSFORM, RADIUS, Z_INDEX_CELL_BACK},
-    functions::{make_cell_interactable, spawn_cell_text},
+    components::Cell,
+    constants::Z_INDEX_CELL_BACK,
+    functions::{calc_translation, make_cell_interactable, spawn_cell, spawn_cell_text},
     level::resources::LevelFile,
     resources::{CellColors, CellMeshes, TextSettings},
     states::AppState,
@@ -9,8 +9,8 @@ use crate::{
 use bevy::{
     hierarchy::BuildChildren,
     math::Vec3,
-    prelude::{default, Commands, Component, Handle, Query, ResMut, State, Transform},
-    sprite::{ColorMaterial, ColorMesh2dBundle},
+    prelude::{Commands, Component, Handle, Query, ResMut, State, Transform},
+    sprite::ColorMaterial,
 };
 
 #[derive(Component)]
@@ -106,15 +106,9 @@ pub fn spawn_cluster(
         .take(stage_cluster.num_levels as usize)
         .enumerate()
     {
-        let mut big_transform = Transform::from_translation(Vec3::new(
-            x + dx as f32 * RADIUS * 1.56,
-            y + dy as f32 * RADIUS * -1.8
-                + match dx == 0 {
-                    true => 0.,
-                    false => RADIUS * 0.9,
-                },
-            Z_INDEX_CELL_BACK,
-        ));
+        let (tx, ty) = calc_translation(dx, dy, 0., 0.);
+        let mut big_transform =
+            Transform::from_translation(Vec3::new(x + tx, y + ty, Z_INDEX_CELL_BACK));
         big_transform.rotate_z(f32::to_radians(90.0));
         spawn_level_selection_cell(
             commands,
@@ -137,33 +131,19 @@ fn spawn_level_selection_cell(
     level_id: u8,
     stage_id: u8,
 ) {
-    let b1 = ColorMesh2dBundle {
-        mesh: cell_meshes.medium_hexagon.clone().into(),
-        material: cell_colors.blue_medium.clone(),
-        transform: OUTER_TRANSFORM,
-        ..default()
-    };
-    let b2 = ColorMesh2dBundle {
-        mesh: cell_meshes.small_hexagon.clone().into(),
-        material: cell_colors.blue_light.clone(),
-        transform: INNER_TRANSFORM,
-        ..default()
-    };
+    let cell = commands.spawn().id();
+    let (child1, child2) = spawn_cell(
+        commands,
+        cell,
+        cell_meshes,
+        (
+            cell_colors.white.clone(),
+            cell_colors.blue_medium.clone(),
+            cell_colors.blue_light.clone(),
+        ),
+        big_transform,
+    );
 
-    // do the same for the child
-    let child1 = commands.spawn_bundle(b1).insert(CellOuter).id();
-    let child2 = commands.spawn_bundle(b2).insert(CellInner).id();
-
-    let cell = commands
-        .spawn()
-        .insert_bundle(ColorMesh2dBundle {
-            mesh: cell_meshes.big_hexagon.clone().into(),
-            material: cell_colors.white.clone(),
-            transform: big_transform,
-            ..default()
-        })
-        .id();
-    commands.entity(cell).push_children(&[child1, child2]);
     let text_entity = spawn_cell_text(
         commands,
         &format!("{}–{}", stage_id, level_id),
@@ -174,8 +154,8 @@ fn spawn_level_selection_cell(
     make_cell_interactable(commands, cell, (true, false));
 
     let cell_component = Cell {
-        x: stage_id as usize,
-        y: level_id as usize,
+        x: stage_id as i32,
+        y: level_id as i32,
         entity: cell,
         outer_hexagon: child1,
         inner_hexagon: child2,

@@ -1,3 +1,4 @@
+mod board_functions;
 mod components;
 mod constants;
 mod editor;

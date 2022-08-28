@@ -1,7 +1,5 @@
-use super::{
-    board::BoardConfig,
-    components::{CellType, ColumnHint, HintDirection, HintType},
-};
+use super::board::BoardConfig;
+use crate::components::{CellType, ColumnHint, HintDirection, HintType};
 use std::fs;
 
 const DONT_MESS: &str = "Please don't mess with my files";
