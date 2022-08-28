@@ -1,14 +1,13 @@
 mod board;
 mod components;
 mod parser;
-pub mod resources;
 mod systems;
 
-use self::{board::Board, resources::LevelFile, systems::*};
+use self::{board::Board, systems::*};
 use crate::{
     cleanup,
     functions::rescale_board,
-    resources::{CellColors, CellMeshes, TextSettings},
+    resources::{CellColors, CellMeshes, LevelFile, TextSettings},
     states::AppState,
 };
 use bevy::{

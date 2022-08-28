@@ -1,6 +1,8 @@
 use super::components::LevelSelectionCell;
 use crate::{
-    components::Cell, functions::rescale_board, level::resources::LevelFile, resources::CellColors,
+    components::Cell,
+    functions::rescale_board,
+    resources::{CellColors, LevelFile},
     states::AppState,
 };
 use bevy::{

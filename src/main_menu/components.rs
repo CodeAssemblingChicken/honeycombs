@@ -2,8 +2,7 @@ use crate::{
     components::Cell,
     constants::Z_INDEX_CELL_BACK,
     functions::{calc_translation, make_cell_interactable, spawn_cell, spawn_cell_text},
-    level::resources::LevelFile,
-    resources::{CellColors, CellMeshes, TextSettings},
+    resources::{CellColors, CellMeshes, LevelFile, TextSettings},
     states::AppState,
 };
 use bevy::{

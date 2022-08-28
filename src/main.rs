@@ -21,17 +21,17 @@ use bevy::{
 };
 use bevy_easings::EasingsPlugin;
 use components::Cell;
-
-use std::{io, panic};
+use std::{
+    io::{self, Write},
+    panic,
+};
 // use chrono::Utc;
 #[cfg(feature = "debug")]
 use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
 use interactable::{InteractableCamera, InteractablePlugin};
-use level::resources::LevelFile;
 use native_dialog::MessageDialog;
-use resources::{CellColors, CellMeshes, SfxHover, TextSettings};
+use resources::{CellColors, CellMeshes, LevelFile, SfxHover, TextSettings};
 use states::AppState;
-use std::io::Write;
 
 fn main() {
     set_panic_hook();

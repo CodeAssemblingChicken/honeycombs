@@ -1,3 +1,4 @@
+use crate::constants::RADIUS;
 use bevy::{
     audio::AudioSource,
     prelude::{shape::RegularPolygon, AssetServer, Assets, Color, FromWorld, Handle, Mesh},
@@ -5,7 +6,10 @@ use bevy::{
     text::{TextAlignment, TextStyle},
 };
 
-use crate::constants::RADIUS;
+#[derive(Debug, Default)]
+pub struct LevelFile {
+    pub filename: Option<String>,
+}
 
 pub struct CellMeshes {
     pub big_hexagon: Handle<Mesh>,
