@@ -15,7 +15,6 @@ pub struct CellMeshes {
 
 /// Resource storing the different colors
 pub struct CellColors {
-    pub white: Handle<ColorMaterial>,
     pub yellow_dark: Handle<ColorMaterial>,
     pub yellow_medium: Handle<ColorMaterial>,
     pub yellow_light: Handle<ColorMaterial>,
@@ -25,6 +24,10 @@ pub struct CellColors {
     pub blue_dark: Handle<ColorMaterial>,
     pub blue_medium: Handle<ColorMaterial>,
     pub blue_light: Handle<ColorMaterial>,
+    pub white: Handle<ColorMaterial>,
+    pub alpha0: Handle<ColorMaterial>,
+    pub alpha1: Handle<ColorMaterial>,
+    pub alpha2: Handle<ColorMaterial>,
 }
 
 /// Resource for hover sfx
@@ -62,6 +65,9 @@ impl FromWorld for CellColors {
             blue_dark: materials.add(ColorMaterial::from(Color::hex("0070e4").unwrap())),
             blue_medium: materials.add(ColorMaterial::from(Color::hex("0088e8").unwrap())),
             blue_light: materials.add(ColorMaterial::from(Color::hex("00a0f0").unwrap())),
+            alpha0: materials.add(ColorMaterial::from(Color::rgba(1., 1., 1., 0.))),
+            alpha1: materials.add(ColorMaterial::from(Color::rgba(1., 1., 1., 0.05))),
+            alpha2: materials.add(ColorMaterial::from(Color::rgba(1., 1., 1., 0.15))),
         }
     }
 }

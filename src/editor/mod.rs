@@ -8,10 +8,17 @@ use bevy::prelude::{App, ParallelSystemDescriptorCoercion, SystemSet};
 
 const STATE: AppState = AppState::Editor;
 
-pub fn prepare_main_menu(app: &mut App) {
+pub fn prepare_editor(app: &mut App) {
     app.add_system_set(SystemSet::on_enter(STATE).with_system(setup))
         .add_system_set(
             SystemSet::on_update(STATE)
+                .with_system(mouse_enter_unset_cell)
+                .with_system(mouse_exit_unset_cell)
+                .with_system(
+                    mouse_click_unset_cell
+                        .after(mouse_enter_unset_cell)
+                        .after(mouse_exit_unset_cell),
+                )
                 // .with_system(mouse_over_cell)
                 // .with_system(mouse_enter_cell.before(mouse_over_cell))
                 // .with_system(mouse_exit_cell.before(mouse_enter_cell))

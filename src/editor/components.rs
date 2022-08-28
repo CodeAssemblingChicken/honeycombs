@@ -16,10 +16,14 @@ pub struct NumberCell {
 #[derive(Debug, Component)]
 pub struct EmptyCell;
 
+#[derive(Debug, Component)]
+pub struct UnsetCell;
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum CellType {
     NumberCell(HintType),
     EmptyCell,
+    UnsetCell,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]

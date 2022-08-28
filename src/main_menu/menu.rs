@@ -38,8 +38,8 @@ pub fn setup(
             ),
         );
     }
-    for w in wnds.iter() {
+    for wnd in wnds.iter() {
         // TODO: Remove hard-coded width/height
-        rescale_board(11, 11, 1, w.width(), w.height(), &mut camera_query);
+        rescale_board(11, 11, 1, wnd.width(), wnd.height(), &mut camera_query);
     }
 }

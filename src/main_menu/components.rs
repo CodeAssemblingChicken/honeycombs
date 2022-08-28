@@ -1,7 +1,7 @@
 use crate::{
     components::{Cell, CellInner, CellOuter},
-    constants::{RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_CELL_INNER, Z_INDEX_CELL_OUTER},
-    functions::spawn_cell_text,
+    constants::{INNER_TRANSFORM, OUTER_TRANSFORM, RADIUS, Z_INDEX_CELL_BACK},
+    functions::{make_cell_interactable, spawn_cell_text},
     level::resources::LevelFile,
     resources::{CellColors, CellMeshes, TextSettings},
     states::AppState,
@@ -11,11 +11,6 @@ use bevy::{
     math::Vec3,
     prelude::{default, Commands, Component, Handle, Query, ResMut, State, Transform},
     sprite::{ColorMaterial, ColorMesh2dBundle},
-};
-use interactable::{
-    click::Clickable,
-    hover::Hoverable,
-    shapes::{Hexagon, Shape},
 };
 
 #[derive(Component)]
@@ -105,8 +100,6 @@ pub fn spawn_cluster(
 ) {
     let mut big_transform = Transform::from_translation(Vec3::new(x, y, Z_INDEX_CELL_BACK));
     big_transform.rotate_z(f32::to_radians(90.0));
-    let medium_transform = Transform::from_translation(Vec3::new(0.0, 0.0, Z_INDEX_CELL_OUTER));
-    let small_transform = Transform::from_translation(Vec3::new(0.0, 0.0, Z_INDEX_CELL_INNER));
 
     for (id, (dx, dy)) in [(0, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0)]
         .into_iter()
@@ -129,8 +122,6 @@ pub fn spawn_cluster(
             cell_colors,
             text_settings,
             big_transform,
-            medium_transform,
-            small_transform,
             id as u8 + 1,
             stage_cluster.stage_no,
         );
@@ -143,21 +134,19 @@ fn spawn_level_selection_cell(
     cell_colors: &CellColors,
     text_settings: &TextSettings,
     big_transform: Transform,
-    medium_transform: Transform,
-    small_transform: Transform,
     level_id: u8,
     stage_id: u8,
 ) {
     let b1 = ColorMesh2dBundle {
         mesh: cell_meshes.medium_hexagon.clone().into(),
         material: cell_colors.blue_medium.clone(),
-        transform: medium_transform,
+        transform: OUTER_TRANSFORM,
         ..default()
     };
     let b2 = ColorMesh2dBundle {
         mesh: cell_meshes.small_hexagon.clone().into(),
         material: cell_colors.blue_light.clone(),
-        transform: small_transform,
+        transform: INNER_TRANSFORM,
         ..default()
     };
 
@@ -182,25 +171,7 @@ fn spawn_level_selection_cell(
     );
     commands.entity(cell).add_child(text_entity);
 
-    commands
-        .entity(cell)
-        .insert(Hoverable {
-            ignore_scale: true,
-            shape: Shape::Hexagon(Hexagon {
-                radius: RADIUS,
-                point_up: false,
-            }),
-            ..default()
-        })
-        .insert(Clickable {
-            ignore_scale: true,
-            shape: Shape::Hexagon(Hexagon {
-                radius: RADIUS,
-                point_up: false,
-            }),
-            left_released: true,
-            ..default()
-        });
+    make_cell_interactable(commands, cell, (true, false));
 
     let cell_component = Cell {
         x: stage_id as usize,

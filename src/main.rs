@@ -3,7 +3,6 @@ mod constants;
 mod editor;
 mod end_screen;
 mod functions;
-mod helpers;
 mod level;
 mod main_menu;
 mod resources;
@@ -60,7 +59,9 @@ fn main() {
         .add_system_set(SystemSet::on_update(AppState::Loading).with_system(show_menu_after_load));
 
     level::prepare_level(&mut app);
+    editor::prepare_editor(&mut app);
     main_menu::prepare_main_menu(&mut app);
+    end_screen::prepare_end_screen(&mut app);
 
     #[cfg(feature = "debug")]
     app.add_plugin(WorldInspectorPlugin::new())

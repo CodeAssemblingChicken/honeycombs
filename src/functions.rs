@@ -7,6 +7,38 @@ use bevy::{
     prelude::{default, Camera, Commands, Entity, Query, Transform, With},
     text::{Text, Text2dBundle},
 };
+use interactable::{
+    click::Clickable,
+    hover::Hoverable,
+    shapes::{Hexagon, Shape},
+};
+
+pub fn make_cell_interactable(
+    commands: &mut Commands,
+    cell: Entity,
+    (left_released, right_released): (bool, bool),
+) {
+    commands
+        .entity(cell)
+        .insert(Hoverable {
+            ignore_scale: true,
+            shape: Shape::Hexagon(Hexagon {
+                radius: RADIUS,
+                point_up: false,
+            }),
+            ..default()
+        })
+        .insert(Clickable {
+            ignore_scale: true,
+            shape: Shape::Hexagon(Hexagon {
+                radius: RADIUS,
+                point_up: false,
+            }),
+            left_released,
+            right_released,
+            ..default()
+        });
+}
 
 /// Spawns the text in a cell
 pub fn spawn_cell_text(

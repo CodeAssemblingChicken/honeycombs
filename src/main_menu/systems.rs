@@ -1,13 +1,9 @@
 use super::components::LevelSelectionCell;
 use crate::{
-    components::Cell,
-    functions::rescale_board,
-    level::resources::LevelFile,
-    resources::{CellColors, SfxHover},
+    components::Cell, functions::rescale_board, level::resources::LevelFile, resources::CellColors,
     states::AppState,
 };
 use bevy::{
-    audio::Audio,
     prelude::{Camera, Commands, EventReader, Handle, Query, Res, ResMut, State, Transform, With},
     sprite::ColorMaterial,
     window::WindowResized,
@@ -47,8 +43,8 @@ pub fn mouse_enter_cell(
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     cell_colors: Res<CellColors>,
     mut ev_mouse_enter: EventReader<MouseEnterEvent>,
-    audio: Res<Audio>,
-    clip: Res<SfxHover>,
+    // audio: Res<Audio>,
+    // clip: Res<SfxHover>,
 ) {
     for ev in ev_mouse_enter.iter() {
         if let Ok((lsc, mut cell)) = cell_query.get_mut(ev.0) {

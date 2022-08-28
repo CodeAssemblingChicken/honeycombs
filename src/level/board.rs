@@ -1,7 +1,7 @@
 use super::components::{CellType, ColumnHint, HintDirection};
 use crate::{
     components::{Cell, CellInner, CellOuter},
-    constants::{RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_CELL_INNER, Z_INDEX_CELL_OUTER, Z_INDEX_TEXT},
+    constants::{INNER_TRANSFORM, OUTER_TRANSFORM, RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_TEXT},
     functions::spawn_cell_text,
     level::components::{EmptyCell, GameCell, HiddenCell, HintType, NumberCell},
     resources::{CellColors, CellMeshes, TextSettings},
@@ -48,9 +48,6 @@ impl Board {
     ) -> Self {
         let cells = config.cells;
         let hints = config.hints;
-
-        let medium_transform = Transform::from_translation(Vec3::new(0.0, 0.0, Z_INDEX_CELL_OUTER));
-        let small_transform = Transform::from_translation(Vec3::new(0.0, 0.0, Z_INDEX_CELL_INNER));
 
         let mut cell_entities = Vec::new();
         let mut text_entities = Vec::new();
@@ -108,13 +105,13 @@ impl Board {
                 let b1 = ColorMesh2dBundle {
                     mesh: cell_meshes.medium_hexagon.clone().into(),
                     material: colors.0,
-                    transform: medium_transform,
+                    transform: OUTER_TRANSFORM,
                     ..default()
                 };
                 let b2 = ColorMesh2dBundle {
                     mesh: cell_meshes.small_hexagon.clone().into(),
                     material: colors.1,
-                    transform: small_transform,
+                    transform: INNER_TRANSFORM,
                     ..default()
                 };
 

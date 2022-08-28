@@ -62,13 +62,13 @@ fn setup(
         &cell_meshes,
         &cell_colors,
     );
-    for w in wnds.iter() {
+    for wnd in wnds.iter() {
         rescale_board(
             b.width,
             b.height,
             4,
-            w.width(),
-            w.height(),
+            wnd.width(),
+            wnd.height(),
             &mut camera_query,
         );
     }
