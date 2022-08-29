@@ -109,7 +109,7 @@ pub fn spawn_cell_text(
 pub fn spawn_hint(
     commands: &mut Commands,
     mut hint: ColumnHint,
-    cells: &Vec<Vec<Option<CellType>>>,
+    cells: &[Vec<Option<CellType>>],
     text_settings: &TextSettings,
     (w, h): (f32, f32),
     (width, height): (usize, usize),
@@ -117,13 +117,13 @@ pub fn spawn_hint(
     let (mut tx, mut ty) = calc_translation(hint.x as i32, hint.y as i32, w, h);
     let mut t = Transform::from_translation(Vec3::new(0., 0., Z_INDEX_TEXT));
     match hint.dir {
-        HintDirection::TOP => (ty += 1.3 * RADIUS),
-        HintDirection::LEFT => {
+        HintDirection::Top => (ty += 1.3 * RADIUS),
+        HintDirection::Left => {
             ty += RADIUS * 0.62;
             tx -= RADIUS * 1.12;
             t.rotate_z(1.047);
         }
-        HintDirection::RIGHT => {
+        HintDirection::Right => {
             ty += RADIUS * 0.62;
             tx += RADIUS * 1.12;
             t.rotate_z(-1.047);

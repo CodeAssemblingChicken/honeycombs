@@ -96,8 +96,8 @@ impl GameCell {
 
     /// Called when cell is hidden and clicked on with the wrong mouse button
     pub fn uncover_fail(&self, cell: &Cell, commands: &mut Commands) {
-        let mut t1 = cell.orig.clone();
-        let mut t2 = cell.orig.clone();
+        let mut t1 = cell.orig;
+        let mut t2 = cell.orig;
         t1.translation += Vec3::new(-RADIUS / 10., -RADIUS / 20., 0.0);
         t2.translation += Vec3::new(RADIUS / 15., RADIUS / 25., 0.0);
         commands.entity(cell.entity).insert(

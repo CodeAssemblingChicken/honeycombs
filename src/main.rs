@@ -20,7 +20,6 @@ use bevy::{
     DefaultPlugins,
 };
 use bevy_easings::EasingsPlugin;
-use components::Cell;
 use std::{
     io::{self, Write},
     panic,
@@ -28,6 +27,8 @@ use std::{
 // use chrono::Utc;
 #[cfg(feature = "debug")]
 use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
+#[cfg(feature = "debug")]
+use components::Cell;
 use interactable::{InteractableCamera, InteractablePlugin};
 use native_dialog::MessageDialog;
 use resources::{CellColors, CellMeshes, LevelFile, SfxHover, TextSettings};

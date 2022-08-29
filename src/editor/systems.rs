@@ -24,11 +24,12 @@ pub fn mouse_click_unset_cell(
     mut commands: Commands,
     mut cell_query: Query<(&mut EditorCell, &mut Cell), With<UnsetCell>>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
-    cell_colors: Res<CellColors>,
-    text_settings: Res<TextSettings>,
+    (cell_colors, text_settings): (Res<CellColors>, Res<TextSettings>),
     mut board: ResMut<Board>,
-    mut ev_mouse_left_click: EventReader<MouseLeftClickEvent>,
-    mut ev_mouse_right_click: EventReader<MouseRightClickEvent>,
+    (mut ev_mouse_left_click, mut ev_mouse_right_click): (
+        EventReader<MouseLeftClickEvent>,
+        EventReader<MouseRightClickEvent>,
+    ),
     mut ev_cell_update: EventWriter<CellUpdateEvent>,
 ) {
     for ev in ev_mouse_left_click
@@ -91,8 +92,10 @@ pub fn mouse_click_empty_cell(
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     cell_colors: Res<CellColors>,
     mut board: ResMut<Board>,
-    mut ev_mouse_left_click: EventReader<MouseLeftClickEvent>,
-    mut ev_mouse_middle_click: EventReader<MouseMiddleClickEvent>,
+    (mut ev_mouse_left_click, mut ev_mouse_middle_click): (
+        EventReader<MouseLeftClickEvent>,
+        EventReader<MouseMiddleClickEvent>,
+    ),
     mut ev_cell_update: EventWriter<CellUpdateEvent>,
 ) {
     for ev in ev_mouse_left_click
@@ -154,9 +157,11 @@ pub fn mouse_click_number_cell(
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     cell_colors: Res<CellColors>,
     mut board: ResMut<Board>,
-    mut ev_mouse_left_click: EventReader<MouseLeftClickEvent>,
-    mut ev_mouse_right_click: EventReader<MouseRightClickEvent>,
-    mut ev_mouse_middle_click: EventReader<MouseMiddleClickEvent>,
+    (mut ev_mouse_left_click, mut ev_mouse_right_click, mut ev_mouse_middle_click): (
+        EventReader<MouseLeftClickEvent>,
+        EventReader<MouseRightClickEvent>,
+        EventReader<MouseMiddleClickEvent>,
+    ),
     mut ev_cell_update: EventWriter<CellUpdateEvent>,
 ) {
     for ev in ev_mouse_left_click

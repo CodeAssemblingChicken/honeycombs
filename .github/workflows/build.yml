@@ -38,7 +38,7 @@ jobs:
     name: Test Suite
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, macos-latest]
         include:
           - os: macos-latest
             features: portaudio_backend,rodio_backend,dbus_keyring

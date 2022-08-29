@@ -28,9 +28,11 @@ pub fn mouse_click_cell(
     mut empty_cell_query: Query<(&GameCell, &mut Cell), With<EmptyCell>>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     cell_colors: Res<CellColors>,
-    mut ev_mouse_left_click: EventReader<MouseLeftClickEvent>,
-    mut ev_mouse_right_click: EventReader<MouseRightClickEvent>,
     mut board: ResMut<Board>,
+    (mut ev_mouse_left_click, mut ev_mouse_right_click): (
+        EventReader<MouseLeftClickEvent>,
+        EventReader<MouseRightClickEvent>,
+    ),
 ) {
     for ev in ev_mouse_left_click
         .iter()

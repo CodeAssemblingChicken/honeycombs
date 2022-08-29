@@ -9,13 +9,14 @@ const TOO_FEW_ARGS: &str = "Expected more arguments";
 /// Receives a file and creates a BoardConfig from it
 pub fn board_from_file(filename: &str) -> BoardConfig {
     let mut configs = Vec::new();
-    let file = fs::read_to_string(filename).expect(&format!("File \"{}\" not found!", filename));
+    let file =
+        fs::read_to_string(filename).unwrap_or_else(|_| panic!("File \"{}\" not found!", filename));
     let mut lines = file.lines();
     let mut line_no = 0;
     let (w, h) = parse_tuple(
         lines
             .next()
-            .expect(&format!("{} in line {}", DONT_MESS, line_no)),
+            .unwrap_or_else(|| panic!("{} in line {}", DONT_MESS, line_no)),
         line_no,
     );
     line_no += 1;
@@ -25,9 +26,9 @@ pub fn board_from_file(filename: &str) -> BoardConfig {
     (0..h).into_iter().for_each(|_| {
         let l = lines
             .next()
-            .expect(&format!("{} in line {}", DONT_MESS, line_no));
+            .unwrap_or_else(|| panic!("{} in line {}", DONT_MESS, line_no));
         assert!(l.len() == w, "Lines must have specified width: {}", w,);
-        configs.push(parse_grid_row(&l));
+        configs.push(parse_grid_row(l));
         line_no += 1;
     });
 
@@ -35,14 +36,14 @@ pub fn board_from_file(filename: &str) -> BoardConfig {
 
     let num_hints: usize = lines
         .next()
-        .expect(&format!("{} in line {}", DONT_MESS, line_no))
+        .unwrap_or_else(|| panic!("{} in line {}", DONT_MESS, line_no))
         .parse()
-        .expect(&format!("{} in line {}", EXPECTED_NO, line_no));
+        .unwrap_or_else(|_| panic!("{} in line {}", EXPECTED_NO, line_no));
     line_no += 1;
     (0..num_hints).into_iter().for_each(|_| {
         let l = lines
             .next()
-            .expect(&format!("{} in line {}", DONT_MESS, line_no));
+            .unwrap_or_else(|| panic!("{} in line {}", DONT_MESS, line_no));
         hints.push(parse_hint(l, line_no));
         line_no += 1;
     });
@@ -61,11 +62,11 @@ pub fn board_from_file(filename: &str) -> BoardConfig {
         hiddens.push(h_row);
     }
 
-    return BoardConfig {
+    BoardConfig {
         cells,
         hiddens,
         hints,
-    };
+    }
 }
 
 /// Function to parse a numeric tuple in a file
@@ -73,18 +74,18 @@ fn parse_tuple(line: &str, line_no: usize) -> (usize, usize) {
     let mut split = line.split(',');
     let s = split
         .next()
-        .expect(&format!("{} in line {}", TOO_FEW_ARGS, line_no));
+        .unwrap_or_else(|| panic!("{} in line {}", TOO_FEW_ARGS, line_no));
     let x = s
         .trim()
         .parse()
-        .expect(&format!("{} in line {}", EXPECTED_NO, line_no));
+        .unwrap_or_else(|_| panic!("{} in line {}", EXPECTED_NO, line_no));
     let s = split
         .next()
-        .expect(&format!("{} in line {}", TOO_FEW_ARGS, line_no));
+        .unwrap_or_else(|| panic!("{} in line {}", TOO_FEW_ARGS, line_no));
     let y = s
         .trim()
         .parse()
-        .expect(&format!("{} in line {}", EXPECTED_NO, line_no));
+        .unwrap_or_else(|_| panic!("{} in line {}", EXPECTED_NO, line_no));
     (x, y)
 }
 
@@ -93,39 +94,39 @@ fn parse_hint(line: &str, line_no: usize) -> ColumnHint {
     let mut split = line.split(',');
     let s = split
         .next()
-        .expect(&format!("{} in line {}", TOO_FEW_ARGS, line_no));
+        .unwrap_or_else(|| panic!("{} in line {}", TOO_FEW_ARGS, line_no));
     let x = s
         .trim()
         .parse()
-        .expect(&format!("{} in line {}", EXPECTED_NO, line_no));
+        .unwrap_or_else(|_| panic!("{} in line {}", EXPECTED_NO, line_no));
     let s = split
         .next()
-        .expect(&format!("{} in line {}", TOO_FEW_ARGS, line_no));
+        .unwrap_or_else(|| panic!("{} in line {}", TOO_FEW_ARGS, line_no));
     let y = s
         .trim()
         .parse()
-        .expect(&format!("{} in line {}", EXPECTED_NO, line_no));
+        .unwrap_or_else(|_| panic!("{} in line {}", EXPECTED_NO, line_no));
     let s = split
         .next()
-        .expect(&format!("{} in line {}", TOO_FEW_ARGS, line_no));
+        .unwrap_or_else(|| panic!("{} in line {}", TOO_FEW_ARGS, line_no));
     let hint_dir: i8 = s
         .trim()
         .parse()
-        .expect(&format!("{} in line {}", EXPECTED_NO, line_no));
+        .unwrap_or_else(|_| panic!("{} in line {}", EXPECTED_NO, line_no));
     let s = split
         .next()
-        .expect(&format!("{} in line {}", TOO_FEW_ARGS, line_no));
+        .unwrap_or_else(|| panic!("{} in line {}", TOO_FEW_ARGS, line_no));
     let hint_type = s
         .trim()
         .parse()
-        .expect(&format!("{} in line {}", EXPECTED_NO, line_no));
+        .unwrap_or_else(|_| panic!("{} in line {}", EXPECTED_NO, line_no));
     ColumnHint {
         x,
         y,
         dir: match hint_dir {
-            -1 => HintDirection::LEFT,
-            1 => HintDirection::RIGHT,
-            _ => HintDirection::TOP,
+            -1 => HintDirection::Left,
+            1 => HintDirection::Right,
+            _ => HintDirection::Top,
         },
         hint_type: match hint_type {
             0 => HintType::None,
@@ -148,5 +149,5 @@ fn parse_grid_row(line: &str) -> Vec<(Option<CellType>, bool)> {
             _ => cells.push((None, false)),
         }
     }
-    return cells;
+    cells
 }

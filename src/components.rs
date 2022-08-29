@@ -76,7 +76,7 @@ impl Cell {
     /// Common function for easing the scale to a given value
     pub fn rescale(&self, commands: &mut Commands, scale: Vec3) {
         // Rescale hexagon to desired scale by easing
-        let mut t1 = self.orig.clone();
+        let mut t1 = self.orig;
         t1.scale = scale;
         commands.entity(self.entity).insert(self.orig.ease_to(
             t1,
@@ -98,16 +98,16 @@ impl Cell {
         // Get Material Handles from the children
         color_query
             .get_mut(self.outer_hexagon)
-            .and_then(|mut h| Ok(*h = dark))
+            .map(|mut h| *h = dark)
             .unwrap();
         color_query
             .get_mut(self.inner_hexagon)
-            .and_then(|mut h| Ok(*h = light))
+            .map(|mut h| *h = light)
             .unwrap();
         if let Some(b) = background {
             color_query
                 .get_mut(self.entity)
-                .and_then(|mut h| Ok(*h = b))
+                .map(|mut h| *h = b)
                 .unwrap();
         }
         // unwrap should be fine, because if the children exist they're also in the query
@@ -150,9 +150,9 @@ pub struct ColumnHint {
 /// Straight down (TOP), down-right (RIGHT) and down-left (LEFT)
 #[derive(Debug)]
 pub enum HintDirection {
-    TOP,
-    LEFT,
-    RIGHT,
+    Top,
+    Left,
+    Right,
 }
 
 /// Indicator for special hints (connected or seperated cells)

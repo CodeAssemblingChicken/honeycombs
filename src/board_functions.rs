@@ -5,7 +5,7 @@ use std::collections::VecDeque;
 pub fn get_neighbours(
     x: i32,
     y: i32,
-    cells: &Vec<Vec<Option<CellType>>>,
+    cells: &[Vec<Option<CellType>>],
     w: usize,
     h: usize,
 ) -> Vec<Option<CellType>> {
@@ -40,12 +40,12 @@ pub fn get_column(
     y: usize,
     w: usize,
     h: usize,
-    cells: &Vec<Vec<Option<CellType>>>,
+    cells: &[Vec<Option<CellType>>],
     dir: HintDirection,
 ) -> Vec<Option<CellType>> {
     match dir {
-        HintDirection::TOP => (0..h).into_iter().map(|dy| cells[dy][x]).collect(),
-        HintDirection::LEFT => {
+        HintDirection::Top => (0..h).into_iter().map(|dy| cells[dy][x]).collect(),
+        HintDirection::Left => {
             let mut pts = VecDeque::new();
             let mut dx = x;
             let mut dy = y;
@@ -68,7 +68,7 @@ pub fn get_column(
             }
             pts.into()
         }
-        HintDirection::RIGHT => {
+        HintDirection::Right => {
             let mut pts = VecDeque::new();
             let mut dx = x;
             let mut dy = y;
@@ -95,7 +95,7 @@ pub fn get_column(
 }
 
 /// Count how many cells in a list are empty
-pub fn count_empty_cells(cells: &Vec<Option<CellType>>) -> u8 {
+pub fn count_empty_cells(cells: &[Option<CellType>]) -> u8 {
     cells
         .iter()
         .map(|c| {
@@ -113,12 +113,12 @@ pub fn count_empty_cells(cells: &Vec<Option<CellType>>) -> u8 {
 }
 
 /// Check if the empty cells are connected or seperated
-pub fn empty_connected(cells: &Vec<Option<CellType>>, count: u8, circular: bool) -> bool {
+pub fn empty_connected(cells: &[Option<CellType>], count: u8, circular: bool) -> bool {
     if count == 0 {
         return true;
     }
     // TODO: So many clones...
-    let mut cells = cells.clone();
+    let mut cells = cells.to_owned();
     if circular {
         cells.extend(cells.clone());
     }
@@ -141,12 +141,10 @@ pub fn empty_connected(cells: &Vec<Option<CellType>>, count: u8, circular: bool)
                     break;
                 }
             }
-        } else {
-            if let Some(ct) = ct {
-                if ct == CellType::EmptyCell {
-                    begun = true;
-                    remaining -= 1;
-                }
+        } else if let Some(ct) = ct {
+            if ct == CellType::EmptyCell {
+                begun = true;
+                remaining -= 1;
             }
         }
     }
