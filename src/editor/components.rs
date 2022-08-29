@@ -1,11 +1,10 @@
-use bevy::{
-    prelude::{Commands, Component, Entity, Handle, Query},
-    sprite::ColorMaterial,
-};
-
 use crate::{
     components::{Cell, CellType},
     resources::CellColors,
+};
+use bevy::{
+    prelude::{Commands, Component, Entity, Handle, Query},
+    sprite::ColorMaterial,
 };
 
 pub struct Board {

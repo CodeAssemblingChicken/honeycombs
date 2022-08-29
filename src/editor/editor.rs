@@ -1,10 +1,3 @@
-use bevy::{
-    math::Vec3,
-    prelude::{Camera, Commands, Entity, Handle, Query, Res, Transform, With},
-    sprite::ColorMaterial,
-    window::Windows,
-};
-
 use super::components::{Board, EditorCell};
 use crate::{
     components::Cell,
@@ -14,6 +7,12 @@ use crate::{
         calc_dimensions, calc_translation, make_cell_interactable, rescale_board, spawn_cell,
     },
     resources::{CellColors, CellMeshes},
+};
+use bevy::{
+    math::Vec3,
+    prelude::{Camera, Commands, Entity, Handle, Query, Res, Transform, With},
+    sprite::ColorMaterial,
+    window::Windows,
 };
 
 pub fn setup(
