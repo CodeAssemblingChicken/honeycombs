@@ -36,14 +36,15 @@ jobs:
   # ubuntu-latest, windows-latest, macos-latest
   test:
     name: Test Suite
+    if: ${{ false }} # disable for now
     strategy:
       matrix:
-        os: [windows-latest]
-        #include:
-        #- os: macos-latest
-        #  features: portaudio_backend,rodio_backend,dbus_keyring
-        #- os: ubuntu-latest
-        #  features: alsa_backend,rodio_backend,dbus_keyring,dbus_mpris
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+        - os: macos-latest
+         features: portaudio_backend,rodio_backend,dbus_keyring
+        - os: ubuntu-latest
+         features: alsa_backend,rodio_backend,dbus_keyring,dbus_mpris
         rust: [stable]
     runs-on: ${{ matrix.os }}
     steps:
