@@ -3,9 +3,10 @@ on:
   # schedule:
   # - cron: '0 0 * * *' # midnight UTC
 
+  pull_request:
   push:
-    tags:
-      - "v[0-9]+.[0-9]+.[0-9]+*"
+    branches:
+      - master
     ## - release
 
 env:
