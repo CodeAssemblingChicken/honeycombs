@@ -35,8 +35,8 @@ jobs:
           command: check
   # ubuntu-latest, windows-latest, macos-latest
   test:
+    if: false
     name: Test Suite
-    if: false # disable for now
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
