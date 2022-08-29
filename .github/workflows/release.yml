@@ -70,6 +70,7 @@ jobs:
           target: ${{ matrix.target }}
           override: true
 
+      if: false
       - name: Run cargo test
         uses: actions-rs/cargo@v1
         with:
