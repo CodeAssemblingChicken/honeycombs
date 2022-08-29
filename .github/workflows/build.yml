@@ -39,11 +39,11 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest]
-        include:
-          #- os: macos-latest
-          #  features: portaudio_backend,rodio_backend,dbus_keyring
-          #- os: ubuntu-latest
-          #  features: alsa_backend,rodio_backend,dbus_keyring,dbus_mpris
+        #include:
+        #- os: macos-latest
+        #  features: portaudio_backend,rodio_backend,dbus_keyring
+        #- os: ubuntu-latest
+        #  features: alsa_backend,rodio_backend,dbus_keyring,dbus_mpris
         rust: [stable]
     runs-on: ${{ matrix.os }}
     steps:
