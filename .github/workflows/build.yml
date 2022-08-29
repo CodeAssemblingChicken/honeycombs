@@ -35,6 +35,7 @@ jobs:
           command: check
   # ubuntu-latest, windows-latest, macos-latest
   test:
+    if: false
     name: Test Suite
     strategy:
       matrix:
