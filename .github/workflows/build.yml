@@ -35,7 +35,7 @@ jobs:
           command: check
   # ubuntu-latest, windows-latest, macos-latest
   test:
-    if: false
+    if: false # temporarily disable test
     name: Test Suite
     strategy:
       matrix:

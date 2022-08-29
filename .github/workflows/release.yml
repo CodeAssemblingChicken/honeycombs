@@ -25,12 +25,12 @@ jobs:
         build: [x86_64-linux] #, aarch64-linux, x86_64-macos, x86_64-windows] #, x86_64-win-gnu, win32-msvc
         include:
           - build: x86_64-linux
-            os: ubuntu-20.04
+            os: ubuntu-latest
             rust: stable
             target: x86_64-unknown-linux-gnu
             cross: false
           # - build: aarch64-linux
-          #   os: ubuntu-20.04
+          #   os: ubuntu-latest
           #   rust: stable
           #   target: aarch64-unknown-linux-gnu
           #   cross: true
@@ -40,7 +40,7 @@ jobs:
           #   target: x86_64-apple-darwin
           #   cross: false
           # - build: x86_64-windows
-          #   os: windows-2019
+          #   os: windows-latest
           #   rust: stable
           #   target: x86_64-pc-windows-msvc
           #   cross: false
@@ -49,11 +49,11 @@ jobs:
         #   rust: stable
         #   target: aarch64-apple-darwin
         # - build: x86_64-win-gnu
-        #   os: windows-2019
+        #   os: windows-latest
         #   rust: stable-x86_64-gnu
         #   target: x86_64-pc-windows-gnu
         # - build: win32-msvc
-        #   os: windows-2019
+        #   os: windows-latest
         #   rust: stable
         #   target: i686-pc-windows-msvc
 
@@ -71,8 +71,14 @@ jobs:
           target: ${{ matrix.target }}
           override: true
 
+      - name: Install dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y -qq libasound2-dev libssl-dev libpulse-dev libdbus-1-dev libudev-dev
+
       - name: Run cargo test
-        if: false
+        if: false # temporarily disable test
         uses: actions-rs/cargo@v1
         with:
           use-cross: ${{ matrix.cross }}
