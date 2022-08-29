@@ -36,7 +36,7 @@ jobs:
   # ubuntu-latest, windows-latest, macos-latest
   test:
     name: Test Suite
-    if: ${{ false }} # disable for now
+    if: false # disable for now
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
