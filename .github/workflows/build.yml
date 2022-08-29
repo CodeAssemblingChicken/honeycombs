@@ -33,17 +33,17 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: check
-  # , windows-latest, macos-latest
+  # ubuntu-latest, windows-latest, macos-latest
   test:
     name: Test Suite
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [windows-latest]
         include:
-          - os: macos-latest
-            features: portaudio_backend,rodio_backend,dbus_keyring
-          - os: ubuntu-latest
-            features: alsa_backend,rodio_backend,dbus_keyring,dbus_mpris
+          #- os: macos-latest
+          #  features: portaudio_backend,rodio_backend,dbus_keyring
+          #- os: ubuntu-latest
+          #  features: alsa_backend,rodio_backend,dbus_keyring,dbus_mpris
         rust: [stable]
     runs-on: ${{ matrix.os }}
     steps:
