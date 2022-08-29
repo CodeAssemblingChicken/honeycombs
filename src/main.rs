@@ -86,7 +86,7 @@ fn show_menu_after_load(mut app_state: ResMut<State<AppState>>, level_file: Res<
     if level_file.filename.is_some() {
         app_state.set(AppState::Level).unwrap();
     } else {
-        app_state.set(AppState::Editor).unwrap();
+        app_state.set(AppState::MainMenu).unwrap();
     }
 }
 
