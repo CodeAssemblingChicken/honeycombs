@@ -41,9 +41,9 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         include:
           - os: ubuntu-latest
-          features: alsa_backend,rodio_backend,dbus_keyring,dbus_mpris
+            features: alsa_backend,rodio_backend,dbus_keyring,dbus_mpris
           - os: macos-latest
-          features: portaudio_backend,rodio_backend,dbus_keyring
+            features: portaudio_backend,rodio_backend,dbus_keyring
         rust: [stable]
     runs-on: ${{ matrix.os }}
     steps:
