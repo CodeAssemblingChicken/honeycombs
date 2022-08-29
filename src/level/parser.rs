@@ -8,7 +8,7 @@ const TOO_FEW_ARGS: &str = "Expected more arguments";
 
 /// Receives a file and creates a BoardConfig from it
 pub fn board_from_file(filename: &str) -> BoardConfig {
-    let mut cells = Vec::new();
+    let mut configs = Vec::new();
     let file = fs::read_to_string(filename).expect(&format!("File \"{}\" not found!", filename));
     let mut lines = file.lines();
     let mut line_no = 0;
@@ -27,7 +27,7 @@ pub fn board_from_file(filename: &str) -> BoardConfig {
             .next()
             .expect(&format!("{} in line {}", DONT_MESS, line_no));
         assert!(l.len() == w, "Lines must have specified width: {}", w,);
-        cells.push(parse_grid_row(&l));
+        configs.push(parse_grid_row(&l));
         line_no += 1;
     });
 
@@ -47,7 +47,25 @@ pub fn board_from_file(filename: &str) -> BoardConfig {
         line_no += 1;
     });
 
-    return BoardConfig { cells, hints };
+    let mut cells = Vec::new();
+    let mut hiddens = Vec::new();
+
+    for row in configs {
+        let mut ct_row = Vec::new();
+        let mut h_row = Vec::new();
+        for (ct, h) in row {
+            ct_row.push(ct);
+            h_row.push(h);
+        }
+        cells.push(ct_row);
+        hiddens.push(h_row);
+    }
+
+    return BoardConfig {
+        cells,
+        hiddens,
+        hints,
+    };
 }
 
 /// Function to parse a numeric tuple in a file

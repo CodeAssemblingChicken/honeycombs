@@ -4,9 +4,25 @@ use bevy::{
 };
 
 use crate::{
-    components::{Cell, CellType, HintType},
+    components::{Cell, CellType},
     resources::CellColors,
 };
+
+pub struct Board {
+    pub cells: Vec<Vec<Option<CellType>>>,
+    pub width: usize,
+    pub height: usize,
+}
+
+impl Board {
+    pub fn new(width: usize, height: usize) -> Self {
+        Self {
+            cells: vec![vec![None; width]; height],
+            width,
+            height,
+        }
+    }
+}
 
 #[derive(Component)]
 pub struct EditorCell {
@@ -98,7 +114,7 @@ impl EditorCell {
 pub struct NumberCell {
     pub count: u8,
     pub label: Entity,
-    pub hint_type: HintType,
+    pub special_hint: bool,
 }
 
 /// Component for the EmptyCell type
@@ -107,3 +123,5 @@ pub struct EmptyCell;
 
 #[derive(Debug, Component)]
 pub struct UnsetCell;
+
+pub struct CellUpdateEvent;

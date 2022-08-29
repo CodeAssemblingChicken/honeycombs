@@ -3,14 +3,12 @@ use std::collections::VecDeque;
 
 /// Get a (ordered?) list of neighbouring cells
 pub fn get_neighbours(
-    x: usize,
-    y: usize,
-    cells: &Vec<Vec<(Option<CellType>, bool)>>,
+    x: i32,
+    y: i32,
+    cells: &Vec<Vec<Option<CellType>>>,
     w: usize,
     h: usize,
-) -> Vec<(Option<CellType>, bool)> {
-    let x = x as i32;
-    let y = y as i32;
+) -> Vec<Option<CellType>> {
     let pos = if x % 2 == 0 {
         [
             (x, y - 1),
@@ -42,9 +40,9 @@ pub fn get_column(
     y: usize,
     w: usize,
     h: usize,
-    cells: &Vec<Vec<(Option<CellType>, bool)>>,
+    cells: &Vec<Vec<Option<CellType>>>,
     dir: HintDirection,
-) -> Vec<(Option<CellType>, bool)> {
+) -> Vec<Option<CellType>> {
     match dir {
         HintDirection::TOP => (0..h).into_iter().map(|dy| cells[dy][x]).collect(),
         HintDirection::LEFT => {
@@ -97,12 +95,12 @@ pub fn get_column(
 }
 
 /// Count how many cells in a list are empty
-pub fn count_empty_cells(cells: &Vec<(Option<CellType>, bool)>) -> u8 {
+pub fn count_empty_cells(cells: &Vec<Option<CellType>>) -> u8 {
     cells
         .iter()
         .map(|c| {
-            if let Some(ct) = c.0 {
-                if ct == CellType::EmptyCell {
+            if let Some(ct) = c {
+                if *ct == CellType::EmptyCell {
                     1
                 } else {
                     0
@@ -114,12 +112,12 @@ pub fn count_empty_cells(cells: &Vec<(Option<CellType>, bool)>) -> u8 {
         .sum()
 }
 
-// TODO: So many clones...
 /// Check if the empty cells are connected or seperated
-pub fn empty_connected(cells: &Vec<(Option<CellType>, bool)>, count: u8, circular: bool) -> bool {
+pub fn empty_connected(cells: &Vec<Option<CellType>>, count: u8, circular: bool) -> bool {
     if count == 0 {
         return true;
     }
+    // TODO: So many clones...
     let mut cells = cells.clone();
     if circular {
         cells.extend(cells.clone());
@@ -127,7 +125,7 @@ pub fn empty_connected(cells: &Vec<(Option<CellType>, bool)>, count: u8, circula
     let mut second_chance = circular;
     let mut remaining = count;
     let mut begun = false;
-    for (ct, _h) in cells {
+    for ct in cells {
         if remaining == 0 {
             return true;
         }

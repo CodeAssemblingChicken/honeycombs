@@ -109,7 +109,7 @@ pub fn spawn_cell_text(
 pub fn spawn_hint(
     commands: &mut Commands,
     mut hint: ColumnHint,
-    cells: &Vec<Vec<(Option<CellType>, bool)>>,
+    cells: &Vec<Vec<Option<CellType>>>,
     text_settings: &TextSettings,
     (w, h): (f32, f32),
     (width, height): (usize, usize),

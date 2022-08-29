@@ -69,9 +69,9 @@ impl FromWorld for CellColors {
             blue_dark: materials.add(ColorMaterial::from(Color::hex("0070e4").unwrap())),
             blue_medium: materials.add(ColorMaterial::from(Color::hex("0088e8").unwrap())),
             blue_light: materials.add(ColorMaterial::from(Color::hex("00a0f0").unwrap())),
-            alpha0: materials.add(ColorMaterial::from(Color::rgba(1., 1., 1., 0.))),
-            alpha1: materials.add(ColorMaterial::from(Color::rgba(1., 1., 1., 0.05))),
-            alpha2: materials.add(ColorMaterial::from(Color::rgba(1., 1., 1., 0.15))),
+            alpha0: materials.add(ColorMaterial::from(Color::rgba(0.5, 0.5, 0.5, 0.))),
+            alpha1: materials.add(ColorMaterial::from(Color::rgba(0.5, 0.5, 0.5, 0.1))),
+            alpha2: materials.add(ColorMaterial::from(Color::rgba(0.5, 0.5, 0.5, 0.2))),
         }
     }
 }

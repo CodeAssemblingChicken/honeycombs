@@ -2,7 +2,7 @@ mod components;
 mod editor;
 mod systems;
 
-use self::{editor::setup, systems::*};
+use self::{components::CellUpdateEvent, editor::setup, systems::*};
 use crate::{cleanup, states::AppState};
 use bevy::prelude::{App, ParallelSystemDescriptorCoercion, SystemSet};
 
@@ -21,13 +21,20 @@ pub fn prepare_editor(app: &mut App) {
                 )
                 .with_system(
                     mouse_click_empty_cell
+                        .before(mouse_click_unset_cell)
                         .after(mouse_enter_cell)
                         .after(mouse_exit_cell),
                 )
                 .with_system(
                     mouse_click_number_cell
+                        .before(mouse_click_unset_cell)
                         .after(mouse_enter_cell)
                         .after(mouse_exit_cell),
+                )
+                .with_system(
+                    cell_update_system
+                        .before(mouse_click_empty_cell)
+                        .before(mouse_click_number_cell),
                 )
                 // .with_system(mouse_over_cell)
                 // .with_system(mouse_enter_cell.before(mouse_over_cell))
@@ -39,5 +46,6 @@ pub fn prepare_editor(app: &mut App) {
                 // )
                 .with_system(window_resize_system),
         )
-        .add_system_set(SystemSet::on_exit(STATE).with_system(cleanup));
+        .add_system_set(SystemSet::on_exit(STATE).with_system(cleanup))
+        .add_event::<CellUpdateEvent>();
 }

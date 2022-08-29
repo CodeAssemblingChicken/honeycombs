@@ -5,6 +5,7 @@ use bevy::{
     window::Windows,
 };
 
+use super::components::{Board, EditorCell};
 use crate::{
     components::Cell,
     constants::Z_INDEX_CELL_BACK,
@@ -15,8 +16,6 @@ use crate::{
     resources::{CellColors, CellMeshes},
 };
 
-use super::components::EditorCell;
-
 pub fn setup(
     mut commands: Commands,
     wnds: Res<Windows>,
@@ -24,8 +23,8 @@ pub fn setup(
     cell_colors: Res<CellColors>,
     mut camera_query: Query<&mut Transform, With<Camera>>,
 ) {
-    let width = 15;
-    let height = 10;
+    let width = 33;
+    let height = 16;
 
     let (w, h) = calc_dimensions(width, height);
 
@@ -34,6 +33,10 @@ pub fn setup(
             spawn_unset_cell(&mut commands, (x, y), (w, h), &cell_meshes, &cell_colors);
         }
     }
+
+    let board = Board::new(width, height);
+    commands.insert_resource(board);
+
     for wnd in wnds.iter() {
         // TODO: Remove hard-coded width/height
         rescale_board(

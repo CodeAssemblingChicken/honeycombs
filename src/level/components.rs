@@ -6,7 +6,7 @@ use crate::{
 };
 use bevy::{
     math::Vec3,
-    prelude::{ColorMaterial, Commands, Component, Entity, Handle, Query, ResMut, Visibility},
+    prelude::{ColorMaterial, Commands, Component, Entity, Handle, Query, Visibility},
 };
 use bevy_easings::{Ease, EaseFunction, EasingType};
 
@@ -61,7 +61,7 @@ impl GameCell {
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
         cell_colors: &CellColors,
         number_cell: Option<&NumberCell>,
-        board: &mut ResMut<Board>,
+        board: &mut Board,
     ) {
         // TODO: Uncover animation/particles
         if cell.hovering {
