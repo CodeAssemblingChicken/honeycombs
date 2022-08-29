@@ -66,7 +66,7 @@ pub fn spawn_unset_cell(
         ),
         pos,
         size,
-        (true, true),
+        (true, true, true),
     );
     commands.entity(cell).insert(UnsetCell);
 }
@@ -137,7 +137,7 @@ fn spawn_cell_common(
     ),
     (x, y): (i32, i32),
     (w, h): (f32, f32),
-    mouse: (bool, bool),
+    mouse: (bool, bool, bool),
 ) {
     let (tx, ty) = calc_translation(x, y, w, h);
     let mut big_transform = Transform::from_translation(Vec3::new(tx, ty, Z_INDEX_CELL_BACK));
@@ -160,5 +160,8 @@ fn spawn_cell_common(
     commands
         .entity(cell)
         .insert(cell_component)
-        .insert(EditorCell { cell_type: None });
+        .insert(EditorCell {
+            hidden: false,
+            cell_type: None,
+        });
 }

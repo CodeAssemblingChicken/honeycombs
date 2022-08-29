@@ -37,6 +37,9 @@ pub struct Clickable {
     pub right_just: bool,
     pub right_pressed: bool,
     pub right_released: bool,
+    pub middle_just: bool,
+    pub middle_pressed: bool,
+    pub middle_released: bool,
 }
 
 impl Interactable for Clickable {
@@ -65,6 +68,9 @@ impl Default for Clickable {
             right_just: false,
             right_pressed: false,
             right_released: false,
+            middle_just: false,
+            middle_pressed: false,
+            middle_released: false,
         }
     }
 }

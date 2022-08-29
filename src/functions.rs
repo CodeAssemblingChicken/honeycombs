@@ -22,7 +22,7 @@ use interactable::{
 pub fn make_cell_interactable(
     commands: &mut Commands,
     cell: Entity,
-    (left_released, right_released): (bool, bool),
+    (left_released, right_released, middle_released): (bool, bool, bool),
 ) {
     commands.entity(cell).insert_bundle(InteractableCell {
         hoverable: Hoverable {
@@ -41,6 +41,7 @@ pub fn make_cell_interactable(
             }),
             left_released,
             right_released,
+            middle_released,
             ..default()
         },
     });

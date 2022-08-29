@@ -95,7 +95,6 @@ impl Cell {
         dark: Handle<ColorMaterial>,
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
     ) {
-        println!("Col");
         // Get Material Handles from the children
         color_query
             .get_mut(self.outer_hexagon)

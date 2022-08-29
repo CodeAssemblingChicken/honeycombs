@@ -153,7 +153,7 @@ fn spawn_level_selection_cell(
     );
     commands.entity(cell).add_child(text_entity);
 
-    make_cell_interactable(commands, cell, (true, false));
+    make_cell_interactable(commands, cell, (true, false, false));
 
     let cell_component = Cell {
         x: stage_id as i32,

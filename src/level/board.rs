@@ -133,7 +133,7 @@ impl Board {
                     }
                 }
                 if hidden {
-                    make_cell_interactable(commands, cell, (true, true));
+                    make_cell_interactable(commands, cell, (true, true, false));
                 }
 
                 let cell_component = Cell {
