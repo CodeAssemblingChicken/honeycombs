@@ -1,7 +1,7 @@
-mod end_screen;
+mod setup;
 
-use self::end_screen::{cleanup, setup};
-use crate::states::AppState;
+use self::setup::setup;
+use crate::{cleanup, states::AppState};
 use bevy::prelude::{App, SystemSet};
 
 const STATE: AppState = AppState::EndScreen;

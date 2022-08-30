@@ -1,8 +1,8 @@
 mod components;
-mod menu;
+mod setup;
 mod systems;
 
-use self::{menu::setup, systems::*};
+use self::{setup::setup, systems::*};
 use crate::{cleanup, states::AppState};
 use bevy::prelude::{App, ParallelSystemDescriptorCoercion, SystemSet};
 

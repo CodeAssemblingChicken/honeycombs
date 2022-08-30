@@ -17,8 +17,7 @@ use bevy::{
 
 /// Used to pass configuration from parser to board
 pub struct BoardConfig {
-    pub cells: Vec<Vec<Option<CellType>>>,
-    pub hiddens: Vec<Vec<bool>>,
+    pub cells: Vec<Vec<(Option<CellType>, bool)>>,
     pub hints: Vec<ColumnHint>,
 }
 
@@ -43,7 +42,6 @@ impl Board {
         cell_colors: &CellColors,
     ) -> Self {
         let cells = config.cells;
-        let hiddens = config.hiddens;
         let hints = config.hints;
 
         let mut cell_entities = Vec::new();
@@ -58,8 +56,7 @@ impl Board {
 
         for y in 0..height {
             for x in 0..width {
-                let cell_type = cells[y][x];
-                let hidden = hiddens[y][x];
+                let (cell_type, hidden) = cells[y][x];
 
                 if cell_type.is_none() {
                     continue;

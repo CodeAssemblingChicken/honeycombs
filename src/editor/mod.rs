@@ -1,8 +1,9 @@
 mod components;
-mod editor;
+mod functions;
+mod setup;
 mod systems;
 
-use self::{components::CellUpdateEvent, editor::setup, systems::*};
+use self::{components::CellUpdateEvent, setup::setup, systems::*};
 use crate::{cleanup, states::AppState};
 use bevy::prelude::{App, ParallelSystemDescriptorCoercion, SystemSet};
 
@@ -44,6 +45,7 @@ pub fn prepare_editor(app: &mut App) {
                 //         .after(mouse_enter_cell)
                 //         .after(mouse_exit_cell),
                 // )
+                .with_system(save_board_system)
                 .with_system(window_resize_system),
         )
         .add_system_set(SystemSet::on_exit(STATE).with_system(cleanup))

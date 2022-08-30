@@ -8,7 +8,7 @@ const TOO_FEW_ARGS: &str = "Expected more arguments";
 
 /// Receives a file and creates a BoardConfig from it
 pub fn board_from_file(filename: &str) -> BoardConfig {
-    let mut configs = Vec::new();
+    let mut cells = Vec::new();
     let file =
         fs::read_to_string(filename).unwrap_or_else(|_| panic!("File \"{}\" not found!", filename));
     let mut lines = file.lines();
@@ -28,7 +28,7 @@ pub fn board_from_file(filename: &str) -> BoardConfig {
             .next()
             .unwrap_or_else(|| panic!("{} in line {}", DONT_MESS, line_no));
         assert!(l.len() == w, "Lines must have specified width: {}", w,);
-        configs.push(parse_grid_row(l));
+        cells.push(parse_grid_row(l));
         line_no += 1;
     });
 
@@ -47,26 +47,7 @@ pub fn board_from_file(filename: &str) -> BoardConfig {
         hints.push(parse_hint(l, line_no));
         line_no += 1;
     });
-
-    let mut cells = Vec::new();
-    let mut hiddens = Vec::new();
-
-    for row in configs {
-        let mut ct_row = Vec::new();
-        let mut h_row = Vec::new();
-        for (ct, h) in row {
-            ct_row.push(ct);
-            h_row.push(h);
-        }
-        cells.push(ct_row);
-        hiddens.push(h_row);
-    }
-
-    BoardConfig {
-        cells,
-        hiddens,
-        hints,
-    }
+    BoardConfig { cells, hints }
 }
 
 /// Function to parse a numeric tuple in a file
@@ -124,9 +105,12 @@ fn parse_hint(line: &str, line_no: usize) -> ColumnHint {
         x,
         y,
         dir: match hint_dir {
-            -1 => HintDirection::Left,
-            1 => HintDirection::Right,
-            _ => HintDirection::Top,
+            -1 => HintDirection::LeftDown,
+            1 => HintDirection::RightDown,
+            -2 => HintDirection::LeftUp,
+            2 => HintDirection::RightUp,
+            3 | -3 => HintDirection::Up,
+            _ => HintDirection::Down,
         },
         hint_type: match hint_type {
             0 => HintType::None,

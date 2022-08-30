@@ -22,7 +22,7 @@ use interactable::{
 pub fn make_cell_interactable(
     commands: &mut Commands,
     cell: Entity,
-    (left_released, right_released, middle_released): (bool, bool, bool),
+    (left_released, right_released, middle_pressed): (bool, bool, bool),
 ) {
     commands.entity(cell).insert_bundle(InteractableCell {
         hoverable: Hoverable {
@@ -41,7 +41,7 @@ pub fn make_cell_interactable(
             }),
             left_released,
             right_released,
-            middle_released,
+            middle_pressed,
             ..default()
         },
     });
@@ -109,7 +109,7 @@ pub fn spawn_cell_text(
 pub fn spawn_hint(
     commands: &mut Commands,
     mut hint: ColumnHint,
-    cells: &[Vec<Option<CellType>>],
+    cells: &[Vec<(Option<CellType>, bool)>],
     text_settings: &TextSettings,
     (w, h): (f32, f32),
     (width, height): (usize, usize),
@@ -117,16 +117,30 @@ pub fn spawn_hint(
     let (mut tx, mut ty) = calc_translation(hint.x as i32, hint.y as i32, w, h);
     let mut t = Transform::from_translation(Vec3::new(0., 0., Z_INDEX_TEXT));
     match hint.dir {
-        HintDirection::Top => (ty += 1.3 * RADIUS),
-        HintDirection::Left => {
+        HintDirection::Down => (ty += 1.3 * RADIUS),
+        HintDirection::LeftDown => {
+            ty += RADIUS * 0.62;
+            tx += RADIUS * 1.12;
+            t.rotate_z(-1.047);
+        }
+        HintDirection::RightDown => {
             ty += RADIUS * 0.62;
             tx -= RADIUS * 1.12;
             t.rotate_z(1.047);
         }
-        HintDirection::Right => {
-            ty += RADIUS * 0.62;
+        HintDirection::Up => {
+            ty -= 1.3 * RADIUS;
+            t.rotate_z(std::f32::consts::PI);
+        }
+        HintDirection::LeftUp => {
+            ty -= RADIUS * 0.62;
             tx += RADIUS * 1.12;
-            t.rotate_z(-1.047);
+            t.rotate_z(-2.097);
+        }
+        HintDirection::RightUp => {
+            ty -= RADIUS * 0.62;
+            tx -= RADIUS * 1.12;
+            t.rotate_z(2.097);
         }
     }
     t.translation.x = tx;

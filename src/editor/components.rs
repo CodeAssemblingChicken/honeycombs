@@ -1,3 +1,4 @@
+use super::functions::row_empty;
 use crate::{
     components::{Cell, CellType},
     resources::CellColors,
@@ -8,7 +9,7 @@ use bevy::{
 };
 
 pub struct Board {
-    pub cells: Vec<Vec<Option<CellType>>>,
+    pub cells: Vec<Vec<(Option<CellType>, bool)>>,
     pub width: usize,
     pub height: usize,
 }
@@ -16,10 +17,50 @@ pub struct Board {
 impl Board {
     pub fn new(width: usize, height: usize) -> Self {
         Self {
-            cells: vec![vec![None; width]; height],
+            cells: vec![vec![(None, false); width]; height],
             width,
             height,
         }
+    }
+    pub fn trim(&self) -> Vec<Vec<(Option<CellType>, bool)>> {
+        let mut cells = self.cells.clone();
+        // Check rows
+        loop {
+            if cells.len() < 3 || !row_empty(&cells[0]) || !row_empty(&cells[1]) {
+                break;
+            }
+            cells.remove(0);
+            cells.remove(0);
+        }
+        loop {
+            if cells.len() < 2 || !row_empty(&cells[cells.len() - 1]) {
+                break;
+            }
+            cells.remove(cells.len() - 1);
+        }
+        // Check columns
+        loop {
+            if cells[0].len() < 3
+                || !row_empty(&(&cells).iter().map(|row| row[0]).collect())
+                || !row_empty(&(&cells).iter().map(|row| row[1]).collect())
+            {
+                break;
+            }
+            for row in &mut cells {
+                *row = row.clone().into_iter().skip(2).collect();
+            }
+        }
+        loop {
+            if cells[0].len() < 2
+                || !row_empty(&(&cells).iter().map(|row| row[row.len() - 1]).collect())
+            {
+                break;
+            }
+            for row in &mut cells {
+                *row = row.clone().into_iter().take(row.len() - 1).collect();
+            }
+        }
+        cells
     }
 }
 
@@ -27,6 +68,7 @@ impl Board {
 pub struct EditorCell {
     pub hidden: bool,
     pub cell_type: Option<CellType>,
+    pub text_entity: Entity,
 }
 
 impl EditorCell {

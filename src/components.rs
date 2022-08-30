@@ -131,7 +131,7 @@ pub struct CellOuter;
 /// The type of cell.
 /// Used in cell component for uncover-handling
 #[cfg_attr(feature = "debug", derive(bevy_inspector_egui::Inspectable))]
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CellType {
     NumberCell(HintType),
     EmptyCell,
@@ -150,14 +150,17 @@ pub struct ColumnHint {
 /// Straight down (TOP), down-right (RIGHT) and down-left (LEFT)
 #[derive(Debug)]
 pub enum HintDirection {
-    Top,
-    Left,
-    Right,
+    Down,
+    LeftDown,
+    RightDown,
+    Up,
+    LeftUp,
+    RightUp,
 }
 
 /// Indicator for special hints (connected or seperated cells)
 #[cfg_attr(feature = "debug", derive(bevy_inspector_egui::Inspectable))]
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HintType {
     None,
     // SOME is quite ugly, it is used in parsing to indicate that the hint

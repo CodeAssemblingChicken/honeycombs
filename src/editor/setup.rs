@@ -5,12 +5,14 @@ use crate::{
     editor::components::UnsetCell,
     functions::{
         calc_dimensions, calc_translation, make_cell_interactable, rescale_board, spawn_cell,
+        spawn_cell_text,
     },
-    resources::{CellColors, CellMeshes},
+    resources::{CellColors, CellMeshes, TextSettings},
 };
 use bevy::{
+    hierarchy::BuildChildren,
     math::Vec3,
-    prelude::{Camera, Commands, Entity, Handle, Query, Res, Transform, With},
+    prelude::{Camera, Commands, Entity, Handle, Query, Res, Transform, Visibility, With},
     sprite::ColorMaterial,
     window::Windows,
 };
@@ -20,16 +22,24 @@ pub fn setup(
     wnds: Res<Windows>,
     cell_meshes: Res<CellMeshes>,
     cell_colors: Res<CellColors>,
+    text_settings: Res<TextSettings>,
     mut camera_query: Query<&mut Transform, With<Camera>>,
 ) {
     let width = 33;
-    let height = 16;
+    let height = 18;
 
     let (w, h) = calc_dimensions(width, height);
 
     for y in 0..height as i32 {
         for x in 0..width as i32 {
-            spawn_unset_cell(&mut commands, (x, y), (w, h), &cell_meshes, &cell_colors);
+            spawn_unset_cell(
+                &mut commands,
+                (x, y),
+                (w, h),
+                &cell_meshes,
+                &cell_colors,
+                &text_settings,
+            );
         }
     }
 
@@ -55,12 +65,13 @@ pub fn spawn_unset_cell(
     size: (f32, f32),
     cell_meshes: &CellMeshes,
     cell_colors: &CellColors,
+    text_settings: &TextSettings,
 ) {
     let cell = commands.spawn().id();
     spawn_cell_common(
         commands,
         cell,
-        cell_meshes,
+        (cell_meshes, text_settings),
         (
             cell_colors.alpha0.clone(),
             cell_colors.alpha1.clone(),
@@ -73,65 +84,10 @@ pub fn spawn_unset_cell(
     commands.entity(cell).insert(UnsetCell);
 }
 
-// pub fn spawn_number_cell(
-//     commands: &mut Commands,
-//     pos: (i32, i32),
-//     size: (f32, f32),
-//     cell_meshes: &CellMeshes,
-//     cell_colors: &CellColors,
-//     text_settings: &TextSettings,
-// ) {
-//     let cell = commands.spawn().id();
-//     spawn_cell_common(
-//         commands,
-//         cell,
-//         cell_meshes,
-//         (
-//             cell_colors.white.clone(),
-//             cell_colors.gray_medium.clone(),
-//             cell_colors.gray_light.clone(),
-//         ),
-//         pos,
-//         size,
-//         (true, false),
-//     );
-//     let count = 1;
-//     let text_entity = spawn_cell_text(commands, &format!("{}", count), text_settings);
-//     commands.entity(cell).add_child(text_entity);
-//     commands.entity(cell).insert(NumberCell {
-//         count,
-//         label: text_entity,
-//     });
-// }
-
-// pub fn spawn_empty_cell(
-//     commands: &mut Commands,
-//     pos: (i32, i32),
-//     size: (f32, f32),
-//     cell_meshes: &CellMeshes,
-//     cell_colors: &CellColors,
-// ) {
-//     let cell = commands.spawn().id();
-//     spawn_cell_common(
-//         commands,
-//         cell,
-//         cell_meshes,
-//         (
-//             cell_colors.white.clone(),
-//             cell_colors.blue_medium.clone(),
-//             cell_colors.blue_light.clone(),
-//         ),
-//         pos,
-//         size,
-//         (true, false),
-//     );
-//     commands.entity(cell).insert(EmptyCell);
-// }
-
 fn spawn_cell_common(
     commands: &mut Commands,
     cell: Entity,
-    cell_meshes: &CellMeshes,
+    (cell_meshes, text_settings): (&CellMeshes, &TextSettings),
     colors: (
         Handle<ColorMaterial>,
         Handle<ColorMaterial>,
@@ -158,6 +114,12 @@ fn spawn_cell_common(
         orig: big_transform,
         hovering: false,
     };
+
+    let text_entity = spawn_cell_text(commands, "0", text_settings);
+    commands
+        .entity(text_entity)
+        .insert(Visibility { is_visible: false });
+
     // TODO: Rethink Cell type
     commands
         .entity(cell)
@@ -165,5 +127,7 @@ fn spawn_cell_common(
         .insert(EditorCell {
             hidden: false,
             cell_type: None,
-        });
+            text_entity,
+        })
+        .add_child(text_entity);
 }

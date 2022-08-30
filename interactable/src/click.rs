@@ -4,12 +4,9 @@ use crate::{
     InteractableCamera,
 };
 use bevy::{
-    input::{mouse::MouseButtonInput, Input},
+    input::Input,
     math::Vec2,
-    prelude::{
-        Camera, Component, Entity, EventReader, EventWriter, MouseButton, Query, Res, Transform,
-        With,
-    },
+    prelude::{Camera, Component, Entity, EventWriter, MouseButton, Query, Res, Transform, With},
     window::Windows,
 };
 
@@ -21,6 +18,7 @@ pub struct MouseRightClickEvent {
     pub entity: Entity,
     pub click_type: ClickType,
 }
+
 pub struct MouseMiddleClickEvent {
     pub entity: Entity,
     pub click_type: ClickType,
@@ -76,23 +74,16 @@ impl Default for Clickable {
 }
 
 pub fn click_system(
-    // mut commands: Commands,
     query: Query<(Entity, &Transform, &mut Clickable)>,
-    // hovering_query: Query<(Entity, &Transform, &mut Hoverable), With<Hovering>>,
-    // not_hovering_query: Query<(Entity, &Transform, &mut Hoverable), Without<Hovering>>,
     wnds: Res<Windows>,
     q_camera: Query<(&Camera, &Transform), With<InteractableCamera>>,
     mouse_button_input: Res<Input<MouseButton>>,
-    mouse_button_input_events: EventReader<MouseButtonInput>,
     (mut left_click, mut right_click, mut middle_click): (
         EventWriter<MouseLeftClickEvent>,
         EventWriter<MouseRightClickEvent>,
         EventWriter<MouseMiddleClickEvent>,
     ),
 ) {
-    if mouse_button_input_events.is_empty() {
-        return;
-    }
     if let Some(pos) = mouse_to_world_pos(wnds, q_camera) {
         let mut clicks = Vec::new();
 
@@ -140,19 +131,19 @@ pub fn click_system(
                     click_type: ClickType::Released,
                 })
             }
-            if c.right_just && mouse_button_input.just_pressed(MouseButton::Middle) {
+            if c.middle_just && mouse_button_input.just_pressed(MouseButton::Middle) {
                 middle_click.send(MouseMiddleClickEvent {
                     entity: e,
                     click_type: ClickType::Just,
                 })
             }
-            if c.right_pressed && mouse_button_input.pressed(MouseButton::Middle) {
+            if c.middle_pressed && mouse_button_input.pressed(MouseButton::Middle) {
                 middle_click.send(MouseMiddleClickEvent {
                     entity: e,
                     click_type: ClickType::Pressed,
                 })
             }
-            if c.right_released && mouse_button_input.just_released(MouseButton::Middle) {
+            if c.middle_released && mouse_button_input.just_released(MouseButton::Middle) {
                 middle_click.send(MouseMiddleClickEvent {
                     entity: e,
                     click_type: ClickType::Released,
@@ -166,7 +157,7 @@ pub fn click_system(
     }
 }
 
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum ClickType {
     Just,
     Pressed,
