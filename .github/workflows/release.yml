@@ -113,7 +113,7 @@ jobs:
           else
             cp "target/${{ matrix.target }}/release/$BIN_NAME" "dist/"
           fi
-          cp -r "assets/" "/dist/assets/"
+          cp -r "assets/" "dist/assets/"
 
       - uses: actions/upload-artifact@v2.2.4
         with:
