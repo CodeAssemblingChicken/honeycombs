@@ -20,7 +20,7 @@ use interactable::{
 pub fn mouse_click_cell(
     mut commands: Commands,
     mut level_cell_query: Query<(&LevelSelectionCell, &mut Cell)>,
-    mut editor_cell_query: Query<(&OptionCell, &mut Cell), Without<LevelSelectionCell>>,
+    mut option_cell_query: Query<(&OptionCell, &mut Cell), Without<LevelSelectionCell>>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     cell_colors: Res<CellColors>,
     (mut app_state, mut level_file): (ResMut<State<AppState>>, ResMut<LevelFile>),
@@ -40,13 +40,14 @@ pub fn mouse_click_cell(
                 &mut level_file,
             );
         }
-        if let Ok((ec, mut cell)) = editor_cell_query.get_mut(ev.entity) {
-            ec.click(
+        if let Ok((oc, mut cell)) = option_cell_query.get_mut(ev.entity) {
+            oc.click(
                 &mut cell,
                 &mut commands,
                 &mut color_query,
                 &cell_colors,
                 &mut app_state,
+                &mut level_file,
             );
         }
     }
@@ -56,7 +57,7 @@ pub fn mouse_click_cell(
 pub fn mouse_enter_cell(
     mut commands: Commands,
     mut level_cell_query: Query<(&LevelSelectionCell, &mut Cell)>,
-    mut editor_cell_query: Query<&mut Cell, (With<OptionCell>, Without<LevelSelectionCell>)>,
+    mut option_cell_query: Query<&mut Cell, (With<OptionCell>, Without<LevelSelectionCell>)>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     cell_colors: Res<CellColors>,
     mut ev_mouse_enter: EventReader<MouseEnterEvent>,
@@ -67,7 +68,7 @@ pub fn mouse_enter_cell(
         if let Ok((lsc, mut cell)) = level_cell_query.get_mut(ev.0) {
             lsc.hover(&mut cell, &mut commands, &mut color_query, &cell_colors);
         }
-        if let Ok(mut cell) = editor_cell_query.get_mut(ev.0) {
+        if let Ok(mut cell) = option_cell_query.get_mut(ev.0) {
             cell.hover(
                 &mut commands,
                 None,
@@ -83,7 +84,7 @@ pub fn mouse_enter_cell(
 pub fn mouse_exit_cell(
     mut commands: Commands,
     mut level_cell_query: Query<(&LevelSelectionCell, &mut Cell)>,
-    mut editor_cell_query: Query<&mut Cell, (With<OptionCell>, Without<LevelSelectionCell>)>,
+    mut option_cell_query: Query<&mut Cell, (With<OptionCell>, Without<LevelSelectionCell>)>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     cell_colors: Res<CellColors>,
     mut ev_mouse_exit: EventReader<MouseExitEvent>,
@@ -92,7 +93,7 @@ pub fn mouse_exit_cell(
         if let Ok((lsc, mut cell)) = level_cell_query.get_mut(ev.0) {
             lsc.unhover(&mut cell, &mut commands, &mut color_query, &cell_colors);
         }
-        if let Ok(mut cell) = editor_cell_query.get_mut(ev.0) {
+        if let Ok(mut cell) = option_cell_query.get_mut(ev.0) {
             cell.unhover(
                 &mut commands,
                 None,

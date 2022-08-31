@@ -100,7 +100,8 @@ impl OptionCell {
         commands: &mut Commands,
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
         cell_colors: &CellColors,
-        app_state: &mut ResMut<State<AppState>>,
+        app_state: &mut State<AppState>,
+        level_file: &mut LevelFile,
     ) {
         if cell.hovering {
             cell.hovering = false;
@@ -112,6 +113,8 @@ impl OptionCell {
             cell_colors.gray_medium.clone(),
             color_query,
         );
+        // TODO: Remove
+        level_file.filename = Some("assets/levels/1/1.lvl".to_string());
         app_state.set(self.app_state).unwrap();
     }
 }

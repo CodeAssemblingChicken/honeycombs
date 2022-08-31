@@ -138,7 +138,7 @@ pub enum CellType {
 }
 
 /// Component for column hints
-#[derive(Debug, Component)]
+#[derive(Debug, Component, Clone, Copy)]
 pub struct ColumnHint {
     pub x: usize,
     pub y: usize,
@@ -148,7 +148,7 @@ pub struct ColumnHint {
 
 /// Direction of the column/row hints.
 /// Straight down (TOP), down-right (RIGHT) and down-left (LEFT)
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum HintDirection {
     Down,
     LeftDown,

@@ -30,13 +30,13 @@ impl Board {
     /// An absolute monster of setup.
     pub fn new(
         commands: &mut Commands,
-        config: BoardConfig,
+        config: &BoardConfig,
         text_settings: &TextSettings,
         cell_meshes: &CellMeshes,
         cell_colors: &CellColors,
     ) -> Self {
-        let cells = config.cells;
-        let hints = config.hints;
+        let cells = &config.cells;
+        let hints = &config.hints;
         let width = config.width;
         let height = config.height;
 
@@ -95,7 +95,7 @@ impl Board {
 
                 match cell_type {
                     CellType::NumberCell(mut ht) => {
-                        let neighbours = get_neighbours(x as i32, y as i32, &cells, width, height);
+                        let neighbours = get_neighbours(x as i32, y as i32, cells, width, height);
                         let count = count_empty_cells(&neighbours);
                         if ht == HintType::Some {
                             ht = match empty_connected(&neighbours, count, true) {
@@ -153,8 +153,8 @@ impl Board {
         for hint in hints {
             text_entities.push(spawn_hint(
                 commands,
-                hint,
-                &cells,
+                *hint,
+                cells,
                 text_settings,
                 (w, h),
                 (width, height),

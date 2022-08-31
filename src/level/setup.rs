@@ -21,25 +21,26 @@ pub fn setup(
     if level_file.filename.is_none() {
         panic!("No level specified.");
     }
-    let cells = parser::board_from_file(level_file.filename.as_ref().unwrap());
+    let config = parser::board_from_file(level_file.filename.as_ref().unwrap());
     level_file.filename = None;
 
-    let b = Board::new(
+    let board = Board::new(
         &mut commands,
-        cells,
+        &config,
         &text_settings,
         &cell_meshes,
         &cell_colors,
     );
+
     for wnd in wnds.iter() {
         rescale_board(
-            b.width,
-            b.height,
+            board.width,
+            board.height,
             4,
             wnd.width(),
             wnd.height(),
             &mut camera_query,
         );
     }
-    commands.insert_resource(b);
+    commands.insert_resource(board);
 }

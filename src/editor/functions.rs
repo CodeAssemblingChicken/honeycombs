@@ -1,10 +1,17 @@
-use super::components::{Board, CellUpdateEvent, EditorCell, EmptyCell, NumberCell, UnsetCell};
+use super::{
+    board::Board,
+    components::{CellUpdateEvent, EditorCell, EmptyCell, NumberCell, UnsetCell},
+};
 use crate::{
     components::{Cell, CellType, HintType},
-    resources::CellColors,
+    constants::{RADIUS, Z_INDEX_CELL_BACK},
+    functions::{calc_translation, make_cell_interactable, spawn_cell, spawn_cell_text},
+    resources::{CellColors, CellMeshes, TextSettings},
 };
 use bevy::{
-    prelude::{Commands, Entity, EventWriter, Handle, Query, Visibility},
+    hierarchy::BuildChildren,
+    math::Vec3,
+    prelude::{Commands, Entity, EventWriter, Handle, Query, Transform, Visibility},
     sprite::ColorMaterial,
 };
 
@@ -15,6 +22,60 @@ pub fn row_empty(row: &Vec<(Option<CellType>, bool)>) -> bool {
         }
     }
     true
+}
+
+// Spawns a cell with common options. Returns the text_entity for convenience
+pub fn spawn_cell_common(
+    commands: &mut Commands,
+    cell: Entity,
+    (cell_meshes, text_settings): (&CellMeshes, &TextSettings),
+    colors: (
+        Handle<ColorMaterial>,
+        Handle<ColorMaterial>,
+        Handle<ColorMaterial>,
+    ),
+    (x, y): (i32, i32),
+    (w, h): (f32, f32),
+    mouse: (bool, bool, bool),
+) -> Entity {
+    let (tx, ty) = calc_translation(x, y, w, h);
+    let mut big_transform = Transform::from_translation(Vec3::new(tx, ty, Z_INDEX_CELL_BACK));
+    big_transform.rotate_z(f32::to_radians(90.0));
+
+    let (child1, child2) = spawn_cell(
+        commands,
+        cell,
+        (
+            cell_meshes.std_hexagon_back.clone(),
+            cell_meshes.std_hexagon_outer.clone(),
+            cell_meshes.std_hexagon_inner.clone(),
+        ),
+        colors,
+        big_transform,
+    );
+
+    make_cell_interactable(commands, cell, mouse, RADIUS);
+
+    let cell_component = Cell {
+        x,
+        y,
+        entity: cell,
+        outer_hexagon: child1,
+        inner_hexagon: child2,
+        orig: big_transform,
+        hovering: false,
+    };
+
+    let text_entity = spawn_cell_text(commands, "0", text_settings);
+    commands
+        .entity(text_entity)
+        .insert(Visibility { is_visible: false });
+
+    commands
+        .entity(cell)
+        .insert(cell_component)
+        .add_child(text_entity);
+    text_entity
 }
 
 pub fn unset_cell(

@@ -1,3 +1,4 @@
+mod board;
 mod components;
 mod functions;
 mod setup;

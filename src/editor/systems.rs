@@ -1,5 +1,6 @@
 use super::{
-    components::{Board, CellUpdateEvent, EditorCell, EmptyCell, NumberCell, UnsetCell},
+    board::Board,
+    components::{CellUpdateEvent, EditorCell, EmptyCell, NumberCell, UnsetCell},
     functions::{set_empty_cell, set_number_cell, unset_cell},
 };
 use crate::{
