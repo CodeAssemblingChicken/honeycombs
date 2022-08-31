@@ -4,7 +4,7 @@ use crate::{
     resources::CellColors,
 };
 use bevy::{
-    prelude::{Commands, Component, Entity, Handle, Query},
+    prelude::{Commands, Component, Entity, EventWriter, Handle, Query},
     sprite::ColorMaterial,
 };
 
@@ -128,25 +128,42 @@ impl EditorCell {
         } else {
             (cell_colors.alpha0.clone(), cell_colors.alpha1.clone())
         };
-        // let (light, dark) = if self.hidden {
-        //     (
-        //         cell_colors.yellow_light.clone(),
-        //         cell_colors.yellow_medium.clone(),
-        //     )
-        // } else {
-        //     match self.cell_type {
-        //         Some(CellType::NumberCell(_)) => (
-        //             cell_colors.gray_light.clone(),
-        //             cell_colors.gray_medium.clone(),
-        //         ),
-        //         Some(CellType::EmptyCell) => (
-        //             cell_colors.blue_light.clone(),
-        //             cell_colors.blue_medium.clone(),
-        //         ),
-        //         None =>
-        //     }
-        // };
         cell.unhover(commands, None, light, dark, color_query);
+    }
+
+    pub fn toggle_hidden(
+        &mut self,
+        cell: &mut Cell,
+        commands: &mut Commands,
+        color_query: &mut Query<&mut Handle<ColorMaterial>>,
+        cell_colors: &CellColors,
+        board: &mut Board,
+        ev_cell_update: &mut EventWriter<CellUpdateEvent>,
+    ) {
+        if self.cell_type.is_none() {
+            return;
+        }
+        self.hidden = !self.hidden;
+        let (c1, c2) = if self.hidden {
+            (
+                cell_colors.yellow_light.clone(),
+                cell_colors.yellow_medium.clone(),
+            )
+        } else {
+            match self.cell_type.unwrap() {
+                CellType::NumberCell(_) => (
+                    cell_colors.gray_light.clone(),
+                    cell_colors.gray_medium.clone(),
+                ),
+                CellType::EmptyCell => (
+                    cell_colors.blue_light.clone(),
+                    cell_colors.blue_medium.clone(),
+                ),
+            }
+        };
+        cell.click(commands, None, c1, c2, color_query);
+        board.cells[cell.y as usize][cell.x as usize].1 = self.hidden;
+        ev_cell_update.send(CellUpdateEvent);
     }
 }
 

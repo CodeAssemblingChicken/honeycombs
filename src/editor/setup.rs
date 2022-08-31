@@ -25,6 +25,7 @@ pub fn setup(
     text_settings: Res<TextSettings>,
     mut camera_query: Query<&mut Transform, With<Camera>>,
 ) {
+    // TODO: Remove hardcoded values
     let width = 33;
     let height = 18;
 
@@ -47,7 +48,6 @@ pub fn setup(
     commands.insert_resource(board);
 
     for wnd in wnds.iter() {
-        // TODO: Remove hard-coded width/height
         rescale_board(
             width,
             height,
@@ -59,7 +59,7 @@ pub fn setup(
     }
 }
 
-pub fn spawn_unset_cell(
+fn spawn_unset_cell(
     commands: &mut Commands,
     pos: (i32, i32),
     size: (f32, f32),
@@ -130,7 +130,6 @@ fn spawn_cell_common(
         .entity(text_entity)
         .insert(Visibility { is_visible: false });
 
-    // TODO: Rethink Cell type
     commands
         .entity(cell)
         .insert(cell_component)

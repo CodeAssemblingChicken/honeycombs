@@ -1,8 +1,11 @@
-use super::components::{Board, CellUpdateEvent, EditorCell, EmptyCell, NumberCell, UnsetCell};
+use super::{
+    components::{Board, CellUpdateEvent, EditorCell, EmptyCell, NumberCell, UnsetCell},
+    functions::{set_empty_cell, set_number_cell, unset_cell},
+};
 use crate::{
     board_functions::{count_empty_cells, empty_connected, get_neighbours},
     components::{Cell, CellType, HintType},
-    editor::functions::board_to_string,
+    editor::parser::board_to_string,
     functions::rescale_board,
     resources::{CellColors, TextSettings},
 };
@@ -10,7 +13,7 @@ use bevy::{
     input::Input,
     prelude::{
         Camera, Color, Commands, EventReader, EventWriter, Handle, KeyCode, Query, Res, ResMut,
-        Transform, Visibility, With,
+        Transform, With,
     },
     sprite::ColorMaterial,
     text::Text,
@@ -38,20 +41,15 @@ pub fn mouse_click_unset_cell(
         .filter(|ev| ev.click_type == ClickType::Released)
     {
         if let Ok((mut ec, mut cell)) = cell_query.get_mut(ev.entity) {
-            ec.cell_type = Some(CellType::EmptyCell);
-            commands
-                .entity(ev.entity)
-                .remove::<UnsetCell>()
-                .insert(EmptyCell);
-            cell.click(
+            set_empty_cell(
                 &mut commands,
-                Some(cell_colors.white.clone()),
-                cell_colors.blue_light.clone(),
-                cell_colors.blue_medium.clone(),
+                ev.entity,
+                (&mut cell, &mut ec),
                 &mut color_query,
-            );
-            board.cells[cell.y as usize][cell.x as usize].0 = Some(CellType::EmptyCell);
-            ev_cell_update.send(CellUpdateEvent);
+                &cell_colors,
+                &mut board,
+                &mut ev_cell_update,
+            )
         }
     }
     for ev in ev_mouse_right_click
@@ -59,29 +57,15 @@ pub fn mouse_click_unset_cell(
         .filter(|ev| ev.click_type == ClickType::Released)
     {
         if let Ok((mut ec, mut cell)) = cell_query.get_mut(ev.entity) {
-            ec.cell_type = Some(CellType::NumberCell(HintType::None));
-            let count = 0;
-            commands
-                .entity(ev.entity)
-                .remove::<UnsetCell>()
-                .insert(NumberCell {
-                    count,
-                    label: ec.text_entity,
-                    special_hint: false,
-                });
-            commands
-                .entity(ec.text_entity)
-                .insert(Visibility { is_visible: true });
-            cell.click(
+            set_number_cell(
                 &mut commands,
-                Some(cell_colors.white.clone()),
-                cell_colors.gray_light.clone(),
-                cell_colors.gray_medium.clone(),
+                ev.entity,
+                (&mut cell, &mut ec),
                 &mut color_query,
+                &cell_colors,
+                &mut board,
+                &mut ev_cell_update,
             );
-            board.cells[cell.y as usize][cell.x as usize].0 =
-                Some(CellType::NumberCell(HintType::None));
-            ev_cell_update.send(CellUpdateEvent);
         }
     }
     ev_mouse_left_click.clear();
@@ -105,27 +89,14 @@ pub fn mouse_click_empty_cell(
         .filter(|ev| ev.click_type == ClickType::Released)
     {
         if let Ok((mut ec, mut cell)) = cell_query.get_mut(ev.entity) {
-            ec.hidden = !ec.hidden;
-            let (c1, c2) = if ec.hidden {
-                (
-                    cell_colors.yellow_light.clone(),
-                    cell_colors.yellow_medium.clone(),
-                )
-            } else {
-                (
-                    cell_colors.blue_light.clone(),
-                    cell_colors.blue_medium.clone(),
-                )
-            };
-            cell.click(
+            ec.toggle_hidden(
+                &mut cell,
                 &mut commands,
-                Some(cell_colors.white.clone()),
-                c1,
-                c2,
                 &mut color_query,
+                &cell_colors,
+                &mut board,
+                &mut ev_cell_update,
             );
-            board.cells[cell.y as usize][cell.x as usize].1 = ec.hidden;
-            ev_cell_update.send(CellUpdateEvent);
         }
     }
     for ev in ev_mouse_middle_click
@@ -133,22 +104,16 @@ pub fn mouse_click_empty_cell(
         .filter(|ev| ev.click_type == ClickType::Pressed)
     {
         if let Ok((mut ec, mut cell)) = cell_query.get_mut(ev.entity) {
-            ec.cell_type = None;
-            ec.hidden = false;
-            commands
-                .entity(ev.entity)
-                .remove::<EmptyCell>()
-                .insert(UnsetCell);
-            cell.click(
+            commands.entity(ev.entity).remove::<EmptyCell>();
+            unset_cell(
                 &mut commands,
-                Some(cell_colors.alpha0.clone()),
-                cell_colors.alpha0.clone(),
-                cell_colors.alpha1.clone(),
+                ev.entity,
+                (&mut cell, &mut ec),
                 &mut color_query,
+                &cell_colors,
+                &mut board,
+                &mut ev_cell_update,
             );
-            board.cells[cell.y as usize][cell.x as usize].0 = None;
-            board.cells[cell.y as usize][cell.x as usize].1 = false;
-            ev_cell_update.send(CellUpdateEvent);
         }
     }
     ev_mouse_left_click.clear();
@@ -173,27 +138,14 @@ pub fn mouse_click_number_cell(
         .filter(|ev| ev.click_type == ClickType::Released)
     {
         if let Ok((mut ec, mut cell, _nc)) = cell_query.get_mut(ev.entity) {
-            ec.hidden = !ec.hidden;
-            let (c1, c2) = if ec.hidden {
-                (
-                    cell_colors.yellow_light.clone(),
-                    cell_colors.yellow_medium.clone(),
-                )
-            } else {
-                (
-                    cell_colors.gray_light.clone(),
-                    cell_colors.gray_medium.clone(),
-                )
-            };
-            cell.click(
+            ec.toggle_hidden(
+                &mut cell,
                 &mut commands,
-                Some(cell_colors.white.clone()),
-                c1,
-                c2,
                 &mut color_query,
+                &cell_colors,
+                &mut board,
+                &mut ev_cell_update,
             );
-            board.cells[cell.y as usize][cell.x as usize].1 = ec.hidden;
-            ev_cell_update.send(CellUpdateEvent);
         }
     }
     for ev in ev_mouse_right_click
@@ -210,25 +162,16 @@ pub fn mouse_click_number_cell(
         .filter(|ev| ev.click_type == ClickType::Pressed)
     {
         if let Ok((mut ec, mut cell, _nc)) = cell_query.get_mut(ev.entity) {
-            ec.cell_type = None;
-            ec.hidden = false;
-            commands
-                .entity(ev.entity)
-                .remove::<NumberCell>()
-                .insert(UnsetCell);
-            commands
-                .entity(ec.text_entity)
-                .insert(Visibility { is_visible: false });
-            cell.click(
+            commands.entity(ev.entity).remove::<NumberCell>();
+            unset_cell(
                 &mut commands,
-                Some(cell_colors.alpha0.clone()),
-                cell_colors.alpha0.clone(),
-                cell_colors.alpha1.clone(),
+                ev.entity,
+                (&mut cell, &mut ec),
                 &mut color_query,
+                &cell_colors,
+                &mut board,
+                &mut ev_cell_update,
             );
-            board.cells[cell.y as usize][cell.x as usize].0 = None;
-            board.cells[cell.y as usize][cell.x as usize].1 = false;
-            ev_cell_update.send(CellUpdateEvent);
         }
     }
     ev_mouse_left_click.clear();
