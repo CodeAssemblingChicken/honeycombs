@@ -9,9 +9,9 @@ on:
     ## - release
 
 env:
-  BIN_NAME: hexacell
-  PROJECT_NAME: hexacell
-  REPO_NAME: codeassemblingchicken/hexacell
+  BIN_NAME: honeycombs
+  PROJECT_NAME: honeycombs
+  REPO_NAME: codeassemblingchicken/honeycombs
 #  BREW_TAP: myname/homebrew-tap
 
 jobs:

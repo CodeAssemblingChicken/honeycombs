@@ -39,7 +39,7 @@ fn main() {
     let mut app = App::new();
     app.insert_resource(Msaa { samples: 4 })
         .insert_resource(WindowDescriptor {
-            title: "Hexacell".to_string(),
+            title: "Honeycombs".to_string(),
             resize_constraints: WindowResizeConstraints {
                 min_width: 640.,
                 min_height: 480.,
