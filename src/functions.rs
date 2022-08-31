@@ -4,12 +4,12 @@ use crate::{
         CellInner, CellOuter, CellType, ColumnHint, HintDirection, HintType, InteractableCell,
     },
     constants::{INNER_TRANSFORM, OUTER_TRANSFORM, RADIUS, Z_INDEX_TEXT},
-    resources::{CellMeshes, TextSettings},
+    resources::TextSettings,
 };
 use bevy::{
     hierarchy::BuildChildren,
     math::Vec3,
-    prelude::{default, Camera, Color, Commands, Entity, Handle, Query, Transform, With},
+    prelude::{default, Camera, Color, Commands, Entity, Handle, Mesh, Query, Transform, With},
     sprite::{ColorMaterial, ColorMesh2dBundle},
     text::{Text, Text2dBundle},
 };
@@ -23,12 +23,13 @@ pub fn make_cell_interactable(
     commands: &mut Commands,
     cell: Entity,
     (left_released, right_released, middle_pressed): (bool, bool, bool),
+    radius: f32,
 ) {
     commands.entity(cell).insert_bundle(InteractableCell {
         hoverable: Hoverable {
             ignore_scale: true,
             shape: Shape::Hexagon(Hexagon {
-                radius: RADIUS,
+                radius,
                 point_up: false,
             }),
             ..default()
@@ -36,7 +37,7 @@ pub fn make_cell_interactable(
         clickable: Clickable {
             ignore_scale: true,
             shape: Shape::Hexagon(Hexagon {
-                radius: RADIUS,
+                radius,
                 point_up: false,
             }),
             left_released,
@@ -50,7 +51,7 @@ pub fn make_cell_interactable(
 pub fn spawn_cell(
     commands: &mut Commands,
     cell: Entity,
-    cell_meshes: &CellMeshes,
+    (m1, m2, m3): (Handle<Mesh>, Handle<Mesh>, Handle<Mesh>),
     (c1, c2, c3): (
         Handle<ColorMaterial>,
         Handle<ColorMaterial>,
@@ -59,13 +60,13 @@ pub fn spawn_cell(
     transform: Transform,
 ) -> (Entity, Entity) {
     let b1 = ColorMesh2dBundle {
-        mesh: cell_meshes.medium_hexagon.clone().into(),
+        mesh: m2.into(),
         material: c2,
         transform: OUTER_TRANSFORM,
         ..default()
     };
     let b2 = ColorMesh2dBundle {
-        mesh: cell_meshes.small_hexagon.clone().into(),
+        mesh: m3.into(),
         material: c3,
         transform: INNER_TRANSFORM,
         ..default()
@@ -78,7 +79,7 @@ pub fn spawn_cell(
     commands
         .entity(cell)
         .insert_bundle(ColorMesh2dBundle {
-            mesh: cell_meshes.big_hexagon.clone().into(),
+            mesh: m1.into(),
             material: c1,
             transform,
             ..default()

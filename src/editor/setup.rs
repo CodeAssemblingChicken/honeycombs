@@ -1,7 +1,7 @@
 use super::components::{Board, EditorCell};
 use crate::{
     components::Cell,
-    constants::Z_INDEX_CELL_BACK,
+    constants::{RADIUS, Z_INDEX_CELL_BACK},
     editor::components::UnsetCell,
     functions::{
         calc_dimensions, calc_translation, make_cell_interactable, rescale_board, spawn_cell,
@@ -101,9 +101,19 @@ fn spawn_cell_common(
     let mut big_transform = Transform::from_translation(Vec3::new(tx, ty, Z_INDEX_CELL_BACK));
     big_transform.rotate_z(f32::to_radians(90.0));
 
-    let (child1, child2) = spawn_cell(commands, cell, cell_meshes, colors, big_transform);
+    let (child1, child2) = spawn_cell(
+        commands,
+        cell,
+        (
+            cell_meshes.std_hexagon_back.clone(),
+            cell_meshes.std_hexagon_outer.clone(),
+            cell_meshes.std_hexagon_inner.clone(),
+        ),
+        colors,
+        big_transform,
+    );
 
-    make_cell_interactable(commands, cell, mouse);
+    make_cell_interactable(commands, cell, mouse, RADIUS);
 
     let cell_component = Cell {
         x,

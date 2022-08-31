@@ -1,4 +1,5 @@
 mod components;
+mod functions;
 mod setup;
 mod systems;
 

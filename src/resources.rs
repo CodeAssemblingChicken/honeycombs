@@ -1,4 +1,4 @@
-use crate::constants::RADIUS;
+use crate::constants::{MED_SCALE, RADIUS};
 use bevy::{
     audio::AudioSource,
     prelude::{shape::RegularPolygon, AssetServer, Assets, Color, FromWorld, Handle, Mesh},
@@ -12,9 +12,12 @@ pub struct LevelFile {
 }
 
 pub struct CellMeshes {
-    pub big_hexagon: Handle<Mesh>,
-    pub medium_hexagon: Handle<Mesh>,
-    pub small_hexagon: Handle<Mesh>,
+    pub std_hexagon_back: Handle<Mesh>,
+    pub std_hexagon_outer: Handle<Mesh>,
+    pub std_hexagon_inner: Handle<Mesh>,
+    pub med_hexagon_back: Handle<Mesh>,
+    pub med_hexagon_outer: Handle<Mesh>,
+    pub med_hexagon_inner: Handle<Mesh>,
 }
 
 /// Resource storing the different colors
@@ -48,9 +51,16 @@ impl FromWorld for CellMeshes {
     fn from_world(world: &mut bevy::prelude::World) -> Self {
         let mut meshes = world.get_resource_mut::<Assets<Mesh>>().unwrap();
         Self {
-            big_hexagon: meshes.add(Mesh::from(RegularPolygon::new(RADIUS, 6))),
-            medium_hexagon: meshes.add(Mesh::from(RegularPolygon::new(RADIUS * 0.94, 6))),
-            small_hexagon: meshes.add(Mesh::from(RegularPolygon::new(RADIUS * 0.8, 6))),
+            std_hexagon_back: meshes.add(Mesh::from(RegularPolygon::new(RADIUS, 6))),
+            std_hexagon_outer: meshes.add(Mesh::from(RegularPolygon::new(RADIUS * 0.94, 6))),
+            std_hexagon_inner: meshes.add(Mesh::from(RegularPolygon::new(RADIUS * 0.8, 6))),
+            med_hexagon_back: meshes.add(Mesh::from(RegularPolygon::new(MED_SCALE * RADIUS, 6))),
+            med_hexagon_outer: meshes.add(Mesh::from(RegularPolygon::new(
+                MED_SCALE * 0.94 * RADIUS,
+                6,
+            ))),
+            med_hexagon_inner: meshes
+                .add(Mesh::from(RegularPolygon::new(MED_SCALE * 0.8 * RADIUS, 6))),
         }
     }
 }

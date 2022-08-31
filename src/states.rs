@@ -1,4 +1,4 @@
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 pub enum AppState {
     MainMenu,
     Level,

@@ -2,6 +2,7 @@ use bevy::{math::Vec3, prelude::Transform};
 
 /// Hex radius (i.e. circumcircle)
 pub const RADIUS: f32 = 100.0;
+pub const MED_SCALE: f32 = 1.5;
 
 /// z coordinates for different items
 pub const Z_INDEX_CELL_BACK: f32 = 2.0;

@@ -1,7 +1,7 @@
 use crate::{
     board_functions::{count_empty_cells, empty_connected, get_neighbours},
     components::{Cell, CellType, ColumnHint, HintType},
-    constants::Z_INDEX_CELL_BACK,
+    constants::{RADIUS, Z_INDEX_CELL_BACK},
     functions::{
         calc_dimensions, calc_translation, make_cell_interactable, spawn_cell, spawn_cell_text,
         spawn_hint,
@@ -91,7 +91,11 @@ impl Board {
                 let (child1, child2) = spawn_cell(
                     commands,
                     cell,
-                    cell_meshes,
+                    (
+                        cell_meshes.std_hexagon_back.clone(),
+                        cell_meshes.std_hexagon_outer.clone(),
+                        cell_meshes.std_hexagon_inner.clone(),
+                    ),
                     (cell_colors.white.clone(), colors.0, colors.1),
                     big_transform,
                 );
@@ -133,7 +137,7 @@ impl Board {
                     }
                 }
                 if hidden {
-                    make_cell_interactable(commands, cell, (true, true, false));
+                    make_cell_interactable(commands, cell, (true, true, false), RADIUS);
                 }
 
                 let cell_component = Cell {
