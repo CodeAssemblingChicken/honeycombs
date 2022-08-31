@@ -178,3 +178,11 @@ impl Default for HintType {
         Self::None
     }
 }
+
+/// Used to pass configuration from parser to board
+pub struct BoardConfig {
+    pub width: usize,
+    pub height: usize,
+    pub cells: Vec<Vec<(Option<CellType>, bool)>>,
+    pub hints: Vec<ColumnHint>,
+}

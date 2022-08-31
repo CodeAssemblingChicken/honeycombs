@@ -32,6 +32,7 @@ pub fn unset_cell(
     commands
         .entity(ec.text_entity)
         .insert(Visibility { is_visible: false });
+    // TODO: Does it really make sense to click here?
     cell.click(
         commands,
         Some(cell_colors.alpha0.clone()),
@@ -58,6 +59,7 @@ pub fn set_empty_cell(
         .entity(entity)
         .remove::<UnsetCell>()
         .insert(EmptyCell);
+    // TODO: Does it really make sense to click here?
     cell.click(
         commands,
         Some(cell_colors.white.clone()),
@@ -91,6 +93,7 @@ pub fn set_number_cell(
     commands
         .entity(ec.text_entity)
         .insert(Visibility { is_visible: true });
+    // TODO: Does it really make sense to click here?
     cell.click(
         commands,
         Some(cell_colors.white.clone()),

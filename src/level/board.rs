@@ -1,6 +1,6 @@
 use crate::{
     board_functions::{count_empty_cells, empty_connected, get_neighbours},
-    components::{Cell, CellType, ColumnHint, HintType},
+    components::{BoardConfig, Cell, CellType, HintType},
     constants::{RADIUS, Z_INDEX_CELL_BACK},
     functions::{
         calc_dimensions, calc_translation, make_cell_interactable, spawn_cell, spawn_cell_text,
@@ -14,12 +14,6 @@ use bevy::{
     math::Vec3,
     prelude::{Color, Commands, Entity, Transform, Visibility},
 };
-
-/// Used to pass configuration from parser to board
-pub struct BoardConfig {
-    pub cells: Vec<Vec<(Option<CellType>, bool)>>,
-    pub hints: Vec<ColumnHint>,
-}
 
 // TODO: Actually use this
 /// Board component storing common variables
@@ -43,12 +37,11 @@ impl Board {
     ) -> Self {
         let cells = config.cells;
         let hints = config.hints;
+        let width = config.width;
+        let height = config.height;
 
         let mut cell_entities = Vec::new();
         let mut text_entities = Vec::new();
-
-        let height = cells.len();
-        let width = cells[0].len();
 
         let (w, h) = calc_dimensions(width, height);
 

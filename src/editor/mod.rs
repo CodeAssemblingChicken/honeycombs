@@ -1,6 +1,5 @@
 mod components;
 mod functions;
-mod parser;
 mod setup;
 mod systems;
 

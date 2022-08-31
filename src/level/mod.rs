@@ -1,22 +1,13 @@
 mod board;
 mod components;
-mod parser;
+mod setup;
 mod systems;
 
-use self::{board::Board, systems::*};
-use crate::{
-    cleanup,
-    functions::rescale_board,
-    resources::{CellColors, CellMeshes, LevelFile, TextSettings},
-    states::AppState,
-};
+use self::{setup::setup, systems::*};
+use crate::{cleanup, states::AppState};
 use bevy::{
     app::App,
-    prelude::{
-        Camera, Commands, ParallelSystemDescriptorCoercion, Query, Res, ResMut, SystemSet,
-        Transform, With,
-    },
-    window::Windows,
+    prelude::{ParallelSystemDescriptorCoercion, SystemSet},
 };
 
 const STATE: AppState = AppState::Level;
@@ -37,39 +28,4 @@ pub fn prepare_level(app: &mut App) {
                 .with_system(check_solved),
         )
         .add_system_set(SystemSet::on_exit(STATE).with_system(cleanup));
-}
-
-fn setup(
-    mut commands: Commands,
-    wnds: Res<Windows>,
-    cell_meshes: Res<CellMeshes>,
-    cell_colors: Res<CellColors>,
-    text_settings: Res<TextSettings>,
-    mut level_file: ResMut<LevelFile>,
-    mut camera_query: Query<&mut Transform, With<Camera>>,
-) {
-    if level_file.filename.is_none() {
-        panic!("No level specified.");
-    }
-    let cells = parser::board_from_file(level_file.filename.as_ref().unwrap());
-    level_file.filename = None;
-
-    let b = Board::new(
-        &mut commands,
-        cells,
-        &text_settings,
-        &cell_meshes,
-        &cell_colors,
-    );
-    for wnd in wnds.iter() {
-        rescale_board(
-            b.width,
-            b.height,
-            4,
-            wnd.width(),
-            wnd.height(),
-            &mut camera_query,
-        );
-    }
-    commands.insert_resource(b);
 }

@@ -6,6 +6,7 @@ mod end_screen;
 mod functions;
 mod level;
 mod main_menu;
+mod parser;
 mod resources;
 mod states;
 

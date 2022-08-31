@@ -1,5 +1,4 @@
-use super::board::BoardConfig;
-use crate::components::{CellType, ColumnHint, HintDirection, HintType};
+use crate::components::{BoardConfig, CellType, ColumnHint, HintDirection, HintType};
 use std::fs;
 
 const DONT_MESS: &str = "Please don't mess with my files";
@@ -13,21 +12,25 @@ pub fn board_from_file(filename: &str) -> BoardConfig {
         fs::read_to_string(filename).unwrap_or_else(|_| panic!("File \"{}\" not found!", filename));
     let mut lines = file.lines();
     let mut line_no = 0;
-    let (w, h) = parse_tuple(
+    let (width, height) = parse_tuple(
         lines
             .next()
             .unwrap_or_else(|| panic!("{} in line {}", DONT_MESS, line_no)),
         line_no,
     );
     line_no += 1;
-    assert!(h > 0, "Height must at least be 1.");
-    assert!(w > 0, "Width must at least be 1.");
+    assert!(height > 0, "Height must at least be 1.");
+    assert!(width > 0, "Width must at least be 1.");
 
-    (0..h).into_iter().for_each(|_| {
+    (0..height).into_iter().for_each(|_| {
         let l = lines
             .next()
             .unwrap_or_else(|| panic!("{} in line {}", DONT_MESS, line_no));
-        assert!(l.len() == w, "Lines must have specified width: {}", w,);
+        assert!(
+            l.len() == width,
+            "Lines must have specified width: {}",
+            width,
+        );
         cells.push(parse_grid_row(l));
         line_no += 1;
     });
@@ -47,7 +50,12 @@ pub fn board_from_file(filename: &str) -> BoardConfig {
         hints.push(parse_hint(l, line_no));
         line_no += 1;
     });
-    BoardConfig { cells, hints }
+    BoardConfig {
+        width,
+        height,
+        cells,
+        hints,
+    }
 }
 
 /// Function to parse a numeric tuple in a file
@@ -134,4 +142,30 @@ fn parse_grid_row(line: &str) -> Vec<(Option<CellType>, bool)> {
         }
     }
     cells
+}
+
+pub fn board_to_string(board_config: BoardConfig) -> String {
+    format!(
+        "{},{}\n{}",
+        board_config.cells[0].len(),
+        board_config.cells.len(),
+        board_config
+            .cells
+            .iter()
+            .map(|row| {
+                row.iter()
+                    .map(|entry| match *entry {
+                        (Some(CellType::EmptyCell), true) => '0',
+                        (Some(CellType::EmptyCell), false) => '1',
+                        (Some(CellType::NumberCell(HintType::None)), true) => '2',
+                        (Some(CellType::NumberCell(HintType::None)), false) => '3',
+                        (Some(CellType::NumberCell(_)), true) => '4',
+                        (Some(CellType::NumberCell(_)), false) => '5',
+                        (None, _) => '.',
+                    })
+                    .collect::<String>()
+            })
+            .collect::<Vec<String>>()
+            .join("\n")
+    )
 }

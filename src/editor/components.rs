@@ -161,6 +161,7 @@ impl EditorCell {
                 ),
             }
         };
+        // TODO: Does it really make sense to click here?
         cell.click(commands, None, c1, c2, color_query);
         board.cells[cell.y as usize][cell.x as usize].1 = self.hidden;
         ev_cell_update.send(CellUpdateEvent);

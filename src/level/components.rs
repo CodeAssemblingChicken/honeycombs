@@ -9,7 +9,6 @@ use bevy::{
     prelude::{ColorMaterial, Commands, Component, Entity, Handle, Query, Visibility},
 };
 use bevy_easings::{Ease, EaseFunction, EasingType};
-
 use std::time::Duration;
 
 #[derive(Component)]

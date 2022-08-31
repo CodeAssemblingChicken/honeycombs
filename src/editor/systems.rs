@@ -4,9 +4,9 @@ use super::{
 };
 use crate::{
     board_functions::{count_empty_cells, empty_connected, get_neighbours},
-    components::{Cell, CellType, HintType},
-    editor::parser::board_to_string,
+    components::{BoardConfig, Cell, CellType, HintType},
     functions::rescale_board,
+    parser::board_to_string,
     resources::{CellColors, TextSettings},
 };
 use bevy::{
@@ -249,7 +249,15 @@ pub fn cell_update_system(
 pub fn save_board_system(board: Res<Board>, keys: Res<Input<KeyCode>>) {
     if keys.just_pressed(KeyCode::S) && keys.pressed(KeyCode::LControl) {
         let c = board.trim();
-        println!("\n{}\n", board_to_string(&c));
+        println!(
+            "\n{}\n",
+            board_to_string(BoardConfig {
+                width: c[0].len(),
+                height: c.len(),
+                cells: c,
+                hints: Vec::new()
+            })
+        );
     }
 }
 
