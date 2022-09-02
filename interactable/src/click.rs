@@ -24,11 +24,8 @@ pub struct MouseMiddleClickEvent {
     pub click_type: ClickType,
 }
 
-#[derive(Component)]
-pub struct Clickable {
-    pub ignore_scale: bool,
-    pub pass_through: bool,
-    pub shape: Shape,
+#[derive(Default)]
+pub struct MouseActions {
     pub left_just: bool,
     pub left_pressed: bool,
     pub left_released: bool,
@@ -38,6 +35,14 @@ pub struct Clickable {
     pub middle_just: bool,
     pub middle_pressed: bool,
     pub middle_released: bool,
+}
+
+#[derive(Component)]
+pub struct Clickable {
+    pub ignore_scale: bool,
+    pub pass_through: bool,
+    pub shape: Shape,
+    pub mouse_actions: MouseActions,
 }
 
 impl Interactable for Clickable {
@@ -60,15 +65,7 @@ impl Default for Clickable {
                 width: 1.,
                 height: 1.,
             }),
-            left_just: false,
-            left_pressed: false,
-            left_released: false,
-            right_just: false,
-            right_pressed: false,
-            right_released: false,
-            middle_just: false,
-            middle_pressed: false,
-            middle_released: false,
+            mouse_actions: MouseActions::default(),
         }
     }
 }
@@ -95,55 +92,60 @@ pub fn click_system(
         clicks.sort_by(|(_, _, z1), (_, _, z2)| z2.partial_cmp(z1).unwrap());
 
         for (e, c, _) in clicks {
-            if c.left_just && mouse_button_input.just_pressed(MouseButton::Left) {
+            if c.mouse_actions.left_just && mouse_button_input.just_pressed(MouseButton::Left) {
                 left_click.send(MouseLeftClickEvent {
                     entity: e,
                     click_type: ClickType::Just,
                 })
             }
-            if c.left_pressed && mouse_button_input.pressed(MouseButton::Left) {
+            if c.mouse_actions.left_pressed && mouse_button_input.pressed(MouseButton::Left) {
                 left_click.send(MouseLeftClickEvent {
                     entity: e,
                     click_type: ClickType::Pressed,
                 })
             }
-            if c.left_released && mouse_button_input.just_released(MouseButton::Left) {
+            if c.mouse_actions.left_released && mouse_button_input.just_released(MouseButton::Left)
+            {
                 left_click.send(MouseLeftClickEvent {
                     entity: e,
                     click_type: ClickType::Released,
                 })
             }
-            if c.right_just && mouse_button_input.just_pressed(MouseButton::Right) {
+            if c.mouse_actions.right_just && mouse_button_input.just_pressed(MouseButton::Right) {
                 right_click.send(MouseRightClickEvent {
                     entity: e,
                     click_type: ClickType::Just,
                 })
             }
-            if c.right_pressed && mouse_button_input.pressed(MouseButton::Right) {
+            if c.mouse_actions.right_pressed && mouse_button_input.pressed(MouseButton::Right) {
                 right_click.send(MouseRightClickEvent {
                     entity: e,
                     click_type: ClickType::Pressed,
                 })
             }
-            if c.right_released && mouse_button_input.just_released(MouseButton::Right) {
+            if c.mouse_actions.right_released
+                && mouse_button_input.just_released(MouseButton::Right)
+            {
                 right_click.send(MouseRightClickEvent {
                     entity: e,
                     click_type: ClickType::Released,
                 })
             }
-            if c.middle_just && mouse_button_input.just_pressed(MouseButton::Middle) {
+            if c.mouse_actions.middle_just && mouse_button_input.just_pressed(MouseButton::Middle) {
                 middle_click.send(MouseMiddleClickEvent {
                     entity: e,
                     click_type: ClickType::Just,
                 })
             }
-            if c.middle_pressed && mouse_button_input.pressed(MouseButton::Middle) {
+            if c.mouse_actions.middle_pressed && mouse_button_input.pressed(MouseButton::Middle) {
                 middle_click.send(MouseMiddleClickEvent {
                     entity: e,
                     click_type: ClickType::Pressed,
                 })
             }
-            if c.middle_released && mouse_button_input.just_released(MouseButton::Middle) {
+            if c.mouse_actions.middle_released
+                && mouse_button_input.just_released(MouseButton::Middle)
+            {
                 middle_click.send(MouseMiddleClickEvent {
                     entity: e,
                     click_type: ClickType::Released,

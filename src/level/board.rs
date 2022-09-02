@@ -1,7 +1,7 @@
 use crate::{
     board_functions::{count_empty_cells, empty_connected, get_neighbours},
     components::{BoardConfig, Cell, CellType, HintType},
-    constants::{RADIUS, Z_INDEX_CELL_BACK},
+    constants::{RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_TEXT},
     functions::{
         calc_dimensions, calc_translation, make_cell_interactable, spawn_cell, spawn_cell_text,
         spawn_hint,
@@ -12,7 +12,8 @@ use crate::{
 use bevy::{
     hierarchy::BuildChildren,
     math::Vec3,
-    prelude::{Color, Commands, Entity, Transform, Visibility},
+    prelude::{default, Color, Commands, Entity, Transform, Visibility},
+    text::{Text, Text2dBundle},
 };
 
 // TODO: Actually use this
@@ -130,7 +131,16 @@ impl Board {
                     }
                 }
                 if hidden {
-                    make_cell_interactable(commands, cell, (true, true, false), RADIUS);
+                    make_cell_interactable(
+                        commands,
+                        cell,
+                        interactable::click::MouseActions {
+                            left_released: true,
+                            right_released: true,
+                            ..default()
+                        },
+                        RADIUS,
+                    );
                 }
 
                 let cell_component = Cell {
@@ -160,6 +170,19 @@ impl Board {
                 (width, height),
             ));
         }
+        if let Some(text) = &config.text {
+            commands.spawn_bundle(Text2dBundle {
+                text: Text::from_section(format!("{}", text), text_settings.style.clone())
+                    .with_alignment(text_settings.alignment),
+                transform: Transform::from_translation(Vec3::new(
+                    0.,
+                    -h - 3. * RADIUS,
+                    Z_INDEX_TEXT,
+                )),
+                ..default()
+            });
+        }
+
         Self {
             cells: cell_entities,
             texts: text_entities,

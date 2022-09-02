@@ -84,7 +84,6 @@ impl Board {
                     colors,
                     (x, y),
                     (w, h),
-                    (true, true, true),
                 );
                 commands.entity(cell).insert(EditorCell {
                     hidden: *hidden,
@@ -113,10 +112,9 @@ impl Board {
         let mut cells = self.cells.clone();
         // Check rows
         loop {
-            if cells.len() < 3 || !row_empty(&cells[0]) || !row_empty(&cells[1]) {
+            if cells.len() < 2 || !row_empty(&cells[0]) {
                 break;
             }
-            cells.remove(0);
             cells.remove(0);
         }
         loop {

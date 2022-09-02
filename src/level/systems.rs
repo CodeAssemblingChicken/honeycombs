@@ -10,9 +10,10 @@ use crate::{
 };
 use bevy::{
     audio::{Audio, PlaybackSettings},
+    input::Input,
     prelude::{
-        Camera, ColorMaterial, Commands, EventReader, Handle, Query, Res, ResMut, State, Transform,
-        With, Without,
+        Camera, ColorMaterial, Commands, EventReader, Handle, KeyCode, Query, Res, ResMut, State,
+        Transform, With, Without,
     },
     window::WindowResized,
 };
@@ -132,6 +133,12 @@ pub fn window_resize_system(
             ev.height,
             &mut camera_query,
         );
+    }
+}
+
+pub fn hotkey_system(mut app_state: ResMut<State<AppState>>, keys: Res<Input<KeyCode>>) {
+    if keys.just_pressed(KeyCode::Escape) {
+        app_state.set(AppState::Loading).unwrap();
     }
 }
 

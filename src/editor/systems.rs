@@ -39,7 +39,7 @@ pub fn mouse_click_unset_cell(
 ) {
     for ev in ev_mouse_left_click
         .iter()
-        .filter(|ev| ev.click_type == ClickType::Released)
+        .filter(|ev| ev.click_type == ClickType::Pressed)
     {
         if let Ok((mut ec, mut cell)) = cell_query.get_mut(ev.entity) {
             set_empty_cell(
@@ -55,7 +55,7 @@ pub fn mouse_click_unset_cell(
     }
     for ev in ev_mouse_right_click
         .iter()
-        .filter(|ev| ev.click_type == ClickType::Released)
+        .filter(|ev| ev.click_type == ClickType::Pressed)
     {
         if let Ok((mut ec, mut cell)) = cell_query.get_mut(ev.entity) {
             set_number_cell(
@@ -87,7 +87,7 @@ pub fn mouse_click_empty_cell(
 ) {
     for ev in ev_mouse_left_click
         .iter()
-        .filter(|ev| ev.click_type == ClickType::Released)
+        .filter(|ev| ev.click_type == ClickType::Just)
     {
         if let Ok((mut ec, mut cell)) = cell_query.get_mut(ev.entity) {
             ec.toggle_hidden(
@@ -136,7 +136,7 @@ pub fn mouse_click_number_cell(
 ) {
     for ev in ev_mouse_left_click
         .iter()
-        .filter(|ev| ev.click_type == ClickType::Released)
+        .filter(|ev| ev.click_type == ClickType::Just)
     {
         if let Ok((mut ec, mut cell, _nc)) = cell_query.get_mut(ev.entity) {
             ec.toggle_hidden(
@@ -151,7 +151,7 @@ pub fn mouse_click_number_cell(
     }
     for ev in ev_mouse_right_click
         .iter()
-        .filter(|ev| ev.click_type == ClickType::Released)
+        .filter(|ev| ev.click_type == ClickType::Just)
     {
         if let Ok((_ec, _cell, mut nc)) = cell_query.get_mut(ev.entity) {
             nc.special_hint = !nc.special_hint;
@@ -247,18 +247,39 @@ pub fn cell_update_system(
     }
 }
 
-pub fn save_board_system(board: Res<Board>, keys: Res<Input<KeyCode>>) {
+pub fn hotkey_system(
+    mut commands: Commands,
+    mut cell_query: Query<(&mut Cell, &mut EditorCell)>,
+    mut color_query: Query<&mut Handle<ColorMaterial>>,
+    cell_colors: Res<CellColors>,
+    mut board: ResMut<Board>,
+    keys: Res<Input<KeyCode>>,
+    mut ev_cell_update: EventWriter<CellUpdateEvent>,
+) {
     if keys.just_pressed(KeyCode::S) && keys.pressed(KeyCode::LControl) {
         let c = board.trim();
         println!(
-            "\n{}\n",
+            "\n{}\n0",
             board_to_string(BoardConfig {
                 width: c[0].len(),
                 height: c.len(),
                 cells: c,
-                hints: Vec::new()
+                hints: Vec::new(),
+                text: None,
             })
         );
+    }
+    if keys.just_pressed(KeyCode::H) {
+        for (mut cell, mut ec) in cell_query.iter_mut() {
+            ec.toggle_hidden(
+                &mut cell,
+                &mut commands,
+                &mut color_query,
+                &cell_colors,
+                &mut board,
+                &mut ev_cell_update,
+            );
+        }
     }
 }
 

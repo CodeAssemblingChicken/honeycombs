@@ -14,7 +14,7 @@ use bevy::{
     text::{Text, Text2dBundle},
 };
 use interactable::{
-    click::Clickable,
+    click::{Clickable, MouseActions},
     hover::Hoverable,
     shapes::{Hexagon, Shape},
 };
@@ -22,7 +22,7 @@ use interactable::{
 pub fn make_cell_interactable(
     commands: &mut Commands,
     cell: Entity,
-    (left_released, right_released, middle_pressed): (bool, bool, bool),
+    mouse_actions: MouseActions,
     radius: f32,
 ) {
     commands.entity(cell).insert_bundle(InteractableCell {
@@ -40,9 +40,7 @@ pub fn make_cell_interactable(
                 radius,
                 point_up: false,
             }),
-            left_released,
-            right_released,
-            middle_pressed,
+            mouse_actions,
             ..default()
         },
     });

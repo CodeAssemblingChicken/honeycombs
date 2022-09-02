@@ -185,4 +185,5 @@ pub struct BoardConfig {
     pub height: usize,
     pub cells: Vec<Vec<(Option<CellType>, bool)>>,
     pub hints: Vec<ColumnHint>,
+    pub text: Option<String>,
 }

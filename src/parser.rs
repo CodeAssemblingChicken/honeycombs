@@ -11,7 +11,7 @@ pub fn board_from_file(filename: &str) -> BoardConfig {
     let file =
         fs::read_to_string(filename).unwrap_or_else(|_| panic!("File \"{}\" not found!", filename));
     let mut lines = file.lines();
-    let mut line_no = 0;
+    let mut line_no = 1;
     let (width, height) = parse_tuple(
         lines
             .next()
@@ -55,6 +55,7 @@ pub fn board_from_file(filename: &str) -> BoardConfig {
         height,
         cells,
         hints,
+        text: lines.next().map_or_else(|| None, |t| Some(t.to_string())),
     }
 }
 

@@ -32,6 +32,7 @@ pub fn setup(
             height: 18,
             cells: vec![vec![(None, false); 33]; 18],
             hints: Vec::new(),
+            text: None,
         }
     };
 

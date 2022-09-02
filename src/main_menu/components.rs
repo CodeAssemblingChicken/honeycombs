@@ -114,7 +114,7 @@ impl OptionCell {
             color_query,
         );
         // TODO: Remove
-        level_file.filename = Some("assets/levels/1/1.lvl".to_string());
+        // level_file.filename = Some("assets/levels/2/2.lvl".to_string());
         app_state.set(self.app_state).unwrap();
     }
 }

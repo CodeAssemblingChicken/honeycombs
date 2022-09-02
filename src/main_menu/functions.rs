@@ -9,7 +9,7 @@ use crate::{
 use bevy::{
     hierarchy::BuildChildren,
     math::Vec3,
-    prelude::{Commands, Transform},
+    prelude::{default, Commands, Transform},
 };
 
 pub fn spawn_cluster(
@@ -77,7 +77,15 @@ fn spawn_level_selection_cell(
     );
     commands.entity(cell).add_child(text_entity);
 
-    make_cell_interactable(commands, cell, (true, false, false), RADIUS);
+    make_cell_interactable(
+        commands,
+        cell,
+        interactable::click::MouseActions {
+            left_released: true,
+            ..default()
+        },
+        RADIUS,
+    );
 
     let cell_component = Cell {
         x: stage_id as i32,
@@ -126,7 +134,15 @@ pub fn spawn_option_cell(
     let text_entity = spawn_cell_text(commands, text, text_settings);
     commands.entity(cell).add_child(text_entity);
 
-    make_cell_interactable(commands, cell, (true, false, false), RADIUS * MED_SCALE);
+    make_cell_interactable(
+        commands,
+        cell,
+        interactable::click::MouseActions {
+            left_released: true,
+            ..default()
+        },
+        RADIUS * MED_SCALE,
+    );
 
     let cell_component = Cell {
         x: -1,

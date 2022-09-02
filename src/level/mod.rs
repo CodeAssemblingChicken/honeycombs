@@ -25,7 +25,8 @@ pub fn prepare_level(app: &mut App) {
                         .after(mouse_exit_cell),
                 )
                 .with_system(window_resize_system)
-                .with_system(check_solved),
+                .with_system(check_solved)
+                .with_system(hotkey_system),
         )
         .add_system_set(SystemSet::on_exit(STATE).with_system(cleanup));
 }

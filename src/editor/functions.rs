@@ -11,7 +11,7 @@ use crate::{
 use bevy::{
     hierarchy::BuildChildren,
     math::Vec3,
-    prelude::{Commands, Entity, EventWriter, Handle, Query, Transform, Visibility},
+    prelude::{default, Commands, Entity, EventWriter, Handle, Query, Transform, Visibility},
     sprite::ColorMaterial,
 };
 
@@ -36,7 +36,6 @@ pub fn spawn_cell_common(
     ),
     (x, y): (i32, i32),
     (w, h): (f32, f32),
-    mouse: (bool, bool, bool),
 ) -> Entity {
     let (tx, ty) = calc_translation(x, y, w, h);
     let mut big_transform = Transform::from_translation(Vec3::new(tx, ty, Z_INDEX_CELL_BACK));
@@ -54,7 +53,19 @@ pub fn spawn_cell_common(
         big_transform,
     );
 
-    make_cell_interactable(commands, cell, mouse, RADIUS);
+    make_cell_interactable(
+        commands,
+        cell,
+        interactable::click::MouseActions {
+            left_just: true,
+            left_pressed: true,
+            right_just: true,
+            right_pressed: true,
+            middle_pressed: true,
+            ..default()
+        },
+        RADIUS,
+    );
 
     let cell_component = Cell {
         x,
