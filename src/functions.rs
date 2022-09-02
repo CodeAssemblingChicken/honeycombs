@@ -4,14 +4,17 @@ use crate::{
         CellInner, CellOuter, CellType, ColumnHint, HintDirection, HintType, InteractableCell,
     },
     constants::{INNER_TRANSFORM, OUTER_TRANSFORM, RADIUS, Z_INDEX_TEXT},
-    resources::TextSettings,
+    resources::{LoadState, TextSettings},
+    states::AppState,
 };
 use bevy::{
     hierarchy::BuildChildren,
     math::Vec3,
-    prelude::{default, Camera, Color, Commands, Entity, Handle, Mesh, Query, Transform, With},
+    prelude::{
+        default, Camera, Color, Commands, Entity, Handle, Mesh, Query, State, Transform, With,
+    },
     sprite::{ColorMaterial, ColorMesh2dBundle},
-    text::{Text, Text2dBundle},
+    text::{Text, Text2dBundle, TextAlignment, TextStyle},
 };
 use interactable::{
     click::{Clickable, MouseActions},
@@ -90,15 +93,15 @@ pub fn spawn_cell(
 pub fn spawn_cell_text(
     commands: &mut Commands,
     text: &str,
-    text_settings: &TextSettings,
+    text_style: TextStyle,
+    text_alignment: TextAlignment,
 ) -> Entity {
     let mut t = Transform::identity();
     t.translation.z = Z_INDEX_TEXT;
     t.rotate_z(f32::to_radians(-90.0));
     commands
         .spawn_bundle(Text2dBundle {
-            text: Text::from_section(text, text_settings.style.clone())
-                .with_alignment(text_settings.alignment),
+            text: Text::from_section(text, text_style).with_alignment(text_alignment),
             transform: t,
             ..default()
         })
@@ -155,14 +158,15 @@ pub fn spawn_hint(
     }
     let mut ts = text_settings.clone();
     match hint.hint_type {
-        HintType::Connected => ts.style.color = Color::GREEN,
-        HintType::Seperated => ts.style.color = Color::RED,
+        HintType::Connected => ts.style_cell.color = Color::GREEN,
+        HintType::Seperated => ts.style_cell.color = Color::RED,
         _ => (),
     }
 
     commands
         .spawn_bundle(Text2dBundle {
-            text: Text::from_section(format!("{}", count), ts.style).with_alignment(ts.alignment),
+            text: Text::from_section(format!("{}", count), ts.style_cell)
+                .with_alignment(ts.alignment),
             transform: t,
             ..default()
         })
@@ -200,4 +204,13 @@ pub fn calc_dimensions(width: usize, height: usize) -> (f32, f32) {
     let w = ((width - 1) as f32 * RADIUS * 1.56) / 2.;
     let h = ((height - 1) as f32 * RADIUS * 1.8) / 2.;
     (w, h)
+}
+
+pub fn switch_state(
+    next_state: Option<AppState>,
+    app_state: &mut State<AppState>,
+    mut load_state: &mut LoadState,
+) {
+    load_state.next_state = next_state;
+    app_state.set(AppState::Loading).unwrap();
 }

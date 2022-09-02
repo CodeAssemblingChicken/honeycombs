@@ -3,7 +3,7 @@ use crate::{
     components::BoardConfig,
     functions::rescale_board,
     parser,
-    resources::{CellColors, CellMeshes, LevelFile, TextSettings},
+    resources::{CellMeshes, GameColors, LoadState, TextSettings},
 };
 use bevy::{
     prelude::{Camera, Commands, EventWriter, Query, Res, ResMut, Transform, With},
@@ -13,12 +13,12 @@ use bevy::{
 pub fn setup(
     mut commands: Commands,
     wnds: Res<Windows>,
-    (cell_meshes, cell_colors, text_settings): (
+    (cell_meshes, game_colors, text_settings): (
         Res<CellMeshes>,
-        Res<CellColors>,
+        Res<GameColors>,
         Res<TextSettings>,
     ),
-    mut level_file: ResMut<LevelFile>,
+    mut level_file: ResMut<LoadState>,
     mut camera_query: Query<&mut Transform, With<Camera>>,
     mut ev_cell_update: EventWriter<CellUpdateEvent>,
 ) {
@@ -40,7 +40,7 @@ pub fn setup(
         &mut commands,
         &config,
         &cell_meshes,
-        &cell_colors,
+        &game_colors,
         &text_settings,
     );
 

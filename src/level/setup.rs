@@ -2,7 +2,7 @@ use super::board::Board;
 use crate::{
     functions::rescale_board,
     parser,
-    resources::{CellColors, CellMeshes, LevelFile, TextSettings},
+    resources::{CellMeshes, GameColors, LoadState, TextSettings},
 };
 use bevy::{
     prelude::{Camera, Commands, Query, Res, ResMut, Transform, With},
@@ -13,9 +13,9 @@ pub fn setup(
     mut commands: Commands,
     wnds: Res<Windows>,
     cell_meshes: Res<CellMeshes>,
-    cell_colors: Res<CellColors>,
+    game_colors: Res<GameColors>,
     text_settings: Res<TextSettings>,
-    mut level_file: ResMut<LevelFile>,
+    mut level_file: ResMut<LoadState>,
     mut camera_query: Query<&mut Transform, With<Camera>>,
 ) {
     if level_file.filename.is_none() {
@@ -29,7 +29,7 @@ pub fn setup(
         &config,
         &text_settings,
         &cell_meshes,
-        &cell_colors,
+        &game_colors,
     );
 
     for wnd in wnds.iter() {

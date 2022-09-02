@@ -6,7 +6,7 @@ use crate::{
     components::{Cell, CellType, HintType},
     constants::{RADIUS, Z_INDEX_CELL_BACK},
     functions::{calc_translation, make_cell_interactable, spawn_cell, spawn_cell_text},
-    resources::{CellColors, CellMeshes, TextSettings},
+    resources::{CellMeshes, GameColors, TextSettings},
 };
 use bevy::{
     hierarchy::BuildChildren,
@@ -77,7 +77,12 @@ pub fn spawn_cell_common(
         hovering: false,
     };
 
-    let text_entity = spawn_cell_text(commands, "0", text_settings);
+    let text_entity = spawn_cell_text(
+        commands,
+        "0",
+        text_settings.style_cell.clone(),
+        text_settings.alignment,
+    );
     commands
         .entity(text_entity)
         .insert(Visibility { is_visible: false });
@@ -94,7 +99,7 @@ pub fn unset_cell(
     entity: Entity,
     (cell, ec): (&mut Cell, &mut EditorCell),
     color_query: &mut Query<&mut Handle<ColorMaterial>>,
-    cell_colors: &CellColors,
+    game_colors: &GameColors,
     board: &mut Board,
     ev_cell_update: &mut EventWriter<CellUpdateEvent>,
 ) {
@@ -107,9 +112,9 @@ pub fn unset_cell(
     // TODO: Does it really make sense to click here?
     cell.click(
         commands,
-        Some(cell_colors.alpha0.clone()),
-        cell_colors.alpha0.clone(),
-        cell_colors.alpha1.clone(),
+        Some(game_colors.alpha0.clone()),
+        game_colors.alpha0.clone(),
+        game_colors.alpha1.clone(),
         color_query,
     );
     board.cells[cell.y as usize][cell.x as usize].0 = None;
@@ -122,7 +127,7 @@ pub fn set_empty_cell(
     entity: Entity,
     (cell, ec): (&mut Cell, &mut EditorCell),
     color_query: &mut Query<&mut Handle<ColorMaterial>>,
-    cell_colors: &CellColors,
+    game_colors: &GameColors,
     board: &mut Board,
     ev_cell_update: &mut EventWriter<CellUpdateEvent>,
 ) {
@@ -134,9 +139,9 @@ pub fn set_empty_cell(
     // TODO: Does it really make sense to click here?
     cell.click(
         commands,
-        Some(cell_colors.white.clone()),
-        cell_colors.blue_light.clone(),
-        cell_colors.blue_medium.clone(),
+        Some(game_colors.white.clone()),
+        game_colors.blue_light.clone(),
+        game_colors.blue_medium.clone(),
         color_query,
     );
     board.cells[cell.y as usize][cell.x as usize].0 = Some(CellType::EmptyCell);
@@ -148,7 +153,7 @@ pub fn set_number_cell(
     entity: Entity,
     (cell, ec): (&mut Cell, &mut EditorCell),
     color_query: &mut Query<&mut Handle<ColorMaterial>>,
-    cell_colors: &CellColors,
+    game_colors: &GameColors,
     board: &mut Board,
     ev_cell_update: &mut EventWriter<CellUpdateEvent>,
 ) {
@@ -168,9 +173,9 @@ pub fn set_number_cell(
     // TODO: Does it really make sense to click here?
     cell.click(
         commands,
-        Some(cell_colors.white.clone()),
-        cell_colors.gray_light.clone(),
-        cell_colors.gray_medium.clone(),
+        Some(game_colors.white.clone()),
+        game_colors.gray_light.clone(),
+        game_colors.gray_medium.clone(),
         color_query,
     );
     board.cells[cell.y as usize][cell.x as usize].0 = Some(CellType::NumberCell(HintType::None));

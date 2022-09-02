@@ -1,4 +1,4 @@
-use crate::constants::{GameColor, SCALE_ENLARGED, SCALE_NORMAL};
+use crate::constants::{SCALE_ENLARGED, SCALE_NORMAL};
 use bevy::{
     math::Vec3,
     prelude::{Bundle, Color, Commands, Component, Entity, Handle, Query, Transform},

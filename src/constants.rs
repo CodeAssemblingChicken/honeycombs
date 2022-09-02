@@ -3,9 +3,11 @@ use bevy::{
     prelude::{Color, Transform},
 };
 
+pub const UNLOCK_POINTS: [u16; 6] = [0, 20, 50, 90, 140, 200];
+
 /// Hex radius (i.e. circumcircle)
 pub const RADIUS: f32 = 100.0;
-pub const MED_SCALE: f32 = 1.5;
+pub const MED_SCALE: f32 = 2.;
 
 /// z coordinates for different items
 pub const Z_INDEX_CELL_BACK: f32 = 2.0;

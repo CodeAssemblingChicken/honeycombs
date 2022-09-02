@@ -3,6 +3,7 @@ use std::{collections::HashMap, fs::File};
 use crate::{
     components::TextSectionConfig,
     constants::{GameColor, MED_SCALE, RADIUS},
+    states::AppState,
 };
 use bevy::{
     audio::AudioSource,
@@ -10,11 +11,15 @@ use bevy::{
     sprite::ColorMaterial,
     text::{TextAlignment, TextStyle},
 };
-use ron::de::from_reader;
-use serde::Deserialize;
+use ron::{
+    de::from_reader,
+    ser::{to_writer_pretty, PrettyConfig},
+};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default)]
-pub struct LevelFile {
+pub struct LoadState {
+    pub next_state: Option<AppState>,
     pub filename: Option<String>,
 }
 
@@ -25,60 +30,6 @@ pub struct CellMeshes {
     pub med_hexagon_back: Handle<Mesh>,
     pub med_hexagon_outer: Handle<Mesh>,
     pub med_hexagon_inner: Handle<Mesh>,
-}
-
-/// Resource storing the different colors
-pub struct CellColors {
-    pub yellow_dark: Handle<ColorMaterial>,
-    pub yellow_medium: Handle<ColorMaterial>,
-    pub yellow_light: Handle<ColorMaterial>,
-    pub gray_dark: Handle<ColorMaterial>,
-    pub gray_medium: Handle<ColorMaterial>,
-    pub gray_light: Handle<ColorMaterial>,
-    pub blue_dark: Handle<ColorMaterial>,
-    pub blue_medium: Handle<ColorMaterial>,
-    pub blue_light: Handle<ColorMaterial>,
-    pub white: Handle<ColorMaterial>,
-    pub alpha0: Handle<ColorMaterial>,
-    pub alpha1: Handle<ColorMaterial>,
-    pub alpha2: Handle<ColorMaterial>,
-}
-
-/// Resource for hover sfx
-pub struct SfxHover(pub Handle<AudioSource>);
-
-/// Resource for text
-#[derive(Clone)]
-pub struct TextSettings {
-    pub style: TextStyle,
-    pub alignment: TextAlignment,
-}
-
-#[derive(Deserialize)]
-pub struct Locale {
-    pub lang: String,
-    pub strings: HashMap<String, Vec<TextSectionConfig>>,
-}
-impl Locale {
-    pub fn new(lang: &str) -> Self {
-        Self {
-            lang: lang.into(),
-            strings: from_reader(
-                File::open(format!("assets/text/{}.ron", lang)).expect("Failed opening file"),
-            )
-            .unwrap(),
-        }
-    }
-    pub fn set_lang(&mut self, lang: &str) {
-        self.lang = lang.into();
-        self.strings = from_reader(
-            File::open(format!("assets/text/{}.ron", lang)).expect("Failed opening file"),
-        )
-        .unwrap();
-    }
-    pub fn get(&self, key: &str) -> Option<&Vec<TextSectionConfig>> {
-        self.strings.get(key)
-    }
 }
 
 impl FromWorld for CellMeshes {
@@ -99,7 +50,24 @@ impl FromWorld for CellMeshes {
     }
 }
 
-impl FromWorld for CellColors {
+/// Resource storing the different colors
+pub struct GameColors {
+    pub yellow_dark: Handle<ColorMaterial>,
+    pub yellow_medium: Handle<ColorMaterial>,
+    pub yellow_light: Handle<ColorMaterial>,
+    pub gray_dark: Handle<ColorMaterial>,
+    pub gray_medium: Handle<ColorMaterial>,
+    pub gray_light: Handle<ColorMaterial>,
+    pub blue_dark: Handle<ColorMaterial>,
+    pub blue_medium: Handle<ColorMaterial>,
+    pub blue_light: Handle<ColorMaterial>,
+    pub white: Handle<ColorMaterial>,
+    pub alpha0: Handle<ColorMaterial>,
+    pub alpha1: Handle<ColorMaterial>,
+    pub alpha2: Handle<ColorMaterial>,
+}
+
+impl FromWorld for GameColors {
     fn from_world(world: &mut bevy::prelude::World) -> Self {
         let mut materials = world.get_resource_mut::<Assets<ColorMaterial>>().unwrap();
         Self {
@@ -120,6 +88,9 @@ impl FromWorld for CellColors {
     }
 }
 
+/// Resource for hover sfx
+pub struct SfxHover(pub Handle<AudioSource>);
+
 impl FromWorld for SfxHover {
     fn from_world(world: &mut bevy::prelude::World) -> Self {
         let asset_server = world.get_resource::<AssetServer>().unwrap();
@@ -128,19 +99,89 @@ impl FromWorld for SfxHover {
     }
 }
 
+/// Resource for text
+#[derive(Clone)]
+pub struct TextSettings {
+    pub style_cell: TextStyle,
+    pub style_menu: TextStyle,
+    pub alignment: TextAlignment,
+}
+
 impl FromWorld for TextSettings {
     fn from_world(world: &mut bevy::prelude::World) -> Self {
         let asset_server = world.get_resource::<AssetServer>().unwrap();
 
         let font = asset_server.load("fonts/Harabara-dash.ttf");
-        let text_style = TextStyle {
-            font,
+        let style_cell = TextStyle {
+            font: font.clone(),
             font_size: (RADIUS * 0.75).round(),
             color: Color::WHITE,
         };
+        let style_menu = TextStyle {
+            font,
+            font_size: (RADIUS).round(),
+            color: Color::WHITE,
+        };
         Self {
-            style: text_style,
+            style_cell,
+            style_menu,
             alignment: TextAlignment::CENTER,
         }
+    }
+}
+
+#[derive(Deserialize)]
+pub struct Locale {
+    pub strings: HashMap<String, Vec<TextSectionConfig>>,
+}
+
+impl Locale {
+    pub fn new(lang: &str) -> Self {
+        Self {
+            strings: from_reader(
+                File::open(format!("assets/text/{}.ron", lang)).expect("Failed opening file"),
+            )
+            .unwrap(),
+        }
+    }
+    pub fn set_lang(&mut self, lang: &str, profile: &mut Profile) {
+        profile.lang = lang.into();
+        self.strings = from_reader(
+            File::open(format!("assets/text/{}.ron", lang)).expect("Failed opening file"),
+        )
+        .unwrap();
+    }
+    #[allow(unused)]
+    pub fn get(&self, key: &str) -> Option<&Vec<TextSectionConfig>> {
+        self.strings.get(key)
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Profile {
+    pub lang: String,
+    pub sfx_volume: f32,
+    pub level_points: [[Option<u16>; 6]; 6],
+}
+impl Profile {
+    pub fn new() -> Self {
+        from_reader(File::open("settings.ron").expect("Failed opening file")).unwrap()
+    }
+    pub fn get_points(&self) -> u16 {
+        self.level_points
+            .iter()
+            .map(|stage| stage.iter().map(|pts| pts.unwrap_or(0)).sum::<u16>())
+            .sum()
+    }
+    pub fn save(&self) {
+        to_writer_pretty(
+            File::create("settings.ron").expect("Failed opening file"),
+            self,
+            PrettyConfig::new()
+                .depth_limit(2)
+                .separate_tuple_members(true)
+                .enumerate_arrays(true),
+        )
+        .expect("Error saving profile");
     }
 }

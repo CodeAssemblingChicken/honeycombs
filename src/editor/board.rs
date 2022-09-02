@@ -5,7 +5,7 @@ use super::{
 use crate::{
     components::{BoardConfig, CellType, HintType},
     functions::calc_dimensions,
-    resources::{CellColors, CellMeshes, TextSettings},
+    resources::{CellMeshes, GameColors, TextSettings},
 };
 use bevy::prelude::{Commands, Visibility};
 
@@ -20,7 +20,7 @@ impl Board {
         commands: &mut Commands,
         config: &BoardConfig,
         cell_meshes: &CellMeshes,
-        cell_colors: &CellColors,
+        game_colors: &GameColors,
         text_settings: &TextSettings,
     ) -> Self {
         let cells = &config.cells;
@@ -40,30 +40,30 @@ impl Board {
                         commands.entity(cell).insert(EmptyCell);
                         if *hidden {
                             (
-                                cell_colors.white.clone(),
-                                cell_colors.yellow_medium.clone(),
-                                cell_colors.yellow_light.clone(),
+                                game_colors.white.clone(),
+                                game_colors.yellow_medium.clone(),
+                                game_colors.yellow_light.clone(),
                             )
                         } else {
                             (
-                                cell_colors.white.clone(),
-                                cell_colors.blue_medium.clone(),
-                                cell_colors.blue_light.clone(),
+                                game_colors.white.clone(),
+                                game_colors.blue_medium.clone(),
+                                game_colors.blue_light.clone(),
                             )
                         }
                     }
                     Some(CellType::NumberCell(_)) => {
                         if *hidden {
                             (
-                                cell_colors.white.clone(),
-                                cell_colors.yellow_medium.clone(),
-                                cell_colors.yellow_light.clone(),
+                                game_colors.white.clone(),
+                                game_colors.yellow_medium.clone(),
+                                game_colors.yellow_light.clone(),
                             )
                         } else {
                             (
-                                cell_colors.white.clone(),
-                                cell_colors.gray_medium.clone(),
-                                cell_colors.gray_light.clone(),
+                                game_colors.white.clone(),
+                                game_colors.gray_medium.clone(),
+                                game_colors.gray_light.clone(),
                             )
                         }
                     }
@@ -71,9 +71,9 @@ impl Board {
                     None => {
                         commands.entity(cell).insert(UnsetCell);
                         (
-                            cell_colors.alpha0.clone(),
-                            cell_colors.alpha1.clone(),
-                            cell_colors.alpha0.clone(),
+                            game_colors.alpha0.clone(),
+                            game_colors.alpha1.clone(),
+                            game_colors.alpha0.clone(),
                         )
                     }
                 };

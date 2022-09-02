@@ -26,7 +26,7 @@ interactable = { path = "interactable" }
 version = "0.8"
 # Disable the default features
 default-features = false
-features = ["bevy_core_pipeline", "bevy_asset", "bevy_sprite", "bevy_text", "bevy_audio", "x11", "vorbis"]
+features = ["bevy_core_pipeline", "bevy_asset", "bevy_sprite", "bevy_text", "bevy_audio", "x11", "vorbis", "png"]
 # perhaps: "bevy_render", "bevy_ui",, "bevy_winit", "bevy_scene", "animation", "filesystem_watcher" , "wayland"
 
 [dependencies.bevy-inspector-egui]

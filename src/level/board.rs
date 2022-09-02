@@ -7,7 +7,7 @@ use crate::{
         spawn_hint,
     },
     level::components::{EmptyCell, GameCell, NumberCell},
-    resources::{CellColors, CellMeshes, TextSettings},
+    resources::{CellMeshes, GameColors, TextSettings},
 };
 use bevy::{
     hierarchy::BuildChildren,
@@ -34,7 +34,7 @@ impl Board {
         config: &BoardConfig,
         text_settings: &TextSettings,
         cell_meshes: &CellMeshes,
-        cell_colors: &CellColors,
+        game_colors: &GameColors,
     ) -> Self {
         let cells = &config.cells;
         let hints = &config.hints;
@@ -61,18 +61,18 @@ impl Board {
                 let colors = if !hidden {
                     match cell_type {
                         CellType::NumberCell(_) => (
-                            cell_colors.gray_medium.clone(),
-                            cell_colors.gray_light.clone(),
+                            game_colors.gray_medium.clone(),
+                            game_colors.gray_light.clone(),
                         ),
                         CellType::EmptyCell => (
-                            cell_colors.blue_medium.clone(),
-                            cell_colors.blue_light.clone(),
+                            game_colors.blue_medium.clone(),
+                            game_colors.blue_light.clone(),
                         ),
                     }
                 } else {
                     (
-                        cell_colors.yellow_medium.clone(),
-                        cell_colors.yellow_light.clone(),
+                        game_colors.yellow_medium.clone(),
+                        game_colors.yellow_light.clone(),
                     )
                 };
 
@@ -90,7 +90,7 @@ impl Board {
                         cell_meshes.std_hexagon_outer.clone(),
                         cell_meshes.std_hexagon_inner.clone(),
                     ),
-                    (cell_colors.white.clone(), colors.0, colors.1),
+                    (game_colors.white.clone(), colors.0, colors.1),
                     big_transform,
                 );
 
@@ -104,13 +104,18 @@ impl Board {
                                 false => HintType::Seperated,
                             };
                         }
-                        let mut ts = text_settings.clone();
+                        let mut ts = text_settings.style_cell.clone();
                         match ht {
-                            HintType::Connected => ts.style.color = Color::GREEN,
-                            HintType::Seperated => ts.style.color = Color::RED,
+                            HintType::Connected => ts.color = Color::GREEN,
+                            HintType::Seperated => ts.color = Color::RED,
                             _ => (),
                         }
-                        let text_entity = spawn_cell_text(commands, &format!("{}", count), &ts);
+                        let text_entity = spawn_cell_text(
+                            commands,
+                            &format!("{}", count),
+                            ts,
+                            text_settings.alignment,
+                        );
                         commands.entity(cell).add_child(text_entity);
                         if hidden {
                             commands
@@ -181,7 +186,7 @@ impl Board {
             text: Text::from_sections(
                 texts
                     .iter()
-                    .map(|tsc| tsc.to_text_section(&text_settings.style)),
+                    .map(|tsc| tsc.to_text_section(&text_settings.style_cell)),
             )
             .with_alignment(text_settings.alignment),
             transform: Transform::from_translation(Vec3::new(0., -h - 3. * RADIUS, Z_INDEX_TEXT)),

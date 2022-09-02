@@ -1,7 +1,7 @@
 use super::board::Board;
 use crate::{
     components::{Cell, CellType},
-    resources::CellColors,
+    resources::GameColors,
 };
 use bevy::{
     prelude::{Commands, Component, Entity, EventWriter, Handle, Query},
@@ -21,24 +21,24 @@ impl EditorCell {
         cell: &mut Cell,
         commands: &mut Commands,
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
-        cell_colors: &CellColors,
+        game_colors: &GameColors,
     ) {
         let (light, dark) = if self.hidden {
             (
-                cell_colors.yellow_medium.clone(),
-                cell_colors.yellow_dark.clone(),
+                game_colors.yellow_medium.clone(),
+                game_colors.yellow_dark.clone(),
             )
         } else {
             match self.cell_type {
                 Some(CellType::NumberCell(_)) => (
-                    cell_colors.gray_medium.clone(),
-                    cell_colors.gray_dark.clone(),
+                    game_colors.gray_medium.clone(),
+                    game_colors.gray_dark.clone(),
                 ),
                 Some(CellType::EmptyCell) => (
-                    cell_colors.blue_medium.clone(),
-                    cell_colors.blue_dark.clone(),
+                    game_colors.blue_medium.clone(),
+                    game_colors.blue_dark.clone(),
                 ),
-                None => (cell_colors.alpha0.clone(), cell_colors.alpha2.clone()),
+                None => (game_colors.alpha0.clone(), game_colors.alpha2.clone()),
             }
         };
         cell.hover(commands, None, light, dark, color_query);
@@ -49,28 +49,28 @@ impl EditorCell {
         cell: &mut Cell,
         commands: &mut Commands,
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
-        cell_colors: &CellColors,
+        game_colors: &GameColors,
     ) {
         let (light, dark) = if let Some(ct) = self.cell_type {
             if self.hidden {
                 (
-                    cell_colors.yellow_light.clone(),
-                    cell_colors.yellow_medium.clone(),
+                    game_colors.yellow_light.clone(),
+                    game_colors.yellow_medium.clone(),
                 )
             } else {
                 match ct {
                     CellType::NumberCell(_) => (
-                        cell_colors.gray_light.clone(),
-                        cell_colors.gray_medium.clone(),
+                        game_colors.gray_light.clone(),
+                        game_colors.gray_medium.clone(),
                     ),
                     CellType::EmptyCell => (
-                        cell_colors.blue_light.clone(),
-                        cell_colors.blue_medium.clone(),
+                        game_colors.blue_light.clone(),
+                        game_colors.blue_medium.clone(),
                     ),
                 }
             }
         } else {
-            (cell_colors.alpha0.clone(), cell_colors.alpha1.clone())
+            (game_colors.alpha0.clone(), game_colors.alpha1.clone())
         };
         cell.unhover(commands, None, light, dark, color_query);
     }
@@ -80,7 +80,7 @@ impl EditorCell {
         cell: &mut Cell,
         commands: &mut Commands,
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
-        cell_colors: &CellColors,
+        game_colors: &GameColors,
         board: &mut Board,
         ev_cell_update: &mut EventWriter<CellUpdateEvent>,
     ) {
@@ -90,18 +90,18 @@ impl EditorCell {
         self.hidden = !self.hidden;
         let (c1, c2) = if self.hidden {
             (
-                cell_colors.yellow_light.clone(),
-                cell_colors.yellow_medium.clone(),
+                game_colors.yellow_light.clone(),
+                game_colors.yellow_medium.clone(),
             )
         } else {
             match self.cell_type.unwrap() {
                 CellType::NumberCell(_) => (
-                    cell_colors.gray_light.clone(),
-                    cell_colors.gray_medium.clone(),
+                    game_colors.gray_light.clone(),
+                    game_colors.gray_medium.clone(),
                 ),
                 CellType::EmptyCell => (
-                    cell_colors.blue_light.clone(),
-                    cell_colors.blue_medium.clone(),
+                    game_colors.blue_light.clone(),
+                    game_colors.blue_medium.clone(),
                 ),
             }
         };

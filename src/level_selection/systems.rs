@@ -1,13 +1,15 @@
-use super::components::{LevelSelectionCell, OptionCell};
+use super::components::LevelSelectionCell;
 use crate::{
     components::Cell,
-    functions::rescale_board,
-    resources::{CellColors, LevelFile},
+    functions::{rescale_board, switch_state},
+    resources::{GameColors, LoadState, Profile, SfxHover},
     states::AppState,
 };
 use bevy::{
+    audio::{Audio, PlaybackSettings},
+    input::Input,
     prelude::{
-        Camera, Commands, EventReader, Handle, Query, Res, ResMut, State, Transform, With, Without,
+        Camera, Commands, EventReader, Handle, KeyCode, Query, Res, ResMut, State, Transform, With,
     },
     sprite::ColorMaterial,
     window::WindowResized,
@@ -20,10 +22,9 @@ use interactable::{
 pub fn mouse_click_cell(
     mut commands: Commands,
     mut level_cell_query: Query<(&LevelSelectionCell, &mut Cell)>,
-    mut option_cell_query: Query<(&OptionCell, &mut Cell), Without<LevelSelectionCell>>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
-    cell_colors: Res<CellColors>,
-    (mut app_state, mut level_file): (ResMut<State<AppState>>, ResMut<LevelFile>),
+    game_colors: Res<GameColors>,
+    (mut app_state, mut level_file): (ResMut<State<AppState>>, ResMut<LoadState>),
     mut ev_mouse_left_click: EventReader<MouseLeftClickEvent>,
 ) {
     for ev in ev_mouse_left_click
@@ -35,17 +36,7 @@ pub fn mouse_click_cell(
                 &mut cell,
                 &mut commands,
                 &mut color_query,
-                &cell_colors,
-                &mut app_state,
-                &mut level_file,
-            );
-        }
-        if let Ok((oc, mut cell)) = option_cell_query.get_mut(ev.entity) {
-            oc.click(
-                &mut cell,
-                &mut commands,
-                &mut color_query,
-                &cell_colors,
+                &game_colors,
                 &mut app_state,
                 &mut level_file,
             );
@@ -57,24 +48,24 @@ pub fn mouse_click_cell(
 pub fn mouse_enter_cell(
     mut commands: Commands,
     mut level_cell_query: Query<(&LevelSelectionCell, &mut Cell)>,
-    mut option_cell_query: Query<&mut Cell, (With<OptionCell>, Without<LevelSelectionCell>)>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
-    cell_colors: Res<CellColors>,
+    (game_colors, profile): (Res<GameColors>, Res<Profile>),
     mut ev_mouse_enter: EventReader<MouseEnterEvent>,
-    // audio: Res<Audio>,
-    // clip: Res<SfxHover>,
+    audio: Res<Audio>,
+    clip: Res<SfxHover>,
 ) {
     for ev in ev_mouse_enter.iter() {
         if let Ok((lsc, mut cell)) = level_cell_query.get_mut(ev.0) {
-            lsc.hover(&mut cell, &mut commands, &mut color_query, &cell_colors);
-        }
-        if let Ok(mut cell) = option_cell_query.get_mut(ev.0) {
-            cell.hover(
+            audio.play_with_settings(
+                clip.0.clone(),
+                PlaybackSettings::ONCE.with_volume(profile.sfx_volume),
+            );
+            lsc.hover(
+                &mut cell,
                 &mut commands,
-                None,
-                cell_colors.gray_medium.clone(),
-                cell_colors.gray_dark.clone(),
                 &mut color_query,
+                &game_colors,
+                &profile,
             );
         }
     }
@@ -84,22 +75,19 @@ pub fn mouse_enter_cell(
 pub fn mouse_exit_cell(
     mut commands: Commands,
     mut level_cell_query: Query<(&LevelSelectionCell, &mut Cell)>,
-    mut option_cell_query: Query<&mut Cell, (With<OptionCell>, Without<LevelSelectionCell>)>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
-    cell_colors: Res<CellColors>,
+    game_colors: Res<GameColors>,
+    profile: Res<Profile>,
     mut ev_mouse_exit: EventReader<MouseExitEvent>,
 ) {
     for ev in ev_mouse_exit.iter() {
         if let Ok((lsc, mut cell)) = level_cell_query.get_mut(ev.0) {
-            lsc.unhover(&mut cell, &mut commands, &mut color_query, &cell_colors);
-        }
-        if let Ok(mut cell) = option_cell_query.get_mut(ev.0) {
-            cell.unhover(
+            lsc.unhover(
+                &mut cell,
                 &mut commands,
-                None,
-                cell_colors.gray_light.clone(),
-                cell_colors.gray_medium.clone(),
                 &mut color_query,
+                &game_colors,
+                &profile,
             );
         }
     }
@@ -114,6 +102,16 @@ pub fn mouse_over_cell(
     mut ev_mouse_over: EventReader<MouseOverEvent>,
 ) {
     for ev in ev_mouse_over.iter() {}
+}
+
+pub fn hotkey_system(
+    keys: Res<Input<KeyCode>>,
+    mut app_state: ResMut<State<AppState>>,
+    mut load_state: ResMut<LoadState>,
+) {
+    if keys.just_pressed(KeyCode::Escape) {
+        switch_state(Some(AppState::Home), &mut app_state, &mut load_state);
+    }
 }
 
 /// On resizing the window, the board is resized too

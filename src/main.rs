@@ -3,8 +3,9 @@ mod components;
 mod constants;
 mod editor;
 mod functions;
+mod home;
 mod level;
-mod main_menu;
+mod level_selection;
 mod overlay;
 mod parser;
 mod resources;
@@ -33,7 +34,7 @@ use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
 use components::Cell;
 use interactable::{InteractableCamera, InteractablePlugin};
 use native_dialog::MessageDialog;
-use resources::{CellColors, CellMeshes, LevelFile, Locale, SfxHover, TextSettings};
+use resources::{CellMeshes, GameColors, LoadState, Locale, Profile, SfxHover, TextSettings};
 use states::AppState;
 
 fn main() {
@@ -51,21 +52,23 @@ fn main() {
             // mode: WindowMode::Fullscreen,
             ..default()
         })
-        .insert_resource(ClearColor(Color::rgb(0.25, 0.25, 0.25)))
-        .insert_resource(LevelFile::default())
+        .insert_resource(ClearColor(Color::rgb(0.15, 0.15, 0.15)))
+        .insert_resource(LoadState::default())
         .add_plugins(DefaultPlugins)
         .add_plugin(InteractablePlugin)
         .add_plugin(EasingsPlugin)
         // .add_plugin(LogDiagnosticsPlugin::default())
         // .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_startup_system(setup)
-        .add_system(set_lang)
+        .add_system(set_lang_system)
+        .add_system(save_profile_system)
         .add_state(AppState::Loading)
         .add_system_set(SystemSet::on_update(AppState::Loading).with_system(show_menu_after_load));
 
+    home::prepare_home(&mut app);
+    level_selection::prepare_level_selection(&mut app);
     level::prepare_level(&mut app);
     editor::prepare_editor(&mut app);
-    main_menu::prepare_main_menu(&mut app);
     overlay::prepare_overlay(&mut app);
 
     #[cfg(feature = "debug")]
@@ -73,10 +76,11 @@ fn main() {
         .register_inspectable::<Cell>();
 
     app.init_resource::<CellMeshes>()
-        .init_resource::<CellColors>()
+        .init_resource::<GameColors>()
         .init_resource::<SfxHover>()
         .init_resource::<TextSettings>()
         .insert_resource(Locale::new("en"))
+        .insert_resource(Profile::new())
         .run();
 }
 
@@ -86,23 +90,33 @@ fn setup(mut commands: Commands) {
         .insert(InteractableCamera);
 }
 
-fn set_lang(mut locale: ResMut<Locale>, keys: Res<Input<KeyCode>>) {
+fn set_lang_system(
+    mut locale: ResMut<Locale>,
+    mut profile: ResMut<Profile>,
+    keys: Res<Input<KeyCode>>,
+) {
     if keys.just_pressed(KeyCode::L) {
-        let s = locale.lang.clone();
-        locale.set_lang(match s.as_str() {
-            "en" => "de",
-            _ => "en",
-        });
-        println!("{:?}", locale.get("nutella").unwrap());
+        let s = profile.lang.clone();
+        locale.set_lang(
+            match s.as_str() {
+                "en" => "de",
+                _ => "en",
+            },
+            &mut profile,
+        );
     }
 }
 
-fn show_menu_after_load(mut app_state: ResMut<State<AppState>>, level_file: Res<LevelFile>) {
-    if level_file.filename.is_some() {
-        app_state.set(AppState::Level).unwrap();
-    } else {
-        app_state.set(AppState::MainMenu).unwrap();
+fn save_profile_system(profile: Res<Profile>) {
+    if profile.is_changed() {
+        profile.save();
     }
+}
+
+fn show_menu_after_load(mut app_state: ResMut<State<AppState>>, level_file: Res<LoadState>) {
+    app_state
+        .set(level_file.next_state.unwrap_or_default())
+        .unwrap();
 }
 
 pub fn cleanup(mut commands: Commands, entities: Query<Entity, Without<Camera>>) {

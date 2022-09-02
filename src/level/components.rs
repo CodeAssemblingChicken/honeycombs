@@ -2,7 +2,7 @@ use super::board::Board;
 use crate::{
     components::{Cell, CellType, InteractableCell},
     constants::RADIUS,
-    resources::CellColors,
+    resources::GameColors,
 };
 use bevy::{
     math::Vec3,
@@ -24,7 +24,7 @@ impl GameCell {
         cell: &mut Cell,
         commands: &mut Commands,
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
-        cell_colors: &CellColors,
+        game_colors: &GameColors,
     ) {
         if !self.hidden {
             return;
@@ -33,8 +33,8 @@ impl GameCell {
         cell.hover(
             commands,
             None,
-            cell_colors.yellow_medium.clone(),
-            cell_colors.yellow_dark.clone(),
+            game_colors.yellow_medium.clone(),
+            game_colors.yellow_dark.clone(),
             color_query,
         );
     }
@@ -45,7 +45,7 @@ impl GameCell {
         cell: &mut Cell,
         commands: &mut Commands,
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
-        cell_colors: &CellColors,
+        game_colors: &GameColors,
     ) {
         if !self.hidden {
             return;
@@ -53,8 +53,8 @@ impl GameCell {
         cell.unhover(
             commands,
             None,
-            cell_colors.yellow_light.clone(),
-            cell_colors.yellow_medium.clone(),
+            game_colors.yellow_light.clone(),
+            game_colors.yellow_medium.clone(),
             color_query,
         );
     }
@@ -65,7 +65,7 @@ impl GameCell {
         cell: &mut Cell,
         commands: &mut Commands,
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
-        cell_colors: &CellColors,
+        game_colors: &GameColors,
         number_cell: Option<&NumberCell>,
         board: &mut Board,
     ) {
@@ -81,15 +81,15 @@ impl GameCell {
                     .remove::<Visibility>()
                     .insert(Visibility { is_visible: true });
                 (
-                    cell_colors.gray_medium.clone(),
-                    cell_colors.gray_light.clone(),
+                    game_colors.gray_medium.clone(),
+                    game_colors.gray_light.clone(),
                 )
             }
             CellType::EmptyCell => {
                 board.remaining -= 1;
                 (
-                    cell_colors.blue_medium.clone(),
-                    cell_colors.blue_light.clone(),
+                    game_colors.blue_medium.clone(),
+                    game_colors.blue_light.clone(),
                 )
             }
         };

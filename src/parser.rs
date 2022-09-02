@@ -66,9 +66,7 @@ fn parse_level_text(
     line_no: usize,
 ) -> Option<(i32, i32, Vec<TextSectionConfig>)> {
     let line = lines.next();
-    if line.is_none() {
-        return None;
-    }
+    line?;
     let (x, y) = parse_tuple(line.unwrap(), line_no);
     let line = lines
         .next()

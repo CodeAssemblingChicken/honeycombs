@@ -6,15 +6,16 @@ use super::{
 use crate::{
     board_functions::{count_empty_cells, empty_connected, get_neighbours},
     components::{BoardConfig, Cell, CellType, HintType},
-    functions::rescale_board,
+    functions::{rescale_board, switch_state},
     parser::board_to_string,
-    resources::{CellColors, TextSettings},
+    resources::{GameColors, LoadState, TextSettings},
+    states::AppState,
 };
 use bevy::{
     input::Input,
     prelude::{
         Camera, Color, Commands, EventReader, EventWriter, Handle, KeyCode, Query, Res, ResMut,
-        Transform, With,
+        State, Transform, With,
     },
     sprite::ColorMaterial,
     text::Text,
@@ -29,7 +30,7 @@ pub fn mouse_click_unset_cell(
     mut commands: Commands,
     mut cell_query: Query<(&mut EditorCell, &mut Cell), With<UnsetCell>>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
-    cell_colors: Res<CellColors>,
+    game_colors: Res<GameColors>,
     mut board: ResMut<Board>,
     (mut ev_mouse_left_click, mut ev_mouse_right_click): (
         EventReader<MouseLeftClickEvent>,
@@ -47,7 +48,7 @@ pub fn mouse_click_unset_cell(
                 ev.entity,
                 (&mut cell, &mut ec),
                 &mut color_query,
-                &cell_colors,
+                &game_colors,
                 &mut board,
                 &mut ev_cell_update,
             )
@@ -63,7 +64,7 @@ pub fn mouse_click_unset_cell(
                 ev.entity,
                 (&mut cell, &mut ec),
                 &mut color_query,
-                &cell_colors,
+                &game_colors,
                 &mut board,
                 &mut ev_cell_update,
             );
@@ -77,7 +78,7 @@ pub fn mouse_click_empty_cell(
     mut commands: Commands,
     mut cell_query: Query<(&mut EditorCell, &mut Cell), With<EmptyCell>>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
-    cell_colors: Res<CellColors>,
+    game_colors: Res<GameColors>,
     mut board: ResMut<Board>,
     (mut ev_mouse_left_click, mut ev_mouse_middle_click): (
         EventReader<MouseLeftClickEvent>,
@@ -94,7 +95,7 @@ pub fn mouse_click_empty_cell(
                 &mut cell,
                 &mut commands,
                 &mut color_query,
-                &cell_colors,
+                &game_colors,
                 &mut board,
                 &mut ev_cell_update,
             );
@@ -111,7 +112,7 @@ pub fn mouse_click_empty_cell(
                 ev.entity,
                 (&mut cell, &mut ec),
                 &mut color_query,
-                &cell_colors,
+                &game_colors,
                 &mut board,
                 &mut ev_cell_update,
             );
@@ -125,7 +126,7 @@ pub fn mouse_click_number_cell(
     mut commands: Commands,
     mut cell_query: Query<(&mut EditorCell, &mut Cell, &mut NumberCell)>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
-    cell_colors: Res<CellColors>,
+    game_colors: Res<GameColors>,
     mut board: ResMut<Board>,
     (mut ev_mouse_left_click, mut ev_mouse_right_click, mut ev_mouse_middle_click): (
         EventReader<MouseLeftClickEvent>,
@@ -143,7 +144,7 @@ pub fn mouse_click_number_cell(
                 &mut cell,
                 &mut commands,
                 &mut color_query,
-                &cell_colors,
+                &game_colors,
                 &mut board,
                 &mut ev_cell_update,
             );
@@ -169,7 +170,7 @@ pub fn mouse_click_number_cell(
                 ev.entity,
                 (&mut cell, &mut ec),
                 &mut color_query,
-                &cell_colors,
+                &game_colors,
                 &mut board,
                 &mut ev_cell_update,
             );
@@ -185,14 +186,14 @@ pub fn mouse_enter_cell(
     mut commands: Commands,
     mut cell_query: Query<(&EditorCell, &mut Cell)>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
-    cell_colors: Res<CellColors>,
+    game_colors: Res<GameColors>,
     mut ev_mouse_enter: EventReader<MouseEnterEvent>,
     // audio: Res<Audio>,
     // clip: Res<SfxHover>,
 ) {
     for ev in ev_mouse_enter.iter() {
         if let Ok((ec, mut cell)) = cell_query.get_mut(ev.0) {
-            ec.hover(&mut cell, &mut commands, &mut color_query, &cell_colors);
+            ec.hover(&mut cell, &mut commands, &mut color_query, &game_colors);
         }
     }
 }
@@ -202,12 +203,12 @@ pub fn mouse_exit_cell(
     mut commands: Commands,
     mut cell_query: Query<(&EditorCell, &mut Cell)>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
-    cell_colors: Res<CellColors>,
+    game_colors: Res<GameColors>,
     mut ev_mouse_exit: EventReader<MouseExitEvent>,
 ) {
     for ev in ev_mouse_exit.iter() {
         if let Ok((ec, mut cell)) = cell_query.get_mut(ev.0) {
-            ec.unhover(&mut cell, &mut commands, &mut color_query, &cell_colors);
+            ec.unhover(&mut cell, &mut commands, &mut color_query, &game_colors);
         }
     }
 }
@@ -228,11 +229,11 @@ pub fn cell_update_system(
             let mut ts = text_settings.clone();
             if nc.special_hint {
                 if empty_connected(&neighbours, count, true) {
-                    ts.style.color = Color::GREEN;
+                    ts.style_cell.color = Color::GREEN;
                     board.cells[cell.y as usize][cell.x as usize].0 =
                         Some(CellType::NumberCell(HintType::Connected));
                 } else {
-                    ts.style.color = Color::RED;
+                    ts.style_cell.color = Color::RED;
                     board.cells[cell.y as usize][cell.x as usize].0 =
                         Some(CellType::NumberCell(HintType::Seperated));
                 }
@@ -241,7 +242,7 @@ pub fn cell_update_system(
                     Some(CellType::NumberCell(HintType::None));
             }
             *text_query.get_mut(nc.label).unwrap() =
-                Text::from_section(&format!("{}", count), ts.style)
+                Text::from_section(&format!("{}", count), ts.style_cell)
                     .with_alignment(text_settings.alignment);
         }
     }
@@ -251,9 +252,13 @@ pub fn hotkey_system(
     mut commands: Commands,
     mut cell_query: Query<(&mut Cell, &mut EditorCell)>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
-    cell_colors: Res<CellColors>,
-    mut board: ResMut<Board>,
+    game_colors: Res<GameColors>,
     keys: Res<Input<KeyCode>>,
+    (mut board, mut app_state, mut load_state): (
+        ResMut<Board>,
+        ResMut<State<AppState>>,
+        ResMut<LoadState>,
+    ),
     mut ev_cell_update: EventWriter<CellUpdateEvent>,
 ) {
     if keys.just_pressed(KeyCode::S) && keys.pressed(KeyCode::LControl) {
@@ -275,11 +280,14 @@ pub fn hotkey_system(
                 &mut cell,
                 &mut commands,
                 &mut color_query,
-                &cell_colors,
+                &game_colors,
                 &mut board,
                 &mut ev_cell_update,
             );
         }
+    }
+    if keys.just_pressed(KeyCode::Escape) {
+        switch_state(None, &mut app_state, &mut load_state);
     }
 }
 

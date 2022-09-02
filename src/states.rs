@@ -1,6 +1,8 @@
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[derive(Debug, Default, Clone, Copy, Eq, PartialEq, Hash)]
 pub enum AppState {
-    MainMenu,
+    #[default]
+    Home,
+    LevelSelection,
     Level,
     Overlay,
     Editor,
