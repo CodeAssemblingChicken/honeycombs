@@ -18,6 +18,8 @@ bevy_easings = "0.8"
 native-dialog = "0.6.3"
 # chrono = "0.4"
 rand = "0.8"
+ron = "0.8"
+serde = { version = "1", features = ["derive"] }
 interactable = { path = "interactable" }
 
 [dependencies.bevy]

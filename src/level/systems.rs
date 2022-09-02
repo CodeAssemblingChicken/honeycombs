@@ -25,8 +25,8 @@ use interactable::{
 /// Calls uncover on a cell that is clicked by the mouse
 pub fn mouse_click_cell(
     mut commands: Commands,
-    mut number_cell_query: Query<(&GameCell, &mut Cell, &NumberCell), Without<EmptyCell>>,
-    mut empty_cell_query: Query<(&GameCell, &mut Cell), With<EmptyCell>>,
+    mut number_cell_query: Query<(&mut GameCell, &mut Cell, &NumberCell), Without<EmptyCell>>,
+    mut empty_cell_query: Query<(&mut GameCell, &mut Cell), With<EmptyCell>>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     cell_colors: Res<CellColors>,
     mut board: ResMut<Board>,
@@ -42,7 +42,7 @@ pub fn mouse_click_cell(
         if let Ok((lc, cell, _nc)) = number_cell_query.get(ev.entity) {
             lc.uncover_fail(cell, &mut commands);
         }
-        if let Ok((lc, mut cell)) = empty_cell_query.get_mut(ev.entity) {
+        if let Ok((mut lc, mut cell)) = empty_cell_query.get_mut(ev.entity) {
             lc.uncover(
                 &mut cell,
                 &mut commands,
@@ -57,7 +57,7 @@ pub fn mouse_click_cell(
         .iter()
         .filter(|ev| ev.click_type == ClickType::Released)
     {
-        if let Ok((lc, mut cell, nc)) = number_cell_query.get_mut(ev.entity) {
+        if let Ok((mut lc, mut cell, nc)) = number_cell_query.get_mut(ev.entity) {
             lc.uncover(
                 &mut cell,
                 &mut commands,

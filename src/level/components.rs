@@ -14,6 +14,7 @@ use std::time::Duration;
 #[derive(Component)]
 pub struct GameCell {
     pub cell_type: CellType,
+    pub hidden: bool,
 }
 
 impl GameCell {
@@ -25,6 +26,9 @@ impl GameCell {
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
         cell_colors: &CellColors,
     ) {
+        if !self.hidden {
+            return;
+        }
         // Pass event to Cell component with yellow colors
         cell.hover(
             commands,
@@ -43,6 +47,9 @@ impl GameCell {
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
         cell_colors: &CellColors,
     ) {
+        if !self.hidden {
+            return;
+        }
         cell.unhover(
             commands,
             None,
@@ -54,7 +61,7 @@ impl GameCell {
 
     /// Called when cell is hidden and clicked on with the correct mouse button
     pub fn uncover(
-        &self,
+        &mut self,
         cell: &mut Cell,
         commands: &mut Commands,
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
@@ -62,6 +69,7 @@ impl GameCell {
         number_cell: Option<&NumberCell>,
         board: &mut Board,
     ) {
+        self.hidden = false;
         // TODO: Uncover animation/particles
         if cell.hovering {
             cell.hovering = false;

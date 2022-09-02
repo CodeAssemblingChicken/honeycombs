@@ -1,11 +1,13 @@
-use crate::constants::{SCALE_ENLARGED, SCALE_NORMAL};
+use crate::constants::{GameColor, SCALE_ENLARGED, SCALE_NORMAL};
 use bevy::{
     math::Vec3,
-    prelude::{Bundle, Commands, Component, Entity, Handle, Query, Transform},
+    prelude::{Bundle, Color, Commands, Component, Entity, Handle, Query, Transform},
     sprite::ColorMaterial,
+    text::{TextSection, TextStyle},
 };
 use bevy_easings::{Ease, EaseFunction, EasingType};
 use interactable::{click::Clickable, hover::Hoverable};
+use serde::Deserialize;
 use std::time::Duration;
 
 // TODO: This is probably way to big
@@ -185,5 +187,29 @@ pub struct BoardConfig {
     pub height: usize,
     pub cells: Vec<Vec<(Option<CellType>, bool)>>,
     pub hints: Vec<ColumnHint>,
-    pub text: Option<String>,
+    pub text: Option<(i32, i32, Vec<TextSectionConfig>)>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct TextSectionConfig {
+    pub text: String,
+    pub color: Option<Color>,
+    pub interactable: bool,
+}
+
+impl TextSectionConfig {
+    pub fn new(text: impl Into<String>, color: Option<Color>, interactable: bool) -> Self {
+        Self {
+            text: text.into(),
+            color,
+            interactable,
+        }
+    }
+    pub fn to_text_section(&self, text_style: &TextStyle) -> TextSection {
+        let mut ts = text_style.clone();
+        if let Some(color) = self.color {
+            ts.color = color;
+        }
+        TextSection::new(self.text.clone(), ts)
+    }
 }

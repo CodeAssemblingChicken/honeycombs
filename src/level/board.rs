@@ -1,7 +1,7 @@
 use crate::{
     board_functions::{count_empty_cells, empty_connected, get_neighbours},
-    components::{BoardConfig, Cell, CellType, HintType},
-    constants::{RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_TEXT},
+    components::{BoardConfig, Cell, CellType, HintType, TextSectionConfig},
+    constants::{GameColor, RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_TEXT},
     functions::{
         calc_dimensions, calc_translation, make_cell_interactable, spawn_cell, spawn_cell_text,
         spawn_hint,
@@ -156,7 +156,7 @@ impl Board {
                 commands
                     .entity(cell)
                     .insert(cell_component)
-                    .insert(GameCell { cell_type });
+                    .insert(GameCell { cell_type, hidden });
                 cell_entities.push(cell);
             }
         }
@@ -170,18 +170,24 @@ impl Board {
                 (width, height),
             ));
         }
-        if let Some(text) = &config.text {
-            commands.spawn_bundle(Text2dBundle {
-                text: Text::from_section(format!("{}", text), text_settings.style.clone())
-                    .with_alignment(text_settings.alignment),
-                transform: Transform::from_translation(Vec3::new(
-                    0.,
-                    -h - 3. * RADIUS,
-                    Z_INDEX_TEXT,
-                )),
-                ..default()
-            });
-        }
+        let texts = [
+            TextSectionConfig::new("Hello ", None, false),
+            TextSectionConfig::new("World", Some(GameColor::BLUE_LIGHT), false),
+            TextSectionConfig::new("!\nOK", None, false),
+        ];
+
+        // if let Some(text) = &config.text {
+        commands.spawn_bundle(Text2dBundle {
+            text: Text::from_sections(
+                texts
+                    .iter()
+                    .map(|tsc| tsc.to_text_section(&text_settings.style)),
+            )
+            .with_alignment(text_settings.alignment),
+            transform: Transform::from_translation(Vec3::new(0., -h - 3. * RADIUS, Z_INDEX_TEXT)),
+            ..default()
+        });
+        // }
 
         Self {
             cells: cell_entities,

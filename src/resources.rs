@@ -1,10 +1,17 @@
-use crate::constants::{MED_SCALE, RADIUS};
+use std::{collections::HashMap, fs::File};
+
+use crate::{
+    components::TextSectionConfig,
+    constants::{GameColor, MED_SCALE, RADIUS},
+};
 use bevy::{
     audio::AudioSource,
     prelude::{shape::RegularPolygon, AssetServer, Assets, Color, FromWorld, Handle, Mesh},
     sprite::ColorMaterial,
     text::{TextAlignment, TextStyle},
 };
+use ron::de::from_reader;
+use serde::Deserialize;
 
 #[derive(Debug, Default)]
 pub struct LevelFile {
@@ -47,6 +54,33 @@ pub struct TextSettings {
     pub alignment: TextAlignment,
 }
 
+#[derive(Deserialize)]
+pub struct Locale {
+    pub lang: String,
+    pub strings: HashMap<String, Vec<TextSectionConfig>>,
+}
+impl Locale {
+    pub fn new(lang: &str) -> Self {
+        Self {
+            lang: lang.into(),
+            strings: from_reader(
+                File::open(format!("assets/text/{}.ron", lang)).expect("Failed opening file"),
+            )
+            .unwrap(),
+        }
+    }
+    pub fn set_lang(&mut self, lang: &str) {
+        self.lang = lang.into();
+        self.strings = from_reader(
+            File::open(format!("assets/text/{}.ron", lang)).expect("Failed opening file"),
+        )
+        .unwrap();
+    }
+    pub fn get(&self, key: &str) -> Option<&Vec<TextSectionConfig>> {
+        self.strings.get(key)
+    }
+}
+
 impl FromWorld for CellMeshes {
     fn from_world(world: &mut bevy::prelude::World) -> Self {
         let mut meshes = world.get_resource_mut::<Assets<Mesh>>().unwrap();
@@ -70,18 +104,18 @@ impl FromWorld for CellColors {
         let mut materials = world.get_resource_mut::<Assets<ColorMaterial>>().unwrap();
         Self {
             white: materials.add(ColorMaterial::from(Color::WHITE)),
-            yellow_dark: materials.add(ColorMaterial::from(Color::hex("d87408").unwrap())),
-            yellow_medium: materials.add(ColorMaterial::from(Color::hex("dc8c10").unwrap())),
-            yellow_light: materials.add(ColorMaterial::from(Color::hex("e4a020").unwrap())),
-            gray_dark: materials.add(ColorMaterial::from(Color::hex("24221c").unwrap())),
-            gray_medium: materials.add(ColorMaterial::from(Color::hex("37352a").unwrap())),
-            gray_light: materials.add(ColorMaterial::from(Color::hex("484537").unwrap())),
-            blue_dark: materials.add(ColorMaterial::from(Color::hex("0070e4").unwrap())),
-            blue_medium: materials.add(ColorMaterial::from(Color::hex("0088e8").unwrap())),
-            blue_light: materials.add(ColorMaterial::from(Color::hex("00a0f0").unwrap())),
-            alpha0: materials.add(ColorMaterial::from(Color::rgba(0.5, 0.5, 0.5, 0.))),
-            alpha1: materials.add(ColorMaterial::from(Color::rgba(0.5, 0.5, 0.5, 0.1))),
-            alpha2: materials.add(ColorMaterial::from(Color::rgba(0.5, 0.5, 0.5, 0.2))),
+            yellow_dark: materials.add(ColorMaterial::from(GameColor::YELLOW_DARK)),
+            yellow_medium: materials.add(ColorMaterial::from(GameColor::YELLOW_MEDIUM)),
+            yellow_light: materials.add(ColorMaterial::from(GameColor::YELLOW_LIGHT)),
+            gray_dark: materials.add(ColorMaterial::from(GameColor::GRAY_DARK)),
+            gray_medium: materials.add(ColorMaterial::from(GameColor::GRAY_MEDIUM)),
+            gray_light: materials.add(ColorMaterial::from(GameColor::GRAY_LIGHT)),
+            blue_dark: materials.add(ColorMaterial::from(GameColor::BLUE_DARK)),
+            blue_medium: materials.add(ColorMaterial::from(GameColor::BLUE_MEDIUM)),
+            blue_light: materials.add(ColorMaterial::from(GameColor::BLUE_LIGHT)),
+            alpha0: materials.add(ColorMaterial::from(GameColor::ALPHA_0)),
+            alpha1: materials.add(ColorMaterial::from(GameColor::ALPHA_1)),
+            alpha2: materials.add(ColorMaterial::from(GameColor::ALPHA_2)),
         }
     }
 }

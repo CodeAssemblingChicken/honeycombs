@@ -2,7 +2,7 @@
 pub enum AppState {
     MainMenu,
     Level,
-    EndScreen,
+    Overlay,
     Editor,
     Settings,
     Loading,

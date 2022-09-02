@@ -1,5 +1,7 @@
-use crate::components::{BoardConfig, CellType, ColumnHint, HintDirection, HintType};
-use std::fs;
+use crate::components::{
+    BoardConfig, CellType, ColumnHint, HintDirection, HintType, TextSectionConfig,
+};
+use std::{fs, str::Lines};
 
 const DONT_MESS: &str = "Please don't mess with my files";
 const EXPECTED_NO: &str = "Expected a number";
@@ -55,8 +57,24 @@ pub fn board_from_file(filename: &str) -> BoardConfig {
         height,
         cells,
         hints,
-        text: lines.next().map_or_else(|| None, |t| Some(t.to_string())),
+        text: parse_level_text(&mut lines, line_no),
     }
+}
+
+fn parse_level_text(
+    lines: &mut Lines,
+    line_no: usize,
+) -> Option<(i32, i32, Vec<TextSectionConfig>)> {
+    let line = lines.next();
+    if line.is_none() {
+        return None;
+    }
+    let (x, y) = parse_tuple(line.unwrap(), line_no);
+    let line = lines
+        .next()
+        .unwrap_or_else(|| panic!("{} in line {}", DONT_MESS, line_no));
+
+    Some((x as i32, y as i32, Vec::new()))
 }
 
 /// Function to parse a numeric tuple in a file

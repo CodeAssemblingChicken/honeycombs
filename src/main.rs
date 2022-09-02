@@ -2,10 +2,10 @@ mod board_functions;
 mod components;
 mod constants;
 mod editor;
-mod end_screen;
 mod functions;
 mod level;
 mod main_menu;
+mod overlay;
 mod parser;
 mod resources;
 mod states;
@@ -13,9 +13,10 @@ mod states;
 use bevy::{
     app::App,
     hierarchy::DespawnRecursiveExt,
+    input::Input,
     prelude::{
-        default, Camera, Camera2dBundle, ClearColor, Color, Commands, Entity, Msaa, Query, Res,
-        ResMut, State, SystemSet, Without,
+        default, Camera, Camera2dBundle, ClearColor, Color, Commands, Entity, KeyCode, Msaa, Query,
+        Res, ResMut, State, SystemSet, Without,
     },
     window::{WindowDescriptor, WindowResizeConstraints},
     DefaultPlugins,
@@ -32,7 +33,7 @@ use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
 use components::Cell;
 use interactable::{InteractableCamera, InteractablePlugin};
 use native_dialog::MessageDialog;
-use resources::{CellColors, CellMeshes, LevelFile, SfxHover, TextSettings};
+use resources::{CellColors, CellMeshes, LevelFile, Locale, SfxHover, TextSettings};
 use states::AppState;
 
 fn main() {
@@ -58,13 +59,14 @@ fn main() {
         // .add_plugin(LogDiagnosticsPlugin::default())
         // .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_startup_system(setup)
+        .add_system(set_lang)
         .add_state(AppState::Loading)
         .add_system_set(SystemSet::on_update(AppState::Loading).with_system(show_menu_after_load));
 
     level::prepare_level(&mut app);
     editor::prepare_editor(&mut app);
     main_menu::prepare_main_menu(&mut app);
-    end_screen::prepare_end_screen(&mut app);
+    overlay::prepare_overlay(&mut app);
 
     #[cfg(feature = "debug")]
     app.add_plugin(WorldInspectorPlugin::new())
@@ -74,6 +76,7 @@ fn main() {
         .init_resource::<CellColors>()
         .init_resource::<SfxHover>()
         .init_resource::<TextSettings>()
+        .insert_resource(Locale::new("en"))
         .run();
 }
 
@@ -81,6 +84,17 @@ fn setup(mut commands: Commands) {
     commands
         .spawn_bundle(Camera2dBundle::default())
         .insert(InteractableCamera);
+}
+
+fn set_lang(mut locale: ResMut<Locale>, keys: Res<Input<KeyCode>>) {
+    if keys.just_pressed(KeyCode::L) {
+        let s = locale.lang.clone();
+        locale.set_lang(match s.as_str() {
+            "en" => "de",
+            _ => "en",
+        });
+        println!("{:?}", locale.get("nutella").unwrap());
+    }
 }
 
 fn show_menu_after_load(mut app_state: ResMut<State<AppState>>, level_file: Res<LevelFile>) {

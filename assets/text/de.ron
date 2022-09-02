@@ -1,0 +1,10 @@
+{
+    "nutella": [
+        (text: "Der", color: Some(GameColor::YELLOW_DARK), interactable: false),
+        (text: ", ", color: None, interactable: false),
+        (text: "die", color: Some(GameColor::YELLOW_DARK), interactable: false),
+        (text: " oder ", color: None, interactable: false),
+        (text: "das", color: Some(GameColor::YELLOW_DARK), interactable: false),
+        (text: " Nutella", color: None, interactable: false),
+    ]
+}
