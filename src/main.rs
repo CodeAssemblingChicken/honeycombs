@@ -34,7 +34,7 @@ use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
 use components::Cell;
 use interactable::{InteractableCamera, InteractablePlugin};
 use native_dialog::MessageDialog;
-use resources::{CellMeshes, GameColors, LoadState, Locale, Profile, SfxHover, TextSettings};
+use resources::{CellMeshes, GameColors, LoadState, Locale, Profile, SfxAssets, TextSettings};
 use states::AppState;
 
 fn main() {
@@ -63,7 +63,7 @@ fn main() {
         .add_system(set_lang_system)
         .add_system(save_profile_system)
         .add_state(AppState::Loading)
-        .add_system_set(SystemSet::on_update(AppState::Loading).with_system(show_menu_after_load));
+        .add_system_set(SystemSet::on_update(AppState::Loading).with_system(load_complete));
 
     home::prepare_home(&mut app);
     level_selection::prepare_level_selection(&mut app);
@@ -77,7 +77,7 @@ fn main() {
 
     app.init_resource::<CellMeshes>()
         .init_resource::<GameColors>()
-        .init_resource::<SfxHover>()
+        .init_resource::<SfxAssets>()
         .init_resource::<TextSettings>()
         .insert_resource(Locale::new("en"))
         .insert_resource(Profile::new())
@@ -113,9 +113,9 @@ fn save_profile_system(profile: Res<Profile>) {
     }
 }
 
-fn show_menu_after_load(mut app_state: ResMut<State<AppState>>, level_file: Res<LoadState>) {
+fn load_complete(mut app_state: ResMut<State<AppState>>, load_state: Res<LoadState>) {
     app_state
-        .set(level_file.next_state.unwrap_or_default())
+        .set(load_state.next_state.unwrap_or_default())
         .unwrap();
 }
 
@@ -133,7 +133,7 @@ fn set_panic_hook() {
             .set_type(native_dialog::MessageType::Error)
             .set_title("Error")
             .set_text(&format!(
-                "An error occurred, please report it to the developer:\n{}",
+                "Sorry, an error occurred. Please report it to the developer:\n{}",
                 String::from_utf8(w).unwrap()
             ))
             .show_alert()

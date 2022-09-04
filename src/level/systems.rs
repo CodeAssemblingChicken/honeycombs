@@ -1,20 +1,21 @@
 use super::{
     board::Board,
-    components::{EmptyCell, GameCell, NumberCell},
+    components::{EmptyCell, GameCell, MistakesText, NumberCell, RemainingText},
 };
 use crate::{
     components::Cell,
     functions::{rescale_board, switch_state},
-    resources::{GameColors, LoadState, Profile, SfxHover},
+    resources::{GameColors, LoadState, Profile, SfxAssets, TextSettings},
     states::AppState,
 };
 use bevy::{
     audio::{Audio, PlaybackSettings},
     input::Input,
     prelude::{
-        Camera, ColorMaterial, Commands, EventReader, Handle, KeyCode, Query, Res, ResMut, State,
-        Transform, With, Without,
+        Camera, ColorMaterial, Commands, EventReader, Handle, KeyCode, ParamSet, Query, Res,
+        ResMut, State, Transform, With, Without,
     },
+    text::Text,
     window::WindowResized,
 };
 use interactable::{
@@ -40,7 +41,7 @@ pub fn mouse_click_cell(
         .filter(|ev| ev.click_type == ClickType::Released)
     {
         if let Ok((lc, cell, _nc)) = number_cell_query.get(ev.entity) {
-            lc.uncover_fail(cell, &mut commands);
+            lc.uncover_fail(cell, &mut commands, &mut board);
         }
         if let Ok((mut lc, mut cell)) = empty_cell_query.get_mut(ev.entity) {
             lc.uncover(
@@ -68,7 +69,7 @@ pub fn mouse_click_cell(
             );
         }
         if let Ok((lc, cell)) = empty_cell_query.get(ev.entity) {
-            lc.uncover_fail(cell, &mut commands);
+            lc.uncover_fail(cell, &mut commands, &mut board);
         }
     }
 }
@@ -80,12 +81,12 @@ pub fn mouse_enter_cell(
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     game_colors: Res<GameColors>,
     mut ev_mouse_enter: EventReader<MouseEnterEvent>,
-    (audio, clip, profile): (Res<Audio>, Res<SfxHover>, Res<Profile>),
+    (audio, sfx_assets, profile): (Res<Audio>, Res<SfxAssets>, Res<Profile>),
 ) {
     for ev in ev_mouse_enter.iter() {
         if let Ok((lc, mut cell)) = cell_query.get_mut(ev.0) {
             audio.play_with_settings(
-                clip.0.clone(),
+                sfx_assets.sfx_hover.clone(),
                 PlaybackSettings::ONCE.with_volume(profile.sfx_volume),
             );
             lc.hover(&mut cell, &mut commands, &mut color_query, &game_colors);
@@ -139,11 +140,12 @@ pub fn window_resize_system(
 }
 
 pub fn hotkey_system(
-    keys: Res<Input<KeyCode>>,
     mut app_state: ResMut<State<AppState>>,
     mut load_state: ResMut<LoadState>,
+    mut keys: ResMut<Input<KeyCode>>,
 ) {
     if keys.just_pressed(KeyCode::Escape) {
+        keys.clear_just_pressed(KeyCode::Escape);
         switch_state(
             Some(AppState::LevelSelection),
             &mut app_state,
@@ -153,15 +155,40 @@ pub fn hotkey_system(
 }
 
 pub fn check_solved(
+    mut text_set: ParamSet<(
+        Query<&mut Text, With<RemainingText>>,
+        Query<&mut Text, With<MistakesText>>,
+    )>,
     board: Res<Board>,
+    text_settings: Res<TextSettings>,
     mut app_state: ResMut<State<AppState>>,
     mut load_state: ResMut<LoadState>,
+    mut profile: ResMut<Profile>,
 ) {
-    if board.is_changed() && board.remaining == 0 {
-        switch_state(
-            Some(AppState::LevelSelection),
-            &mut app_state,
-            &mut load_state,
-        );
+    if board.is_changed() {
+        if let Ok(mut text) = text_set.p0().get_single_mut() {
+            *text = Text::from_section(
+                format!("{}: {}", "Remaining", board.get_empty_remaining()),
+                text_settings.style_cell.clone(),
+            );
+        }
+        if let Ok(mut text) = text_set.p1().get_single_mut() {
+            *text = Text::from_section(
+                format!("{}: {}", "Mistakes", board.get_mistakes()),
+                text_settings.style_cell.clone(),
+            );
+        }
+        if board.is_solved() {
+            profile.update_point(
+                board.get_points(),
+                board.get_stage_id(),
+                board.get_level_id(),
+            );
+            switch_state(
+                Some(AppState::LevelSelection),
+                &mut app_state,
+                &mut load_state,
+            );
+        }
     }
 }

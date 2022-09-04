@@ -7,7 +7,10 @@ use crate::{
     functions::calc_dimensions,
     resources::{CellMeshes, GameColors, TextSettings},
 };
-use bevy::prelude::{Commands, Visibility};
+use bevy::{
+    prelude::{Commands, Visibility},
+    reflect::List,
+};
 
 pub struct Board {
     pub cells: Vec<Vec<(Option<CellType>, bool)>>,
@@ -115,12 +118,14 @@ impl Board {
             if cells.len() < 2 || !row_empty(&cells[0]) {
                 break;
             }
+            // Remove from top
             cells.remove(0);
         }
         loop {
             if cells.len() < 2 || !row_empty(&cells[cells.len() - 1]) {
                 break;
             }
+            // Remove from bottom
             cells.remove(cells.len() - 1);
         }
         // Check columns
@@ -131,6 +136,7 @@ impl Board {
             {
                 break;
             }
+            // Remove from left
             for row in &mut cells {
                 *row = row.clone().into_iter().skip(2).collect();
             }
@@ -141,8 +147,43 @@ impl Board {
             {
                 break;
             }
+            // Remove from right
             for row in &mut cells {
                 *row = row.clone().into_iter().take(row.len() - 1).collect();
+            }
+        }
+        // Perform left shift if necessary
+        if row_empty(&(&cells).iter().map(|row| row[0]).collect()) {
+            // Remove from left
+            for row in &mut cells {
+                *row = row.clone().into_iter().skip(1).collect();
+            }
+            if row_empty(&(&cells[0]).iter().step_by(2).map(|e| *e).collect()) {
+                // Pull up every 2n
+                println!("Shiftable 1");
+                let h = cells.len() - 1;
+                for x in (0..cells[0].len()).step_by(2) {
+                    for y in 0..h {
+                        cells[y][x] = cells[y + 1][x];
+                    }
+                    cells[h][x] = (None, false);
+                }
+            } else {
+                // Insert new empty row, needed in some cases
+                cells.push(vec![(None, false); cells[0].len()]);
+                // Push down every 2n+1
+                let h = cells.len() - 1;
+                for x in (1..cells[0].len()).step_by(2) {
+                    for y in (1..=h).rev() {
+                        cells[y][x] = cells[y - 1][x];
+                    }
+                    cells[0][x] = (None, false);
+                }
+            }
+
+            // Remove from bottom if necessary
+            if cells.len() > 1 && row_empty(&cells[cells.len() - 1]) {
+                cells.remove(cells.len() - 1);
             }
         }
         cells

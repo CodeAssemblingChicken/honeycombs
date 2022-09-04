@@ -29,8 +29,13 @@ pub fn get_neighbours(
         ]
     };
     pos.iter()
-        .filter(|(x, y)| !(*x < 0 || *x >= w as i32 || *y < 0 || *y >= h as i32))
-        .map(|(x, y)| (cells[*y as usize][*x as usize]))
+        .map(|(x, y)| {
+            if *x < 0 || *x >= w as i32 || *y < 0 || *y >= h as i32 {
+                (None, false)
+            } else {
+                cells[*y as usize][*x as usize]
+            }
+        })
         .collect()
 }
 

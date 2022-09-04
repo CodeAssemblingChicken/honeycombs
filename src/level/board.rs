@@ -1,3 +1,5 @@
+use std::ops::Sub;
+
 use crate::{
     board_functions::{count_empty_cells, empty_connected, get_neighbours},
     components::{BoardConfig, Cell, CellType, HintType, TextSectionConfig},
@@ -16,6 +18,8 @@ use bevy::{
     text::{Text, Text2dBundle},
 };
 
+use super::components::{MistakesText, RemainingText};
+
 // TODO: Actually use this
 /// Board component storing common variables
 pub struct Board {
@@ -23,7 +27,11 @@ pub struct Board {
     pub texts: Vec<Entity>,
     pub width: usize,
     pub height: usize,
-    pub remaining: usize,
+    remaining: (u16, u16),
+    hidden: u16,
+    mistakes: u16,
+    stage_id: u8,
+    level_id: u8,
 }
 
 impl Board {
@@ -35,6 +43,7 @@ impl Board {
         text_settings: &TextSettings,
         cell_meshes: &CellMeshes,
         game_colors: &GameColors,
+        (stage_id, level_id): (u8, u8),
     ) -> Self {
         let cells = &config.cells;
         let hints = &config.hints;
@@ -47,6 +56,7 @@ impl Board {
         let (w, h) = calc_dimensions(width, height);
 
         let mut empty_remaining = 0;
+        let mut number_remaining = 0;
 
         for y in 0..height {
             for x in 0..width {
@@ -96,6 +106,9 @@ impl Board {
 
                 match cell_type {
                     CellType::NumberCell(mut ht) => {
+                        if hidden {
+                            number_remaining += 1;
+                        }
                         let neighbours = get_neighbours(x as i32, y as i32, cells, width, height);
                         let count = count_empty_cells(&neighbours);
                         if ht == HintType::Some {
@@ -194,12 +207,84 @@ impl Board {
         });
         // }
 
+        commands
+            .spawn_bundle(Text2dBundle {
+                text: Text::from_section(
+                    format!("{}: {}", "Remaining", empty_remaining),
+                    text_settings.style_cell.clone(),
+                )
+                .with_alignment(text_settings.alignment),
+                transform: Transform::from_translation(Vec3::new(w + 3. * RADIUS, h, Z_INDEX_TEXT)),
+                ..default()
+            })
+            .insert(RemainingText);
+        commands
+            .spawn_bundle(Text2dBundle {
+                text: Text::from_section(
+                    format!("{}: {}", "Mistakes", empty_remaining),
+                    text_settings.style_cell.clone(),
+                )
+                .with_alignment(text_settings.alignment),
+                transform: Transform::from_translation(Vec3::new(
+                    w + 3. * RADIUS,
+                    h - RADIUS,
+                    Z_INDEX_TEXT,
+                )),
+                ..default()
+            })
+            .insert(MistakesText);
+
         Self {
             cells: cell_entities,
             texts: text_entities,
             width,
             height,
-            remaining: empty_remaining,
+            remaining: (empty_remaining, number_remaining),
+            hidden: empty_remaining + number_remaining,
+            mistakes: 0,
+            stage_id,
+            level_id,
         }
+    }
+    pub fn uncover_empty(&mut self) {
+        if self.remaining.0 > u16::MIN {
+            self.remaining.0 -= 1;
+        }
+    }
+    pub fn uncover_number(&mut self) {
+        if self.remaining.1 > u16::MIN {
+            self.remaining.1 -= 1;
+        }
+    }
+    pub fn make_mistake(&mut self) {
+        if self.mistakes < u16::MAX {
+            self.mistakes += 1;
+        }
+    }
+    pub fn is_solved(&self) -> bool {
+        self.remaining.0 == 0 && self.remaining.1 == 0
+    }
+    pub fn get_points(&self) -> u16 {
+        ((self.hidden as f32).sqrt() as u16)
+            .max(1)
+            .saturating_sub(self.mistakes)
+    }
+    pub fn get_empty_remaining(&self) -> u16 {
+        self.remaining.0
+    }
+    pub fn get_number_remaining(&self) -> u16 {
+        self.remaining.1
+    }
+    pub fn get_hidden(&self) -> u16 {
+        self.hidden
+    }
+    pub fn get_mistakes(&self) -> u16 {
+        self.mistakes
+    }
+    pub fn get_stage_id(&self) -> u8 {
+        self.stage_id
+    }
+    pub fn get_level_id(&self) -> u8 {
+        self.level_id
     }
 }

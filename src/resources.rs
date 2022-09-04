@@ -21,6 +21,7 @@ use serde::{Deserialize, Serialize};
 pub struct LoadState {
     pub next_state: Option<AppState>,
     pub filename: Option<String>,
+    pub ids: Option<(u8, u8)>,
 }
 
 pub struct CellMeshes {
@@ -89,13 +90,15 @@ impl FromWorld for GameColors {
 }
 
 /// Resource for hover sfx
-pub struct SfxHover(pub Handle<AudioSource>);
+pub struct SfxAssets {
+    pub sfx_hover: Handle<AudioSource>,
+}
 
-impl FromWorld for SfxHover {
+impl FromWorld for SfxAssets {
     fn from_world(world: &mut bevy::prelude::World) -> Self {
         let asset_server = world.get_resource::<AssetServer>().unwrap();
         let sfx_hover: Handle<AudioSource> = asset_server.load("sfx/hover.ogg");
-        Self(sfx_hover)
+        Self { sfx_hover }
     }
 }
 
@@ -183,5 +186,17 @@ impl Profile {
                 .enumerate_arrays(true),
         )
         .expect("Error saving profile");
+    }
+    pub fn update_point(
+        &mut self,
+        points: u16,
+        stage_id: impl Into<usize> + std::marker::Copy,
+        level_id: impl Into<usize> + std::marker::Copy,
+    ) {
+        let current = self.level_points[stage_id.into()][level_id.into()].unwrap_or_default();
+        if points > current {
+            self.level_points[stage_id.into()][level_id.into()] = Some(points);
+            self.save();
+        }
     }
 }

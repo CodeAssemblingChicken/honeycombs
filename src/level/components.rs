@@ -76,6 +76,7 @@ impl GameCell {
         }
         let (dark, light) = match self.cell_type {
             CellType::NumberCell(_) => {
+                board.uncover_number();
                 commands
                     .entity(number_cell.unwrap().label)
                     .remove::<Visibility>()
@@ -86,7 +87,7 @@ impl GameCell {
                 )
             }
             CellType::EmptyCell => {
-                board.remaining -= 1;
+                board.uncover_empty();
                 (
                     game_colors.blue_medium.clone(),
                     game_colors.blue_light.clone(),
@@ -102,7 +103,7 @@ impl GameCell {
     }
 
     /// Called when cell is hidden and clicked on with the wrong mouse button
-    pub fn uncover_fail(&self, cell: &Cell, commands: &mut Commands) {
+    pub fn uncover_fail(&self, cell: &Cell, commands: &mut Commands, board: &mut Board) {
         let mut t1 = cell.orig;
         let mut t2 = cell.orig;
         t1.translation += Vec3::new(-RADIUS / 10., -RADIUS / 20., 0.0);
@@ -131,6 +132,7 @@ impl GameCell {
                     },
                 ),
         );
+        board.make_mistake();
     }
 }
 
@@ -144,3 +146,9 @@ pub struct NumberCell {
 /// Component for the EmptyCell type
 #[derive(Debug, Component)]
 pub struct EmptyCell;
+
+#[derive(Debug, Component)]
+pub struct RemainingText;
+
+#[derive(Debug, Component)]
+pub struct MistakesText;

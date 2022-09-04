@@ -41,7 +41,7 @@ pub fn spawn_cluster(
             profile,
             text_settings,
             big_transform,
-            (id as u8 + 1, stage_cluster.stage_no, unlocked),
+            (id as u8, stage_cluster.stage_no, unlocked),
         );
     }
     let (tx, ty) = calc_translation(0, 0, 0., 0.);
@@ -79,7 +79,7 @@ fn spawn_level_selection_cell(
             },
             RADIUS,
         );
-        if profile.level_points[stage_id as usize - 1][level_id as usize - 1].is_some() {
+        if profile.level_points[stage_id as usize][level_id as usize].is_some() {
             (
                 game_colors.white.clone(),
                 game_colors.blue_medium.clone(),
@@ -114,7 +114,7 @@ fn spawn_level_selection_cell(
 
     let text_entity = spawn_cell_text(
         commands,
-        &format!("{}–{}", stage_id, level_id),
+        &format!("{}–{}", stage_id + 1, level_id + 1),
         text_settings.style_cell.clone(),
         text_settings.alignment,
     );

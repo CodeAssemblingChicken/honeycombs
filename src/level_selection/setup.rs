@@ -22,7 +22,7 @@ pub fn setup(
         .into_iter()
         .enumerate()
     {
-        let sc = StageCluster::new(id as u8 + 1, UNLOCK_POINTS[id], 6);
+        let sc = StageCluster::new(id as u8, UNLOCK_POINTS[id], 6);
         spawn_cluster(
             &mut commands,
             &cell_meshes,

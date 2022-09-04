@@ -189,7 +189,7 @@ pub fn mouse_enter_cell(
     game_colors: Res<GameColors>,
     mut ev_mouse_enter: EventReader<MouseEnterEvent>,
     // audio: Res<Audio>,
-    // clip: Res<SfxHover>,
+    // sfx_assets: Res<SfxAssets>,
 ) {
     for ev in ev_mouse_enter.iter() {
         if let Ok((ec, mut cell)) = cell_query.get_mut(ev.0) {

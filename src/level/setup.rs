@@ -15,14 +15,14 @@ pub fn setup(
     cell_meshes: Res<CellMeshes>,
     game_colors: Res<GameColors>,
     text_settings: Res<TextSettings>,
-    mut level_file: ResMut<LoadState>,
+    mut load_state: ResMut<LoadState>,
     mut camera_query: Query<&mut Transform, With<Camera>>,
 ) {
-    if level_file.filename.is_none() {
+    if load_state.filename.is_none() {
         panic!("No level specified.");
     }
-    let config = parser::board_from_file(level_file.filename.as_ref().unwrap());
-    level_file.filename = None;
+    let config = parser::board_from_file(load_state.filename.as_ref().unwrap());
+    load_state.filename = None;
 
     let board = Board::new(
         &mut commands,
@@ -30,6 +30,7 @@ pub fn setup(
         &text_settings,
         &cell_meshes,
         &game_colors,
+        load_state.ids.unwrap(),
     );
 
     for wnd in wnds.iter() {

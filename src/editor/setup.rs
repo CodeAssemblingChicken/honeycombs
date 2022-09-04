@@ -18,12 +18,12 @@ pub fn setup(
         Res<GameColors>,
         Res<TextSettings>,
     ),
-    mut level_file: ResMut<LoadState>,
+    mut load_state: ResMut<LoadState>,
     mut camera_query: Query<&mut Transform, With<Camera>>,
     mut ev_cell_update: EventWriter<CellUpdateEvent>,
 ) {
-    let config = if let Some(filename) = level_file.filename.clone() {
-        level_file.filename = None;
+    let config = if let Some(filename) = load_state.filename.clone() {
+        load_state.filename = None;
         parser::board_from_file(&filename)
     } else {
         // TODO: Think about these hardcoded values

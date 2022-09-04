@@ -2,7 +2,7 @@ use super::components::LevelSelectionCell;
 use crate::{
     components::Cell,
     functions::{rescale_board, switch_state},
-    resources::{GameColors, LoadState, Profile, SfxHover},
+    resources::{GameColors, LoadState, Profile, SfxAssets},
     states::AppState,
 };
 use bevy::{
@@ -24,7 +24,7 @@ pub fn mouse_click_cell(
     mut level_cell_query: Query<(&LevelSelectionCell, &mut Cell)>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     game_colors: Res<GameColors>,
-    (mut app_state, mut level_file): (ResMut<State<AppState>>, ResMut<LoadState>),
+    (mut app_state, mut load_state): (ResMut<State<AppState>>, ResMut<LoadState>),
     mut ev_mouse_left_click: EventReader<MouseLeftClickEvent>,
 ) {
     for ev in ev_mouse_left_click
@@ -38,7 +38,7 @@ pub fn mouse_click_cell(
                 &mut color_query,
                 &game_colors,
                 &mut app_state,
-                &mut level_file,
+                &mut load_state,
             );
         }
     }
@@ -52,12 +52,12 @@ pub fn mouse_enter_cell(
     (game_colors, profile): (Res<GameColors>, Res<Profile>),
     mut ev_mouse_enter: EventReader<MouseEnterEvent>,
     audio: Res<Audio>,
-    clip: Res<SfxHover>,
+    sfx_assets: Res<SfxAssets>,
 ) {
     for ev in ev_mouse_enter.iter() {
         if let Ok((lsc, mut cell)) = level_cell_query.get_mut(ev.0) {
             audio.play_with_settings(
-                clip.0.clone(),
+                sfx_assets.sfx_hover.clone(),
                 PlaybackSettings::ONCE.with_volume(profile.sfx_volume),
             );
             lsc.hover(

@@ -23,18 +23,17 @@ impl LevelSelectionCell {
         game_colors: &GameColors,
         profile: &Profile,
     ) {
-        let (c1, c2) =
-            if profile.level_points[self.stage as usize - 1][self.level as usize - 1].is_some() {
-                (
-                    game_colors.blue_medium.clone(),
-                    game_colors.blue_dark.clone(),
-                )
-            } else {
-                (
-                    game_colors.yellow_medium.clone(),
-                    game_colors.yellow_dark.clone(),
-                )
-            };
+        let (c1, c2) = if profile.level_points[self.stage as usize][self.level as usize].is_some() {
+            (
+                game_colors.blue_medium.clone(),
+                game_colors.blue_dark.clone(),
+            )
+        } else {
+            (
+                game_colors.yellow_medium.clone(),
+                game_colors.yellow_dark.clone(),
+            )
+        };
         cell.hover(commands, None, c1, c2, color_query);
     }
 
@@ -46,18 +45,17 @@ impl LevelSelectionCell {
         game_colors: &GameColors,
         profile: &Profile,
     ) {
-        let (c1, c2) =
-            if profile.level_points[self.stage as usize - 1][self.level as usize - 1].is_some() {
-                (
-                    game_colors.blue_light.clone(),
-                    game_colors.blue_medium.clone(),
-                )
-            } else {
-                (
-                    game_colors.yellow_light.clone(),
-                    game_colors.yellow_medium.clone(),
-                )
-            };
+        let (c1, c2) = if profile.level_points[self.stage as usize][self.level as usize].is_some() {
+            (
+                game_colors.blue_light.clone(),
+                game_colors.blue_medium.clone(),
+            )
+        } else {
+            (
+                game_colors.yellow_light.clone(),
+                game_colors.yellow_medium.clone(),
+            )
+        };
         cell.unhover(commands, None, c1, c2, color_query);
     }
 
@@ -68,7 +66,7 @@ impl LevelSelectionCell {
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
         game_colors: &GameColors,
         app_state: &mut ResMut<State<AppState>>,
-        level_file: &mut ResMut<LoadState>,
+        load_state: &mut ResMut<LoadState>,
     ) {
         if cell.hovering {
             cell.hovering = false;
@@ -80,7 +78,12 @@ impl LevelSelectionCell {
             game_colors.blue_medium.clone(),
             color_query,
         );
-        level_file.filename = Some(format!("assets/levels/{}/{}.lvl", self.stage, self.level));
+        load_state.filename = Some(format!(
+            "assets/levels/{}/{}.lvl",
+            self.stage + 1,
+            self.level + 1
+        ));
+        load_state.ids = Some((self.stage, self.level));
         app_state.set(AppState::Level).unwrap();
     }
 }
