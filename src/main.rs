@@ -14,15 +14,15 @@ mod states;
 use bevy::{
     app::App,
     hierarchy::DespawnRecursiveExt,
-    input::Input,
     prelude::{
-        default, Camera, Camera2dBundle, ClearColor, Color, Commands, Entity, KeyCode, Msaa, Query,
-        Res, ResMut, State, SystemSet, Without,
+        default, Camera, Camera2dBundle, ClearColor, Color, Commands, Entity, Msaa, Query, Res,
+        ResMut, State, SystemSet, Without,
     },
     window::{WindowDescriptor, WindowResizeConstraints},
     DefaultPlugins,
 };
 use bevy_easings::EasingsPlugin;
+use overlay::resources::OverlaySettings;
 use std::{
     io::{self, Write},
     panic,
@@ -34,9 +34,7 @@ use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
 use components::Cell;
 use interactable::{InteractableCamera, InteractablePlugin};
 use native_dialog::MessageDialog;
-use resources::{
-    CellMeshes, GameColors, LoadState, Locale, Profile, SfxAssets, TextSettings, Viewport,
-};
+use resources::{CellMeshes, GameColors, LoadState, Locale, Profile, SfxAssets, TextSettings};
 use states::AppState;
 
 fn main() {
@@ -56,14 +54,13 @@ fn main() {
         })
         .insert_resource(ClearColor(Color::rgb(0.15, 0.15, 0.15)))
         .insert_resource(LoadState::default())
-        .insert_resource(Viewport::default())
+        .insert_resource(OverlaySettings::default())
         .add_plugins(DefaultPlugins)
         .add_plugin(InteractablePlugin)
         .add_plugin(EasingsPlugin)
         // .add_plugin(LogDiagnosticsPlugin::default())
         // .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_startup_system(setup)
-        .add_system(set_lang_system)
         .add_system(save_profile_system)
         .add_state(AppState::Loading)
         .add_system_set(SystemSet::on_update(AppState::Loading).with_system(load_complete));
@@ -78,12 +75,14 @@ fn main() {
     app.add_plugin(WorldInspectorPlugin::new())
         .register_inspectable::<Cell>();
 
+    let profile = Profile::new();
+
     app.init_resource::<CellMeshes>()
         .init_resource::<GameColors>()
         .init_resource::<SfxAssets>()
         .init_resource::<TextSettings>()
-        .insert_resource(Locale::new("en"))
-        .insert_resource(Profile::new())
+        .insert_resource(Locale::new(&profile.lang))
+        .insert_resource(profile)
         .run();
 }
 
@@ -91,23 +90,6 @@ fn setup(mut commands: Commands) {
     commands
         .spawn_bundle(Camera2dBundle::default())
         .insert(InteractableCamera);
-}
-
-fn set_lang_system(
-    mut locale: ResMut<Locale>,
-    mut profile: ResMut<Profile>,
-    keys: Res<Input<KeyCode>>,
-) {
-    if keys.just_pressed(KeyCode::L) {
-        let s = profile.lang.clone();
-        locale.set_lang(
-            match s.as_str() {
-                "en" => "de",
-                _ => "en",
-            },
-            &mut profile,
-        );
-    }
 }
 
 fn save_profile_system(profile: Res<Profile>) {

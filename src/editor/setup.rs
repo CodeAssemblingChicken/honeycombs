@@ -37,7 +37,6 @@ pub fn setup(
 
     let mut root_transform = Transform::identity();
     for wnd in wnds.iter() {
-        // TODO: Remove hard-coded width/height
         rescale_board(
             config.width,
             config.height,

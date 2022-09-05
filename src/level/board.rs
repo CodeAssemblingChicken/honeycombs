@@ -8,7 +8,7 @@ use crate::{
         spawn_hint,
     },
     level::components::{EmptyCell, GameCell, NumberCell},
-    resources::{CellMeshes, GameColors, TextSettings, Viewport},
+    resources::{CellMeshes, GameColors, TextSettings},
 };
 use bevy::{
     hierarchy::BuildChildren,
@@ -16,7 +16,6 @@ use bevy::{
     text::{Text, Text2dBundle},
 };
 
-// TODO: Actually use this
 /// Board component storing common variables
 pub struct Board {
     pub cells: Vec<Entity>,
@@ -38,7 +37,6 @@ impl Board {
         root_transform: Transform,
         config: &BoardConfig,
         (cell_meshes, game_colors, text_settings): (&CellMeshes, &GameColors, &TextSettings),
-        viewport: &mut Viewport,
         (stage_id, level_id): (u8, u8),
     ) -> Self {
         let cells = &config.cells;
@@ -50,8 +48,6 @@ impl Board {
         let mut text_entities = Vec::new();
 
         let (w, h) = calc_dimensions(width, height);
-        viewport.width = w;
-        viewport.height = h;
 
         let mut empty_remaining = 0;
         let mut number_remaining = 0;
@@ -167,7 +163,6 @@ impl Board {
                     orig: big_transform,
                     hovering: false,
                 };
-                // TODO: Rethink Cell type
                 commands
                     .entity(cell)
                     .insert(cell_component)
@@ -269,10 +264,11 @@ impl Board {
     pub fn is_solved(&self) -> bool {
         self.remaining.0 == 0 && self.remaining.1 == 0
     }
+    pub fn get_max_points(&self) -> u16 {
+        ((self.hidden as f32).powf(0.6) as u16).max(1)
+    }
     pub fn get_points(&self) -> u16 {
-        ((self.hidden as f32).sqrt() as u16)
-            .max(1)
-            .saturating_sub(self.mistakes)
+        self.get_max_points().saturating_sub(self.mistakes)
     }
     pub fn get_empty_remaining(&self) -> u16 {
         self.remaining.0

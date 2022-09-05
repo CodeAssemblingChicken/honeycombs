@@ -38,14 +38,6 @@ pub fn prepare_editor(app: &mut App) {
                         .before(mouse_click_empty_cell)
                         .before(mouse_click_number_cell),
                 )
-                // .with_system(mouse_over_cell)
-                // .with_system(mouse_enter_cell.before(mouse_over_cell))
-                // .with_system(mouse_exit_cell.before(mouse_enter_cell))
-                // .with_system(
-                //     mouse_click_cell
-                //         .after(mouse_enter_cell)
-                //         .after(mouse_exit_cell),
-                // )
                 .with_system(hotkey_system)
                 .with_system(window_resize_system),
         )

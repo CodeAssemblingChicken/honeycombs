@@ -1,12 +1,12 @@
 (
-    lang: "en",
-    sfx_volume: 0.05,
+    lang: "de",
+    sfx_volume: 0.5,
     level_points: (
-        (Some(4), Some(4), Some(3), Some(4), Some(7), Some(9)),
-        (Some(4), Some(7), Some(7), Some(8), Some(9), Some(6)),
-        (Some(4), Some(6), Some(3), Some(6), Some(7), Some(1000)),
-        (Some(4), Some(8), Some(4), Some(7), Some(8), Some(10)),
-        (Some(8), None, None, None, None, Some(9)),
-        (None, None, None, None, None, Some(8)),
+        (Some(1000), None, None, None, None, None),
+        (None, None, None, None, None, None),
+        (None, None, None, None, None, None),
+        (None, None, None, None, None, None),
+        (None, Some(16), None, None, None, None),
+        (None, None, None, None, None, None),
     ),
 )

@@ -3,7 +3,7 @@ use bevy::{
     prelude::{Color, Transform},
 };
 
-pub const UNLOCK_POINTS: [u16; 6] = [0, 20, 50, 90, 140, 200];
+pub const UNLOCK_POINTS: [u16; 6] = [0, 40, 90, 140, 190, 250];
 
 /// Hex radius (i.e. circumcircle)
 pub const RADIUS: f32 = 100.0;

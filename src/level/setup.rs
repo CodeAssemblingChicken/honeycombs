@@ -2,7 +2,7 @@ use super::board::Board;
 use crate::{
     functions::rescale_board,
     parser,
-    resources::{CellMeshes, GameColors, LoadState, TextSettings, Viewport},
+    resources::{CellMeshes, GameColors, LoadState, TextSettings},
 };
 use bevy::{
     prelude::{Commands, Res, ResMut, Transform},
@@ -18,7 +18,6 @@ pub fn setup(
         Res<TextSettings>,
     ),
     mut load_state: ResMut<LoadState>,
-    mut viewport: ResMut<Viewport>,
 ) {
     if load_state.filename.is_none() {
         panic!("No level specified.");
@@ -28,7 +27,6 @@ pub fn setup(
 
     let mut root_transform = Transform::identity();
     for wnd in wnds.iter() {
-        // TODO: Remove hard-coded width/height
         rescale_board(
             config.width,
             config.height,
@@ -43,7 +41,6 @@ pub fn setup(
         root_transform,
         &config,
         (&cell_meshes, &game_colors, &text_settings),
-        &mut viewport,
         load_state.ids.unwrap(),
     );
 

@@ -107,6 +107,7 @@ impl FromWorld for SfxAssets {
 pub struct TextSettings {
     pub style_cell: TextStyle,
     pub style_menu: TextStyle,
+    pub style_menu_dark: TextStyle,
     pub alignment: TextAlignment,
 }
 
@@ -121,13 +122,19 @@ impl FromWorld for TextSettings {
             color: Color::WHITE,
         };
         let style_menu = TextStyle {
-            font,
+            font: font.clone(),
             font_size: (RADIUS).round(),
             color: Color::WHITE,
+        };
+        let style_menu_dark = TextStyle {
+            font: font.clone(),
+            font_size: (RADIUS).round(),
+            color: Color::BLACK,
         };
         Self {
             style_cell,
             style_menu,
+            style_menu_dark,
             alignment: TextAlignment::CENTER,
         }
     }
@@ -135,28 +142,29 @@ impl FromWorld for TextSettings {
 
 #[derive(Deserialize)]
 pub struct Locale {
-    pub strings: HashMap<String, Vec<TextSectionConfig>>,
+    pub strings: HashMap<String, String>,
+    pub text_sections: HashMap<String, Vec<TextSectionConfig>>,
 }
 
 impl Locale {
     pub fn new(lang: &str) -> Self {
-        Self {
-            strings: from_reader(
-                File::open(format!("assets/text/{}.ron", lang)).expect("Failed opening file"),
-            )
-            .unwrap(),
-        }
+        from_reader(File::open(format!("assets/lang/{}.ron", lang)).expect("Failed opening file"))
+            .unwrap()
     }
     pub fn set_lang(&mut self, lang: &str, profile: &mut Profile) {
         profile.lang = lang.into();
-        self.strings = from_reader(
-            File::open(format!("assets/text/{}.ron", lang)).expect("Failed opening file"),
+        let load: Self = from_reader(
+            File::open(format!("assets/lang/{}.ron", lang)).expect("Failed opening file"),
         )
         .unwrap();
+        self.strings = load.strings;
+        self.text_sections = load.text_sections;
     }
-    #[allow(unused)]
-    pub fn get(&self, key: &str) -> Option<&Vec<TextSectionConfig>> {
+    pub fn get_string(&self, key: &str) -> Option<&String> {
         self.strings.get(key)
+    }
+    pub fn get_text_section(&self, key: &str) -> Option<&Vec<TextSectionConfig>> {
+        self.text_sections.get(key)
     }
 }
 
@@ -168,7 +176,7 @@ pub struct Profile {
 }
 impl Profile {
     pub fn new() -> Self {
-        from_reader(File::open("settings.ron").expect("Failed opening file")).unwrap()
+        from_reader(File::open("settings.ron").expect("Failed opening file")).unwrap_or_default()
     }
     pub fn get_points(&self) -> u16 {
         self.level_points
@@ -200,9 +208,12 @@ impl Profile {
         }
     }
 }
-
-#[derive(Debug, Default)]
-pub struct Viewport {
-    pub width: f32,
-    pub height: f32,
+impl Default for Profile {
+    fn default() -> Self {
+        Self {
+            lang: "en".to_string(),
+            sfx_volume: 0.0,
+            level_points: Default::default(),
+        }
+    }
 }

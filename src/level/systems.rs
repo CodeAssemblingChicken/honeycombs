@@ -5,6 +5,7 @@ use super::{
 use crate::{
     components::{Cell, RootComponent},
     functions::{rescale_board, switch_state},
+    overlay::resources::{OverlaySettings, OverlayType},
     resources::{GameColors, LoadState, Profile, SfxAssets, TextSettings},
     states::AppState,
 };
@@ -109,17 +110,6 @@ pub fn mouse_exit_cell(
     }
 }
 
-// TODO: Not used
-/// Could call a function on the currently hovered cell, but doesn't right now
-#[allow(unused_mut, unused_variables)]
-pub fn mouse_over_cell(
-    mut commands: Commands,
-    cell_query: Query<&Transform, With<Cell>>,
-    mut ev_mouse_over: EventReader<MouseOverEvent>,
-) {
-    for ev in ev_mouse_over.iter() {}
-}
-
 /// On resizing the window, the board is resized too
 pub fn window_resize_system(
     mut ev_window_resize: EventReader<WindowResized>,
@@ -133,9 +123,18 @@ pub fn window_resize_system(
     }
 }
 
-pub fn hotkey_system(mut app_state: ResMut<State<AppState>>, mut keys: ResMut<Input<KeyCode>>) {
+pub fn hotkey_system(
+    mut app_state: ResMut<State<AppState>>,
+    mut keys: ResMut<Input<KeyCode>>,
+    mut overlay_settings: ResMut<OverlaySettings>,
+    board: Res<Board>,
+) {
     if keys.just_pressed(KeyCode::Escape) {
         keys.clear_just_pressed(KeyCode::Escape);
+        overlay_settings.stage_id = board.get_stage_id();
+        overlay_settings.level_id = board.get_level_id();
+        overlay_settings.max_points = board.get_max_points();
+        overlay_settings.overlay_type = OverlayType::Pause;
         app_state.push(AppState::Overlay).unwrap();
     }
 }

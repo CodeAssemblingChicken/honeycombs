@@ -91,17 +91,6 @@ pub fn mouse_exit_cell(
     }
 }
 
-// TODO: Not used
-/// Could call a function on the currently hovered cell, but doesn't right now
-#[allow(unused_mut, unused_variables)]
-pub fn mouse_over_cell(
-    mut commands: Commands,
-    mut cell_query: Query<&mut Cell>,
-    mut ev_mouse_over: EventReader<MouseOverEvent>,
-) {
-    for ev in ev_mouse_over.iter() {}
-}
-
 pub fn hotkey_system(
     mut keys: ResMut<Input<KeyCode>>,
     mut app_state: ResMut<State<AppState>>,

@@ -1,0 +1,20 @@
+(
+    strings: {
+        "editor": "Editor",
+        "start": "Start",
+        "options": "Options",
+        "pause": "Pause",
+        "mistakes": "Mistakes",
+        "remaining": "Remaining",
+    },
+    text_sections: {
+        "nutella": [
+            (text: "The", color: Some(Rgba(red: 1., green: 1., blue: 1., alpha: 1.)), interactable: false),
+            (text: ", ", color: None, interactable: false),
+            (text: "the", color: None, interactable: false),
+            (text: " or ", color: None, interactable: false),
+            (text: "the", color: None, interactable: false),
+            (text: " Nutella", color: None, interactable: false),
+        ]
+    }
+)

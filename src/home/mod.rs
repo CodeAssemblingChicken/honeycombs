@@ -16,6 +16,7 @@ pub fn prepare_home(app: &mut App) {
                 .with_system(mouse_enter_cell)
                 .with_system(mouse_exit_cell.before(mouse_enter_cell))
                 .with_system(mouse_click_cell.after(mouse_enter_cell))
+                .with_system(mouse_click_lang)
                 .with_system(window_resize_system),
         )
         .add_system_set(SystemSet::on_exit(STATE).with_system(cleanup));
