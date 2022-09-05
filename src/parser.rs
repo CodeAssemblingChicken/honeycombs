@@ -1,5 +1,6 @@
-use crate::components::{
-    BoardConfig, CellType, ColumnHint, HintDirection, HintType, TextSectionConfig,
+use crate::{
+    components::{BoardConfig, CellType, ColumnHint, HintDirection, HintType, TextSectionConfig},
+    resources::Locale,
 };
 use std::{fs, str::Lines};
 
@@ -8,7 +9,7 @@ const EXPECTED_NO: &str = "Expected a number";
 const TOO_FEW_ARGS: &str = "Expected more arguments";
 
 /// Receives a file and creates a BoardConfig from it
-pub fn board_from_file(filename: &str) -> BoardConfig {
+pub fn board_from_file(filename: &str, locale: &Locale) -> BoardConfig {
     let mut cells = Vec::new();
     let file =
         fs::read_to_string(filename).unwrap_or_else(|_| panic!("File \"{}\" not found!", filename));
@@ -57,13 +58,14 @@ pub fn board_from_file(filename: &str) -> BoardConfig {
         height,
         cells,
         hints,
-        text: parse_level_text(&mut lines, line_no),
+        text: parse_level_text(&mut lines, line_no, locale),
     }
 }
 
 fn parse_level_text(
     lines: &mut Lines,
     line_no: usize,
+    locale: &Locale,
 ) -> Option<(i32, i32, Vec<TextSectionConfig>)> {
     let line = lines.next();
     line?;
@@ -72,7 +74,11 @@ fn parse_level_text(
         .next()
         .unwrap_or_else(|| panic!("{} in line {}", DONT_MESS, line_no));
 
-    Some((x as i32, y as i32, Vec::new()))
+    Some((
+        x as i32,
+        y as i32,
+        locale.get_text_section(line).unwrap().to_vec(),
+    ))
 }
 
 /// Function to parse a numeric tuple in a file

@@ -106,7 +106,7 @@ impl FromWorld for SfxAssets {
 #[derive(Clone)]
 pub struct TextSettings {
     pub style_cell: TextStyle,
-    pub style_menu: TextStyle,
+    pub style_cell_large: TextStyle,
     pub style_menu_dark: TextStyle,
     pub alignment: TextAlignment,
 }
@@ -116,6 +116,7 @@ impl FromWorld for TextSettings {
         let asset_server = world.get_resource::<AssetServer>().unwrap();
 
         let font = asset_server.load("fonts/Harabara-dash.ttf");
+        let font2 = asset_server.load("fonts/Uroob-Regular.ttf");
         let style_cell = TextStyle {
             font: font.clone(),
             font_size: (RADIUS * 0.75).round(),
@@ -123,17 +124,17 @@ impl FromWorld for TextSettings {
         };
         let style_menu = TextStyle {
             font: font.clone(),
-            font_size: (RADIUS).round(),
+            font_size: (RADIUS * 0.9).round(),
             color: Color::WHITE,
         };
         let style_menu_dark = TextStyle {
-            font: font.clone(),
-            font_size: (RADIUS).round(),
+            font: font2.clone(),
+            font_size: (RADIUS * 0.99).round(),
             color: Color::BLACK,
         };
         Self {
             style_cell,
-            style_menu,
+            style_cell_large: style_menu,
             style_menu_dark,
             alignment: TextAlignment::CENTER,
         }

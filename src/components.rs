@@ -190,7 +190,7 @@ pub struct BoardConfig {
     pub text: Option<(i32, i32, Vec<TextSectionConfig>)>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct TextSectionConfig {
     pub text: String,
     pub color: Option<Color>,

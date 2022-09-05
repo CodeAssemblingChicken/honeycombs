@@ -147,7 +147,7 @@ pub fn check_solved(
     board: Res<Board>,
     text_settings: Res<TextSettings>,
     mut app_state: ResMut<State<AppState>>,
-    mut load_state: ResMut<LoadState>,
+    mut overlay_settings: ResMut<OverlaySettings>,
     mut profile: ResMut<Profile>,
 ) {
     if board.is_changed() {
@@ -164,16 +164,24 @@ pub fn check_solved(
             );
         }
         if board.is_solved() {
+            println!("{},{}", board.get_stage_id(), board.get_level_id());
             profile.update_point(
                 board.get_points(),
                 board.get_stage_id(),
                 board.get_level_id(),
             );
-            switch_state(
-                Some(AppState::LevelSelection),
-                &mut app_state,
-                &mut load_state,
-            );
+            // switch_state(
+            //     Some(AppState::LevelSelection),
+            //     &mut app_state,
+            //     &mut load_state,
+            // );
+            overlay_settings.stage_id = board.get_stage_id();
+            overlay_settings.level_id = board.get_level_id();
+            overlay_settings.max_points = board.get_max_points();
+            overlay_settings.points = board.get_points();
+            overlay_settings.mistakes = board.get_mistakes();
+            overlay_settings.overlay_type = OverlayType::LevelComplete;
+            app_state.push(AppState::Overlay).unwrap();
         }
     }
 }

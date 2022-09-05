@@ -39,7 +39,7 @@ pub fn spawn_option_cell(
     let text_entity = spawn_cell_text(
         commands,
         text,
-        text_settings.style_menu.clone(),
+        text_settings.style_cell_large.clone(),
         text_settings.alignment,
     );
     commands.entity(cell).add_child(text_entity);

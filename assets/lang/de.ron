@@ -4,10 +4,34 @@
         "start": "Start",
         "options": "Optionen",
         "pause": "Pause",
+        "complete": "Rätsel gelöst!",
+        "highscore": "Highscore",
         "mistakes": "Fehler",
         "remaining": "Verbleibend",
+        "total": "Gesamt",
+        "retry": "Neustart",
+        "menu": "Menü",
+        "next": "Nächstes\nLevel"
     },
     text_sections: {
+        "esc": [
+            (text: "Ich war zu faul, Zurück-Knöpfe einzubauen. Um in Menüs zurück zu navigieren, drücke ", color: None, interactable: false),
+            (text: "Esc", color: Some(Rgba(red: 0.3, green: 1., blue: 0.5, alpha: 1.)), interactable: false),
+            (text: ".\nProbiere es gerne jetzt aus: Drücke ein mal zum Öffnen und noch mal zum Schließen des Menüs.", color: None, interactable: false),
+        ],
+        "game-name": [
+            (text: "The Name of the Game? ", color: None, interactable: false),
+            (text: "Honeycombs", color: Some(Rgba(red: 0.894, green: 0.627, blue: 0.125, alpha: 1.0)), interactable: false),
+        ],
+        "last-insect": [
+            (text: "Das ist das letzte Insekt. Versprochen.", color: None, interactable: false),
+        ],
+        "not-insect": [
+            (text: "Ich sagte das letzte ", color: None, interactable: false),
+            (text: "Insekt", color: Some(Rgba(red: 0.9, green: 0.4, blue: 0.3, alpha: 1.0)), interactable: false),
+            (text: ".\n", color: None, interactable: false),
+            (text: "Niemand hat was von Spinnen gesagt.", color: Some(Rgba(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.05)), interactable: false),
+        ],
         "nutella": [
             (text: "Der", color: Some(Rgba(red: 1., green: 1., blue: 1., alpha: 1.)), interactable: false),
             (text: ", ", color: None, interactable: false),

@@ -186,20 +186,27 @@ impl Board {
             TextSectionConfig::new("!\nOK", None, false),
         ];
 
-        // if let Some(text) = &config.text {
-        let text1 = commands
-            .spawn_bundle(Text2dBundle {
-                text: Text::from_sections(
-                    texts
-                        .iter()
-                        .map(|tsc| tsc.to_text_section(&text_settings.style_cell)),
-                )
-                .with_alignment(text_settings.alignment),
-                transform: Transform::from_xyz(0., -h - 3. * RADIUS, Z_INDEX_TEXT),
-                ..default()
-            })
-            .id();
-        // }
+        let text1 = if let Some(text) = &config.text {
+            Some(
+                commands
+                    .spawn_bundle(Text2dBundle {
+                        text: Text::from_sections(
+                            // texts
+                            //     .iter()
+                            //     .map(|tsc| tsc.to_text_section(&text_settings.style_cell)),
+                            text.2
+                                .iter()
+                                .map(|tsc| tsc.to_text_section(&text_settings.style_cell)),
+                        )
+                        .with_alignment(text_settings.alignment),
+                        transform: Transform::from_xyz(0., -h - 3. * RADIUS, Z_INDEX_TEXT),
+                        ..default()
+                    })
+                    .id(),
+            )
+        } else {
+            None
+        };
 
         let text2 = commands
             .spawn_bundle(Text2dBundle {
@@ -226,13 +233,17 @@ impl Board {
             .insert(MistakesText)
             .id();
 
-        commands
+        let root = commands
             .spawn()
             .push_children(&cell_entities)
             .push_children(&text_entities)
-            .push_children(&[text1, text2, text3])
+            .push_children(&[text2, text3])
             .insert_bundle(SpatialBundle::from_transform(root_transform))
-            .insert(RootComponent);
+            .insert(RootComponent)
+            .id();
+        if let Some(t) = text1 {
+            commands.entity(root).add_child(t);
+        }
 
         Self {
             cells: cell_entities,
@@ -265,7 +276,7 @@ impl Board {
         self.remaining.0 == 0 && self.remaining.1 == 0
     }
     pub fn get_max_points(&self) -> u16 {
-        ((self.hidden as f32).powf(0.6) as u16).max(1)
+        ((self.hidden as f32).powf(0.6) as u16).max(1).min(30)
     }
     pub fn get_points(&self) -> u16 {
         self.get_max_points().saturating_sub(self.mistakes)

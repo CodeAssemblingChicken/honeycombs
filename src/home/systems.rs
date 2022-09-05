@@ -42,7 +42,7 @@ pub fn mouse_click_cell(
 }
 
 pub fn mouse_click_lang(
-    mut level_cell_query: Query<&Language>,
+    level_cell_query: Query<&Language>,
     (mut app_state, mut load_state, mut locale, mut profile): (
         ResMut<State<AppState>>,
         ResMut<LoadState>,
@@ -55,7 +55,7 @@ pub fn mouse_click_lang(
         .iter()
         .filter(|ev| ev.click_type == ClickType::Released)
     {
-        if let Ok(lang) = level_cell_query.get_mut(ev.entity) {
+        if let Ok(lang) = level_cell_query.get(ev.entity) {
             locale.set_lang(
                 match lang {
                     Language::EN => "en",

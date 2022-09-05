@@ -1,6 +1,6 @@
 use super::{
-    components::{UiBackground, UiRootNode},
-    resources::OverlaySettings,
+    components::{ButtonMenu, ButtonNext, ButtonRetry, UiBackground, UiRootNode},
+    resources::{OverlaySettings, OverlayType},
 };
 use crate::{
     constants::{RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_UI},
@@ -14,6 +14,10 @@ use bevy::{
     sprite::{ColorMaterial, ColorMesh2dBundle},
     text::{Text, Text2dBundle},
     window::Windows,
+};
+use interactable::{
+    click::{Clickable, MouseActions},
+    shapes::Shape,
 };
 
 pub fn setup(
@@ -30,16 +34,55 @@ pub fn setup(
     wnds: Res<Windows>,
 ) {
     // Panel width and height 1920×1080p window
-    let (panel_width, panel_height) = (1280., 720.);
+    let (panel_width, panel_height) = (1280., 960.);
+    let (points, title_text) = match overlay_settings.overlay_type {
+        OverlayType::LevelComplete => (
+            overlay_settings.points,
+            locale
+                .get_string("complete")
+                .unwrap_or(&"String not found".to_string())
+                .clone(),
+        ),
+        OverlayType::Pause => (
+            profile.level_points[overlay_settings.stage_id as usize]
+                [overlay_settings.level_id as usize]
+                .unwrap_or_default(),
+            locale
+                .get_string("pause")
+                .unwrap_or(&"String not found".to_string())
+                .clone(),
+        ),
+    };
+    let point_text = match overlay_settings.overlay_type {
+        OverlayType::LevelComplete => format!(
+            "{}: {}",
+            locale
+                .get_string("mistakes")
+                .unwrap_or(&"String not found".to_string()),
+            overlay_settings.mistakes
+        ),
+        OverlayType::Pause => format!(
+            "{}: {}",
+            locale
+                .get_string("highscore")
+                .unwrap_or(&"String not found".to_string()),
+            profile.level_points[overlay_settings.stage_id as usize]
+                [overlay_settings.level_id as usize]
+                .unwrap_or_default()
+        ),
+    };
+    let total_text = format!(
+        "{}:",
+        locale
+            .get_string("total")
+            .unwrap_or(&"String not found".to_string())
+    );
 
     let mut point_cells = Vec::new();
-    let points = profile.level_points[overlay_settings.stage_id as usize]
-        [overlay_settings.level_id as usize]
-        .unwrap_or_default();
     for i in 0..overlay_settings.max_points {
         let mut big_transform = Transform::from_xyz(
-            (i / 5) as f32 * RADIUS / 1.2 - 560.,
-            (i % 5) as f32 * RADIUS / -1.2 + 100.,
+            (i % 6) as f32 * RADIUS / 1.2 - 208.,
+            (i / 6) as f32 * RADIUS / -1.2 + 117.,
             Z_INDEX_CELL_BACK,
         )
         .with_scale(Vec3::new(0.4, 0.4, 1.0));
@@ -72,6 +115,25 @@ pub fn setup(
         point_cells.push(cell);
     }
 
+    let total_cell = commands.spawn().id();
+    let mut tf = Transform::from_scale(Vec3::new(1.5, 1.5, 1.0));
+    tf.rotate_z(f32::to_radians(90.0));
+    spawn_cell(
+        &mut commands,
+        total_cell,
+        (
+            cell_meshes.std_hexagon_back.clone(),
+            cell_meshes.std_hexagon_outer.clone(),
+            cell_meshes.std_hexagon_inner.clone(),
+        ),
+        (
+            game_colors.alpha2.clone(),
+            game_colors.blue_light.clone(),
+            game_colors.blue_medium.clone(),
+        ),
+        tf,
+    );
+
     let mut tf_background = Transform::from_xyz(0., 0., Z_INDEX_UI);
     let mut tf_panel = Transform::from_xyz(0., 0., Z_INDEX_UI + 1.);
     for wnd in wnds.iter() {
@@ -96,28 +158,172 @@ pub fn setup(
             mesh: meshes
                 .add(Mesh::from(Quad::new(Vec2::new(panel_width, panel_height))))
                 .into(),
-            material: colors.add(ColorMaterial::from(Color::rgba(0.8, 0.8, 0.8, 0.92))),
+            material: colors.add(ColorMaterial::from(Color::rgba(0.8, 0.8, 0.8, 0.9))),
             transform: tf_panel,
             ..default()
         })
         .insert(UiRootNode)
         .with_children(|parent| {
             parent.spawn_bundle(Text2dBundle {
-                text: Text::from_section(
-                    locale
-                        .get_string("pause")
-                        .unwrap_or(&"String not found".to_string()),
-                    text_settings.style_menu_dark.clone(),
-                )
-                .with_alignment(text_settings.alignment),
-                transform: Transform::from_xyz(0., 250., Z_INDEX_UI + 2.),
+                text: Text::from_section(title_text, text_settings.style_menu_dark.clone())
+                    .with_alignment(text_settings.alignment),
+                transform: Transform::from_xyz(0., 400., 1.),
                 ..default()
             });
-            parent.spawn_bundle(Text2dBundle {
-                text: Text::from_section("Highscore:", text_settings.style_menu_dark.clone()),
-                transform: Transform::from_xyz(-600., 50., Z_INDEX_UI + 2.),
-                ..default()
-            });
-        })
-        .push_children(&point_cells);
+            parent
+                .spawn_bundle(ColorMesh2dBundle {
+                    mesh: meshes
+                        .add(Mesh::from(Quad::new(Vec2::new(600., 580.))))
+                        .into(),
+                    material: colors.add(ColorMaterial::from(Color::rgba(0.7, 0.7, 0.7, 0.92))),
+                    transform: Transform::from_xyz(-310., 50., 1.),
+                    ..default()
+                })
+                .push_children(&point_cells)
+                .with_children(|parent| {
+                    parent.spawn_bundle(Text2dBundle {
+                        text: Text::from_section(point_text, text_settings.style_menu_dark.clone())
+                            .with_alignment(text_settings.alignment),
+                        transform: Transform::from_xyz(0., 200., 10.),
+                        ..default()
+                    });
+                });
+            parent
+                .spawn_bundle(ColorMesh2dBundle {
+                    mesh: meshes
+                        .add(Mesh::from(Quad::new(Vec2::new(600., 580.))))
+                        .into(),
+                    material: colors.add(ColorMaterial::from(Color::rgba(0.7, 0.7, 0.7, 0.92))),
+                    transform: Transform::from_xyz(310., 50., 1.),
+                    ..default()
+                })
+                .add_child(total_cell)
+                .with_children(|parent| {
+                    parent.spawn_bundle(Text2dBundle {
+                        text: Text::from_section(total_text, text_settings.style_menu_dark.clone())
+                            .with_alignment(text_settings.alignment),
+                        transform: Transform::from_xyz(0., 200., 10.),
+                        ..default()
+                    });
+                    parent.spawn_bundle(Text2dBundle {
+                        text: Text::from_section(
+                            format!("×{}", profile.get_points()),
+                            text_settings.style_menu_dark.clone(),
+                        )
+                        .with_alignment(text_settings.alignment),
+                        transform: Transform::from_xyz(0., -190., 10.),
+                        ..default()
+                    });
+                });
+            parent
+                .spawn_bundle(ColorMesh2dBundle {
+                    mesh: meshes
+                        .add(Mesh::from(Quad::new(Vec2::new(240., 190.))))
+                        .into(),
+                    material: colors.add(ColorMaterial::from(Color::rgba(0.7, 0.7, 0.7, 0.92))),
+                    transform: Transform::from_xyz(-260., -355., 1.),
+                    ..default()
+                })
+                .with_children(|parent| {
+                    parent.spawn_bundle(Text2dBundle {
+                        text: Text::from_section(
+                            locale
+                                .get_string("retry")
+                                .unwrap_or(&"String not found".to_string()),
+                            text_settings.style_menu_dark.clone(),
+                        )
+                        .with_alignment(text_settings.alignment),
+                        transform: Transform::from_xyz(0., -10., 10.)
+                            .with_scale(Vec3::new(0.75, 0.75, 1.)),
+                        ..default()
+                    });
+                })
+                .insert(ButtonRetry)
+                .insert(Clickable {
+                    shape: Shape::Quad(interactable::shapes::Quad {
+                        width: 240.,
+                        height: 190.,
+                    }),
+                    mouse_actions: MouseActions {
+                        left_released: true,
+                        ..default()
+                    },
+                    ..default()
+                });
+            if overlay_settings.overlay_type == OverlayType::LevelComplete
+                && overlay_settings.stage_id < 5
+                && overlay_settings.level_id < 5
+            {
+                parent
+                    .spawn_bundle(ColorMesh2dBundle {
+                        mesh: meshes
+                            .add(Mesh::from(Quad::new(Vec2::new(240., 190.))))
+                            .into(),
+                        material: colors.add(ColorMaterial::from(Color::rgba(0.7, 0.7, 0.7, 0.92))),
+                        transform: Transform::from_xyz(0., -355., 1.),
+                        ..default()
+                    })
+                    .with_children(|parent| {
+                        parent.spawn_bundle(Text2dBundle {
+                            text: Text::from_section(
+                                locale
+                                    .get_string("next")
+                                    .unwrap_or(&"String not found".to_string()),
+                                text_settings.style_menu_dark.clone(),
+                            )
+                            .with_alignment(text_settings.alignment),
+                            transform: Transform::from_xyz(0., -10., 10.)
+                                .with_scale(Vec3::new(0.75, 0.75, 1.)),
+                            ..default()
+                        });
+                    })
+                    .insert(ButtonNext)
+                    .insert(Clickable {
+                        shape: Shape::Quad(interactable::shapes::Quad {
+                            width: 240.,
+                            height: 190.,
+                        }),
+                        mouse_actions: MouseActions {
+                            left_released: true,
+                            ..default()
+                        },
+                        ..default()
+                    });
+            }
+            parent
+                .spawn_bundle(ColorMesh2dBundle {
+                    mesh: meshes
+                        .add(Mesh::from(Quad::new(Vec2::new(240., 190.))))
+                        .into(),
+                    material: colors.add(ColorMaterial::from(Color::rgba(0.7, 0.7, 0.7, 0.92))),
+                    transform: Transform::from_xyz(260., -355., 1.),
+                    ..default()
+                })
+                .with_children(|parent| {
+                    parent.spawn_bundle(Text2dBundle {
+                        text: Text::from_section(
+                            locale
+                                .get_string("menu")
+                                .unwrap_or(&"String not found".to_string()),
+                            text_settings.style_menu_dark.clone(),
+                        )
+                        .with_alignment(text_settings.alignment),
+                        transform: Transform::from_xyz(0., -10., 10.)
+                            .with_scale(Vec3::new(0.75, 0.75, 1.)),
+                        ..default()
+                    });
+                })
+                .insert(ButtonMenu)
+                .insert(Clickable {
+                    shape: Shape::Quad(interactable::shapes::Quad {
+                        width: 240.,
+                        height: 190.,
+                    }),
+                    mouse_actions: MouseActions {
+                        left_released: true,
+                        ..default()
+                    },
+                    ..default()
+                });
+        });
 }

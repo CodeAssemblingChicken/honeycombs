@@ -4,10 +4,34 @@
         "start": "Start",
         "options": "Options",
         "pause": "Pause",
+        "complete": "Puzzle complete!",
+        "highscore": "Highscore",
         "mistakes": "Mistakes",
         "remaining": "Remaining",
+        "total": "Total",
+        "retry": "Restart",
+        "menu": "Menu",
+        "next": "Next\nLevel"
     },
     text_sections: {
+        "esc": [
+            (text: "I was too lazy to place return buttons. To navigate back in Menus, press ", color: None, interactable: false),
+            (text: "Esc", color: Some(Rgba(red: 0.3, green: 1., blue: 0.5, alpha: 1.)), interactable: false),
+            (text: ".\nFeel free to try it now. Press once to open and again to close the menu.", color: None, interactable: false),
+        ],
+        "game-name": [
+            (text: "The Name of the Game? ", color: None, interactable: false),
+            (text: "Honeycombs", color: Some(Rgba(red: 0.894, green: 0.627, blue: 0.125, alpha: 1.0)), interactable: false),
+        ],
+        "last-insect": [
+            (text: "That's the last insect. I promise.", color: None, interactable: false),
+        ],
+        "not-insect": [
+            (text: "I said the last ", color: None, interactable: false),
+            (text: "insect", color: Some(Rgba(red: 0.9, green: 0.4, blue: 0.3, alpha: 1.0)), interactable: false),
+            (text: ".\n", color: None, interactable: false),
+            (text: "No one mentioned spiders.", color: Some(Rgba(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.05)), interactable: false),
+        ],
         "nutella": [
             (text: "The", color: Some(Rgba(red: 1., green: 1., blue: 1., alpha: 1.)), interactable: false),
             (text: ", ", color: None, interactable: false),
