@@ -253,7 +253,7 @@ pub fn hotkey_system(
     mut cell_query: Query<(&mut Cell, &mut EditorCell)>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     game_colors: Res<GameColors>,
-    keys: Res<Input<KeyCode>>,
+    mut keys: ResMut<Input<KeyCode>>,
     (mut board, mut app_state, mut load_state): (
         ResMut<Board>,
         ResMut<State<AppState>>,
@@ -287,6 +287,7 @@ pub fn hotkey_system(
         }
     }
     if keys.just_pressed(KeyCode::Escape) {
+        keys.clear_just_pressed(KeyCode::Escape);
         switch_state(None, &mut app_state, &mut load_state);
     }
 }

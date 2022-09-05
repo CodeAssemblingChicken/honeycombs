@@ -105,11 +105,12 @@ pub fn mouse_over_cell(
 }
 
 pub fn hotkey_system(
-    keys: Res<Input<KeyCode>>,
+    mut keys: ResMut<Input<KeyCode>>,
     mut app_state: ResMut<State<AppState>>,
     mut load_state: ResMut<LoadState>,
 ) {
     if keys.just_pressed(KeyCode::Escape) {
+        keys.clear_just_pressed(KeyCode::Escape);
         switch_state(Some(AppState::Home), &mut app_state, &mut load_state);
     }
 }

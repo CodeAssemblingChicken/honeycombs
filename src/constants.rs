@@ -14,6 +14,7 @@ pub const Z_INDEX_CELL_BACK: f32 = 2.0;
 pub const Z_INDEX_CELL_OUTER: f32 = 3.0;
 pub const Z_INDEX_CELL_INNER: f32 = 4.0;
 pub const Z_INDEX_TEXT: f32 = 10.0;
+pub const Z_INDEX_UI: f32 = 20.0;
 
 /// Cell scale values (normal and hovered)
 pub const SCALE_NORMAL: Vec3 = Vec3::new(1., 1., 1.);

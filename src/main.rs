@@ -34,7 +34,9 @@ use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
 use components::Cell;
 use interactable::{InteractableCamera, InteractablePlugin};
 use native_dialog::MessageDialog;
-use resources::{CellMeshes, GameColors, LoadState, Locale, Profile, SfxAssets, TextSettings};
+use resources::{
+    CellMeshes, GameColors, LoadState, Locale, Profile, SfxAssets, TextSettings, Viewport,
+};
 use states::AppState;
 
 fn main() {
@@ -54,6 +56,7 @@ fn main() {
         })
         .insert_resource(ClearColor(Color::rgb(0.15, 0.15, 0.15)))
         .insert_resource(LoadState::default())
+        .insert_resource(Viewport::default())
         .add_plugins(DefaultPlugins)
         .add_plugin(InteractablePlugin)
         .add_plugin(EasingsPlugin)

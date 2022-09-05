@@ -146,11 +146,12 @@ pub fn hotkey_system(
 ) {
     if keys.just_pressed(KeyCode::Escape) {
         keys.clear_just_pressed(KeyCode::Escape);
-        switch_state(
-            Some(AppState::LevelSelection),
-            &mut app_state,
-            &mut load_state,
-        );
+        // switch_state(
+        //     Some(AppState::LevelSelection),
+        //     &mut app_state,
+        //     &mut load_state,
+        // );
+        app_state.push(AppState::Overlay).unwrap();
     }
 }
 
@@ -190,5 +191,16 @@ pub fn check_solved(
                 &mut load_state,
             );
         }
+    }
+}
+
+pub fn pause(
+    mut commands: Commands,
+    mut cell_query: Query<(&GameCell, &mut Cell)>,
+    mut color_query: Query<&mut Handle<ColorMaterial>>,
+    game_colors: Res<GameColors>,
+) {
+    for (gc, mut c) in cell_query.iter_mut() {
+        gc.unhover(&mut c, &mut commands, &mut color_query, &game_colors);
     }
 }

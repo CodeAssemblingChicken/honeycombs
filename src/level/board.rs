@@ -9,7 +9,7 @@ use crate::{
         spawn_hint,
     },
     level::components::{EmptyCell, GameCell, NumberCell},
-    resources::{CellMeshes, GameColors, TextSettings},
+    resources::{CellMeshes, GameColors, TextSettings, Viewport},
 };
 use bevy::{
     hierarchy::BuildChildren,
@@ -43,6 +43,7 @@ impl Board {
         text_settings: &TextSettings,
         cell_meshes: &CellMeshes,
         game_colors: &GameColors,
+        viewport: &mut Viewport,
         (stage_id, level_id): (u8, u8),
     ) -> Self {
         let cells = &config.cells;
@@ -54,6 +55,8 @@ impl Board {
         let mut text_entities = Vec::new();
 
         let (w, h) = calc_dimensions(width, height);
+        viewport.width = w;
+        viewport.height = h;
 
         let mut empty_remaining = 0;
         let mut number_remaining = 0;

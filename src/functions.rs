@@ -206,11 +206,13 @@ pub fn calc_dimensions(width: usize, height: usize) -> (f32, f32) {
     (w, h)
 }
 
+/// Switch to a new state replacing the full stack.
+/// This is relevant for the Overlay state.
 pub fn switch_state(
     next_state: Option<AppState>,
     app_state: &mut State<AppState>,
     mut load_state: &mut LoadState,
 ) {
     load_state.next_state = next_state;
-    app_state.set(AppState::Loading).unwrap();
+    app_state.replace(AppState::Loading).unwrap();
 }
