@@ -1,13 +1,13 @@
 use crate::InteractableCamera;
 use bevy::{
     math::Vec2,
-    prelude::{Camera, Query, Res, Transform, With},
+    prelude::{Camera, GlobalTransform, Query, Res, Transform, With},
     render::camera::RenderTarget,
     window::Windows,
 };
 
 pub trait Interactable {
-    fn contains_point(&self, point: Vec2, tf: &Transform) -> bool;
+    fn contains_point(&self, point: Vec2, tf: &GlobalTransform) -> bool;
 }
 
 pub fn mouse_to_world_pos(

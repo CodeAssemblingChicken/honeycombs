@@ -6,7 +6,8 @@ use crate::{
 use bevy::{
     math::Vec2,
     prelude::{
-        Camera, Commands, Component, Entity, EventWriter, Query, Res, Transform, With, Without,
+        Camera, Commands, Component, Entity, EventWriter, GlobalTransform, Query, Res, Transform,
+        With, Without,
     },
     window::Windows,
 };
@@ -26,13 +27,13 @@ pub struct Hoverable {
 }
 
 impl Interactable for Hoverable {
-    fn contains_point(&self, point: Vec2, tf: &Transform) -> bool {
+    fn contains_point(&self, point: Vec2, tf: &GlobalTransform) -> bool {
         let scaling = match self.ignore_scale {
             true => None,
-            false => Some(tf.scale.truncate()),
+            false => Some(tf.affine().to_scale_rotation_translation().0.truncate()),
         };
         self.shape
-            .contains_point(point, tf.translation.truncate(), scaling)
+            .contains_point(point, tf.translation().truncate(), scaling)
     }
 }
 
@@ -51,8 +52,8 @@ impl Default for Hoverable {
 
 pub fn hover_system(
     mut commands: Commands,
-    hovering_query: Query<(Entity, &Transform, &mut Hoverable), With<Hovering>>,
-    not_hovering_query: Query<(Entity, &Transform, &mut Hoverable), Without<Hovering>>,
+    hovering_query: Query<(Entity, &GlobalTransform, &mut Hoverable), With<Hovering>>,
+    not_hovering_query: Query<(Entity, &GlobalTransform, &mut Hoverable), Without<Hovering>>,
     wnds: Res<Windows>,
     q_camera: Query<(&Camera, &Transform), With<InteractableCamera>>,
     mut ev_mouse_over: EventWriter<MouseOverEvent>,
@@ -64,7 +65,7 @@ pub fn hover_system(
 
         for (e, t, h) in hovering_query.iter() {
             if h.contains_point(pos, t) {
-                hovers.push((e, h, t.translation.z));
+                hovers.push((e, h, t.translation().z));
             } else {
                 ev_mouse_exit.send(MouseExitEvent(e));
                 commands.entity(e).remove::<Hovering>();
@@ -72,7 +73,7 @@ pub fn hover_system(
         }
         for (e, t, h) in not_hovering_query.iter() {
             if h.contains_point(pos, t) {
-                hovers.push((e, h, t.translation.z));
+                hovers.push((e, h, t.translation().z));
             }
         }
         hovers.sort_by(|(_, _, z1), (_, _, z2)| z2.partial_cmp(z1).unwrap());

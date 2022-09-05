@@ -200,3 +200,9 @@ impl Profile {
         }
     }
 }
+
+#[derive(Debug, Default)]
+pub struct Viewport {
+    pub width: f32,
+    pub height: f32,
+}

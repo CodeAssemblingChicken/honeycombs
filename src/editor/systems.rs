@@ -5,7 +5,7 @@ use super::{
 };
 use crate::{
     board_functions::{count_empty_cells, empty_connected, get_neighbours},
-    components::{BoardConfig, Cell, CellType, HintType},
+    components::{BoardConfig, Cell, CellType, HintType, RootComponent},
     functions::{rescale_board, switch_state},
     parser::board_to_string,
     resources::{GameColors, LoadState, TextSettings},
@@ -14,8 +14,8 @@ use crate::{
 use bevy::{
     input::Input,
     prelude::{
-        Camera, Color, Commands, EventReader, EventWriter, Handle, KeyCode, Query, Res, ResMut,
-        State, Transform, With,
+        Color, Commands, EventReader, EventWriter, Handle, KeyCode, Query, Res, ResMut, State,
+        Transform, With,
     },
     sprite::ColorMaterial,
     text::Text,
@@ -253,7 +253,7 @@ pub fn hotkey_system(
     mut cell_query: Query<(&mut Cell, &mut EditorCell)>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     game_colors: Res<GameColors>,
-    keys: Res<Input<KeyCode>>,
+    mut keys: ResMut<Input<KeyCode>>,
     (mut board, mut app_state, mut load_state): (
         ResMut<Board>,
         ResMut<State<AppState>>,
@@ -287,25 +287,20 @@ pub fn hotkey_system(
         }
     }
     if keys.just_pressed(KeyCode::Escape) {
+        keys.clear_just_pressed(KeyCode::Escape);
         switch_state(None, &mut app_state, &mut load_state);
     }
 }
 
 /// On resizing the window, the board is resized too
-/// i.e. the camera zoom (scale) is recalculated
 pub fn window_resize_system(
-    mut camera_query: Query<&mut Transform, With<Camera>>,
-    board: Res<Board>,
     mut ev_window_resize: EventReader<WindowResized>,
+    mut root_query: Query<&mut Transform, With<RootComponent>>,
+    board: Res<Board>,
 ) {
     for ev in ev_window_resize.iter() {
-        rescale_board(
-            board.width,
-            board.height,
-            3,
-            ev.width,
-            ev.height,
-            &mut camera_query,
-        );
+        if let Ok(mut root) = root_query.get_single_mut() {
+            rescale_board(board.width, board.height, 3, ev.width, ev.height, &mut root);
+        }
     }
 }

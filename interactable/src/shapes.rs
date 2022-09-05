@@ -59,16 +59,17 @@ pub struct Hexagon {
 
 impl ContainsPoint for Hexagon {
     fn contains_point(&self, p: Vec2, tl: Vec2, s: Option<Vec2>) -> bool {
-        // TODO: Handle scaling
         // TODO: handle orientation
-        let (_sx, _sy) = scale_to_pair(s);
+        // TODO: Handle non uniform scaling (sx != sy)
+        let (sx, _sy) = scale_to_pair(s);
 
         let dist = p.distance(tl);
+        let radius = sx * self.radius;
 
-        if dist > self.radius {
+        if dist > radius {
             return false;
         }
-        if dist < self.radius * 3. / 4. {
+        if dist < radius * 3. / 4. {
             return true;
         }
 
@@ -76,16 +77,16 @@ impl ContainsPoint for Hexagon {
 
         // Check against borders
         let py = p.y * 1.15470053838; // 2/sqrt(3)
-        if py > self.radius || py < -self.radius {
+        if py > radius || py < -radius {
             return false;
         }
 
         let px = 0.5 * py + p.x;
-        if px > self.radius || px < -self.radius {
+        if px > radius || px < -radius {
             return false;
         }
 
-        if py - px > self.radius || py - px < -self.radius {
+        if py - px > radius || py - px < -radius {
             return false;
         }
 

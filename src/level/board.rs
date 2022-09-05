@@ -1,24 +1,20 @@
-use std::ops::Sub;
-
+use super::components::{MistakesText, RemainingText};
 use crate::{
     board_functions::{count_empty_cells, empty_connected, get_neighbours},
-    components::{BoardConfig, Cell, CellType, HintType, TextSectionConfig},
+    components::{BoardConfig, Cell, CellType, HintType, RootComponent, TextSectionConfig},
     constants::{GameColor, RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_TEXT},
     functions::{
         calc_dimensions, calc_translation, make_cell_interactable, spawn_cell, spawn_cell_text,
         spawn_hint,
     },
     level::components::{EmptyCell, GameCell, NumberCell},
-    resources::{CellMeshes, GameColors, TextSettings},
+    resources::{CellMeshes, GameColors, TextSettings, Viewport},
 };
 use bevy::{
     hierarchy::BuildChildren,
-    math::Vec3,
-    prelude::{default, Color, Commands, Entity, Transform, Visibility},
+    prelude::{default, Color, Commands, Entity, SpatialBundle, Transform, Visibility},
     text::{Text, Text2dBundle},
 };
-
-use super::components::{MistakesText, RemainingText};
 
 // TODO: Actually use this
 /// Board component storing common variables
@@ -39,10 +35,10 @@ impl Board {
     /// An absolute monster of setup.
     pub fn new(
         commands: &mut Commands,
+        root_transform: Transform,
         config: &BoardConfig,
-        text_settings: &TextSettings,
-        cell_meshes: &CellMeshes,
-        game_colors: &GameColors,
+        (cell_meshes, game_colors, text_settings): (&CellMeshes, &GameColors, &TextSettings),
+        viewport: &mut Viewport,
         (stage_id, level_id): (u8, u8),
     ) -> Self {
         let cells = &config.cells;
@@ -54,6 +50,8 @@ impl Board {
         let mut text_entities = Vec::new();
 
         let (w, h) = calc_dimensions(width, height);
+        viewport.width = w;
+        viewport.height = h;
 
         let mut empty_remaining = 0;
         let mut number_remaining = 0;
@@ -86,8 +84,7 @@ impl Board {
                     )
                 };
 
-                let mut big_transform =
-                    Transform::from_translation(Vec3::new(tx, ty, Z_INDEX_CELL_BACK));
+                let mut big_transform = Transform::from_xyz(tx, ty, Z_INDEX_CELL_BACK);
                 big_transform.rotate_z(f32::to_radians(90.0));
 
                 let cell = commands.spawn().id();
@@ -195,44 +192,52 @@ impl Board {
         ];
 
         // if let Some(text) = &config.text {
-        commands.spawn_bundle(Text2dBundle {
-            text: Text::from_sections(
-                texts
-                    .iter()
-                    .map(|tsc| tsc.to_text_section(&text_settings.style_cell)),
-            )
-            .with_alignment(text_settings.alignment),
-            transform: Transform::from_translation(Vec3::new(0., -h - 3. * RADIUS, Z_INDEX_TEXT)),
-            ..default()
-        });
+        let text1 = commands
+            .spawn_bundle(Text2dBundle {
+                text: Text::from_sections(
+                    texts
+                        .iter()
+                        .map(|tsc| tsc.to_text_section(&text_settings.style_cell)),
+                )
+                .with_alignment(text_settings.alignment),
+                transform: Transform::from_xyz(0., -h - 3. * RADIUS, Z_INDEX_TEXT),
+                ..default()
+            })
+            .id();
         // }
 
-        commands
+        let text2 = commands
             .spawn_bundle(Text2dBundle {
                 text: Text::from_section(
                     format!("{}: {}", "Remaining", empty_remaining),
                     text_settings.style_cell.clone(),
                 )
                 .with_alignment(text_settings.alignment),
-                transform: Transform::from_translation(Vec3::new(w + 3. * RADIUS, h, Z_INDEX_TEXT)),
+                transform: Transform::from_xyz(w + 3. * RADIUS, h, Z_INDEX_TEXT),
                 ..default()
             })
-            .insert(RemainingText);
-        commands
+            .insert(RemainingText)
+            .id();
+        let text3 = commands
             .spawn_bundle(Text2dBundle {
                 text: Text::from_section(
                     format!("{}: {}", "Mistakes", empty_remaining),
                     text_settings.style_cell.clone(),
                 )
                 .with_alignment(text_settings.alignment),
-                transform: Transform::from_translation(Vec3::new(
-                    w + 3. * RADIUS,
-                    h - RADIUS,
-                    Z_INDEX_TEXT,
-                )),
+                transform: Transform::from_xyz(w + 3. * RADIUS, h - RADIUS, Z_INDEX_TEXT),
                 ..default()
             })
-            .insert(MistakesText);
+            .insert(MistakesText)
+            .id();
+
+        commands
+            .spawn()
+            .push_children(&cell_entities)
+            .push_children(&text_entities)
+            .push_children(&[text1, text2, text3])
+            .insert_bundle(SpatialBundle::from_transform(root_transform))
+            .insert(RootComponent);
 
         Self {
             cells: cell_entities,

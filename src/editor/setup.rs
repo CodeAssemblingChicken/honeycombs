@@ -6,7 +6,7 @@ use crate::{
     resources::{CellMeshes, GameColors, LoadState, TextSettings},
 };
 use bevy::{
-    prelude::{Camera, Commands, EventWriter, Query, Res, ResMut, Transform, With},
+    prelude::{Commands, EventWriter, Res, ResMut, Transform},
     window::Windows,
 };
 
@@ -19,7 +19,6 @@ pub fn setup(
         Res<TextSettings>,
     ),
     mut load_state: ResMut<LoadState>,
-    mut camera_query: Query<&mut Transform, With<Camera>>,
     mut ev_cell_update: EventWriter<CellUpdateEvent>,
 ) {
     let config = if let Some(filename) = load_state.filename.clone() {
@@ -36,24 +35,37 @@ pub fn setup(
         }
     };
 
-    let board = Board::new(
-        &mut commands,
-        &config,
-        &cell_meshes,
-        &game_colors,
-        &text_settings,
-    );
-
+    let mut root_transform = Transform::identity();
     for wnd in wnds.iter() {
+        // TODO: Remove hard-coded width/height
         rescale_board(
             config.width,
             config.height,
             4,
             wnd.width(),
             wnd.height(),
-            &mut camera_query,
+            &mut root_transform,
         );
     }
+    let board = Board::new(
+        &mut commands,
+        root_transform,
+        &config,
+        &cell_meshes,
+        &game_colors,
+        &text_settings,
+    );
+
+    // for wnd in wnds.iter() {
+    //     rescale_board(
+    //         config.width,
+    //         config.height,
+    //         4,
+    //         wnd.width(),
+    //         wnd.height(),
+    //         &mut camera_query,
+    //     );
+    // }
     commands.insert_resource(board);
     ev_cell_update.send(CellUpdateEvent);
 }
