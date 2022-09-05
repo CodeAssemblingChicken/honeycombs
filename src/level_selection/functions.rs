@@ -7,7 +7,6 @@ use crate::{
 };
 use bevy::{
     hierarchy::BuildChildren,
-    math::Vec3,
     prelude::{default, Commands, Entity, SpatialBundle, Transform},
 };
 

@@ -2,7 +2,6 @@ use crate::{
     board_functions::{count_empty_cells, empty_connected, get_column},
     components::{
         CellInner, CellOuter, CellType, ColumnHint, HintDirection, HintType, InteractableCell,
-        RootComponent,
     },
     constants::{INNER_TRANSFORM, OUTER_TRANSFORM, RADIUS, Z_INDEX_TEXT},
     resources::{LoadState, TextSettings},
@@ -11,9 +10,7 @@ use crate::{
 use bevy::{
     hierarchy::BuildChildren,
     math::Vec3,
-    prelude::{
-        default, Camera, Color, Commands, Entity, Handle, Mesh, Query, State, Transform, With,
-    },
+    prelude::{default, Color, Commands, Entity, Handle, Mesh, State, Transform},
     sprite::{ColorMaterial, ColorMesh2dBundle},
     text::{Text, Text2dBundle, TextAlignment, TextStyle},
 };

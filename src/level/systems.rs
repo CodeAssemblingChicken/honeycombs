@@ -121,7 +121,6 @@ pub fn mouse_over_cell(
 }
 
 /// On resizing the window, the board is resized too
-/// i.e. the camera zoom (scale) is recalculated
 pub fn window_resize_system(
     mut ev_window_resize: EventReader<WindowResized>,
     mut root_query: Query<&mut Transform, With<RootComponent>>,

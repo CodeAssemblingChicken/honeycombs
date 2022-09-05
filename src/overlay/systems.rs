@@ -1,12 +1,16 @@
 use bevy::{
     hierarchy::DespawnRecursiveExt,
     input::Input,
-    prelude::{Commands, Entity, KeyCode, Query, ResMut, State, With},
+    math::Vec3,
+    prelude::{
+        Commands, Entity, EventReader, KeyCode, Or, Query, ResMut, State, Transform, With, Without,
+    },
+    window::WindowResized,
 };
 
 use crate::{functions::switch_state, resources::LoadState, states::AppState};
 
-use super::components::UiRootNode;
+use super::components::{UiBackground, UiRootNode};
 
 pub fn hotkey_system(
     mut app_state: ResMut<State<AppState>>,
@@ -27,7 +31,29 @@ pub fn hotkey_system(
     }
 }
 
-pub fn cleanup(mut commands: Commands, entities: Query<Entity, With<UiRootNode>>) {
+/// On resizing the window, the ui is resized too
+pub fn window_resize_system(
+    mut ev_window_resize: EventReader<WindowResized>,
+    mut root_query: Query<&mut Transform, With<UiRootNode>>,
+    mut background_query: Query<&mut Transform, (With<UiBackground>, Without<UiRootNode>)>,
+) {
+    for ev in ev_window_resize.iter() {
+        if let Ok(mut root) = root_query.get_single_mut() {
+            let w = ev.width / 1920.;
+            let h = ev.height / 1080.;
+            let s = w.min(h);
+            root.scale = Vec3::new(s, s, 1.0);
+        }
+        if let Ok(mut background) = background_query.get_single_mut() {
+            background.scale = Vec3::new(ev.width, ev.height, 1.0);
+        }
+    }
+}
+
+pub fn cleanup(
+    mut commands: Commands,
+    entities: Query<Entity, Or<(With<UiRootNode>, With<UiBackground>)>>,
+) {
     for entity in &entities {
         commands.entity(entity).despawn_recursive();
     }

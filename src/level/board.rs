@@ -12,7 +12,6 @@ use crate::{
 };
 use bevy::{
     hierarchy::BuildChildren,
-    math::Vec3,
     prelude::{default, Color, Commands, Entity, SpatialBundle, Transform, Visibility},
     text::{Text, Text2dBundle},
 };
