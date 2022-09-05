@@ -3,7 +3,7 @@ use super::{
     components::{EmptyCell, GameCell, MistakesText, NumberCell, RemainingText},
 };
 use crate::{
-    components::Cell,
+    components::{Cell, RootComponent},
     functions::{rescale_board, switch_state},
     resources::{GameColors, LoadState, Profile, SfxAssets, TextSettings},
     states::AppState,
@@ -12,8 +12,8 @@ use bevy::{
     audio::{Audio, PlaybackSettings},
     input::Input,
     prelude::{
-        Camera, ColorMaterial, Commands, EventReader, Handle, KeyCode, ParamSet, Query, Res,
-        ResMut, State, Transform, With, Without,
+        ColorMaterial, Commands, EventReader, Handle, KeyCode, ParamSet, Query, Res, ResMut, State,
+        Transform, With, Without,
     },
     text::Text,
     window::WindowResized,
@@ -124,33 +124,19 @@ pub fn mouse_over_cell(
 /// i.e. the camera zoom (scale) is recalculated
 pub fn window_resize_system(
     mut ev_window_resize: EventReader<WindowResized>,
-    mut camera_query: Query<&mut Transform, With<Camera>>,
+    mut root_query: Query<&mut Transform, With<RootComponent>>,
     board: Res<Board>,
 ) {
     for ev in ev_window_resize.iter() {
-        rescale_board(
-            board.width,
-            board.height,
-            4,
-            ev.width,
-            ev.height,
-            &mut camera_query,
-        );
+        if let Ok(mut root) = root_query.get_single_mut() {
+            rescale_board(board.width, board.height, 4, ev.width, ev.height, &mut root);
+        }
     }
 }
 
-pub fn hotkey_system(
-    mut app_state: ResMut<State<AppState>>,
-    mut load_state: ResMut<LoadState>,
-    mut keys: ResMut<Input<KeyCode>>,
-) {
+pub fn hotkey_system(mut app_state: ResMut<State<AppState>>, mut keys: ResMut<Input<KeyCode>>) {
     if keys.just_pressed(KeyCode::Escape) {
         keys.clear_just_pressed(KeyCode::Escape);
-        // switch_state(
-        //     Some(AppState::LevelSelection),
-        //     &mut app_state,
-        //     &mut load_state,
-        // );
         app_state.push(AppState::Overlay).unwrap();
     }
 }

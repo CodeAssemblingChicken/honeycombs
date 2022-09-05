@@ -38,7 +38,7 @@ pub fn spawn_cell_common(
     (w, h): (f32, f32),
 ) -> Entity {
     let (tx, ty) = calc_translation(x, y, w, h);
-    let mut big_transform = Transform::from_translation(Vec3::new(tx, ty, Z_INDEX_CELL_BACK));
+    let mut big_transform = Transform::from_xyz(tx, ty, Z_INDEX_CELL_BACK);
     big_transform.rotate_z(f32::to_radians(90.0));
 
     let (child1, child2) = spawn_cell(

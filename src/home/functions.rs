@@ -7,7 +7,7 @@ use crate::{
 };
 use bevy::{
     hierarchy::BuildChildren,
-    prelude::{default, Commands, Handle, Transform},
+    prelude::{default, Commands, Entity, Handle, Transform},
     sprite::ColorMaterial,
 };
 
@@ -21,7 +21,7 @@ pub fn spawn_option_cell(
     big_transform: Transform,
     app_state: AppState,
     text: &str,
-) {
+) -> Entity {
     let cell = commands.spawn().id();
     let colors = get_colors_for_app_state(game_colors, app_state);
     let (child1, child2) = spawn_cell(
@@ -67,6 +67,8 @@ pub fn spawn_option_cell(
         .entity(cell)
         .insert(cell_component)
         .insert(OptionCell { app_state });
+
+    cell
 }
 
 pub fn get_colors_for_app_state(

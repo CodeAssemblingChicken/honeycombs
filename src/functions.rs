@@ -2,6 +2,7 @@ use crate::{
     board_functions::{count_empty_cells, empty_connected, get_column},
     components::{
         CellInner, CellOuter, CellType, ColumnHint, HintDirection, HintType, InteractableCell,
+        RootComponent,
     },
     constants::{INNER_TRANSFORM, OUTER_TRANSFORM, RADIUS, Z_INDEX_TEXT},
     resources::{LoadState, TextSettings},
@@ -30,7 +31,7 @@ pub fn make_cell_interactable(
 ) {
     commands.entity(cell).insert_bundle(InteractableCell {
         hoverable: Hoverable {
-            ignore_scale: true,
+            ignore_scale: false,
             shape: Shape::Hexagon(Hexagon {
                 radius,
                 point_up: false,
@@ -38,7 +39,7 @@ pub fn make_cell_interactable(
             ..default()
         },
         clickable: Clickable {
-            ignore_scale: true,
+            ignore_scale: false,
             shape: Shape::Hexagon(Hexagon {
                 radius,
                 point_up: false,
@@ -117,7 +118,7 @@ pub fn spawn_hint(
     (width, height): (usize, usize),
 ) -> Entity {
     let (mut tx, mut ty) = calc_translation(hint.x as i32, hint.y as i32, w, h);
-    let mut t = Transform::from_translation(Vec3::new(0., 0., Z_INDEX_TEXT));
+    let mut t = Transform::from_xyz(0., 0., Z_INDEX_TEXT);
     match hint.dir {
         HintDirection::Down => (ty += 1.3 * RADIUS),
         HintDirection::LeftDown => {
@@ -179,14 +180,13 @@ pub fn rescale_board(
     margin: usize,
     wd_width: f32,
     wd_height: f32,
-    camera_query: &mut Query<&mut Transform, With<Camera>>,
+    // camera_query: &mut Query<&mut Transform, With<Camera>>,
+    root: &mut Transform,
 ) {
-    let w = ((board_width + margin) as f32 * RADIUS * 1.56) / wd_width;
-    let h = ((board_height + margin) as f32 * RADIUS * 1.8) / wd_height;
-    let s = w.max(h);
-    for mut t in camera_query.iter_mut() {
-        t.scale = Vec3::new(s, s, 1.0);
-    }
+    let w = 1. / (((board_width + margin) as f32 * RADIUS * 1.56) / wd_width);
+    let h = 1. / (((board_height + margin) as f32 * RADIUS * 1.8) / wd_height);
+    let s = w.min(h);
+    root.scale = Vec3::new(s, s, 1.0);
 }
 
 pub fn calc_translation(x: i32, y: i32, w: f32, h: f32) -> (f32, f32) {

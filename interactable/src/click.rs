@@ -6,7 +6,10 @@ use crate::{
 use bevy::{
     input::Input,
     math::Vec2,
-    prelude::{Camera, Component, Entity, EventWriter, MouseButton, Query, Res, Transform, With},
+    prelude::{
+        Camera, Component, Entity, EventWriter, GlobalTransform, MouseButton, Query, Res,
+        Transform, With,
+    },
     window::Windows,
 };
 
@@ -46,13 +49,13 @@ pub struct Clickable {
 }
 
 impl Interactable for Clickable {
-    fn contains_point(&self, point: Vec2, tf: &Transform) -> bool {
+    fn contains_point(&self, point: Vec2, tf: &GlobalTransform) -> bool {
         let scaling = match self.ignore_scale {
             true => None,
-            false => Some(tf.scale.truncate()),
+            false => Some(tf.affine().to_scale_rotation_translation().0.truncate()),
         };
         self.shape
-            .contains_point(point, tf.translation.truncate(), scaling)
+            .contains_point(point, tf.translation().truncate(), scaling)
     }
 }
 
@@ -71,7 +74,7 @@ impl Default for Clickable {
 }
 
 pub fn click_system(
-    query: Query<(Entity, &Transform, &mut Clickable)>,
+    query: Query<(Entity, &GlobalTransform, &mut Clickable)>,
     wnds: Res<Windows>,
     q_camera: Query<(&Camera, &Transform), With<InteractableCamera>>,
     mouse_button_input: Res<Input<MouseButton>>,
@@ -86,7 +89,7 @@ pub fn click_system(
 
         for (e, t, c) in query.iter() {
             if c.contains_point(pos, t) {
-                clicks.push((e, c, t.translation.z));
+                clicks.push((e, c, t.translation().z));
             }
         }
         clicks.sort_by(|(_, _, z1), (_, _, z2)| z2.partial_cmp(z1).unwrap());

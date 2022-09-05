@@ -213,3 +213,6 @@ impl TextSectionConfig {
         TextSection::new(self.text.clone(), ts)
     }
 }
+
+#[derive(Component)]
+pub struct RootComponent;

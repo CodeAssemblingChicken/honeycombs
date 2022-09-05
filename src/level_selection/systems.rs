@@ -1,6 +1,6 @@
 use super::components::LevelSelectionCell;
 use crate::{
-    components::Cell,
+    components::{Cell, RootComponent},
     functions::{rescale_board, switch_state},
     resources::{GameColors, LoadState, Profile, SfxAssets},
     states::AppState,
@@ -8,9 +8,7 @@ use crate::{
 use bevy::{
     audio::{Audio, PlaybackSettings},
     input::Input,
-    prelude::{
-        Camera, Commands, EventReader, Handle, KeyCode, Query, Res, ResMut, State, Transform, With,
-    },
+    prelude::{Commands, EventReader, Handle, KeyCode, Query, Res, ResMut, State, Transform, With},
     sprite::ColorMaterial,
     window::WindowResized,
 };
@@ -119,10 +117,12 @@ pub fn hotkey_system(
 /// i.e. the camera zoom (scale) is recalculated
 pub fn window_resize_system(
     mut ev_window_resize: EventReader<WindowResized>,
-    mut camera_query: Query<&mut Transform, With<Camera>>,
+    mut root_query: Query<&mut Transform, With<RootComponent>>,
 ) {
     for ev in ev_window_resize.iter() {
-        // TODO: Remove hard-coded width/height
-        rescale_board(11, 11, 1, ev.width, ev.height, &mut camera_query);
+        if let Ok(mut root) = root_query.get_single_mut() {
+            // TODO: Remove hard-coded width/height
+            rescale_board(11, 11, 1, ev.width, ev.height, &mut root);
+        }
     }
 }

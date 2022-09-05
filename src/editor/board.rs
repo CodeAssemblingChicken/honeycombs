@@ -3,13 +3,13 @@ use super::{
     functions::{row_empty, spawn_cell_common},
 };
 use crate::{
-    components::{BoardConfig, CellType, HintType},
+    components::{BoardConfig, CellType, HintType, RootComponent},
     functions::calc_dimensions,
     resources::{CellMeshes, GameColors, TextSettings},
 };
 use bevy::{
-    prelude::{Commands, Visibility},
-    reflect::List,
+    hierarchy::BuildChildren,
+    prelude::{Commands, SpatialBundle, Transform, Visibility},
 };
 
 pub struct Board {
@@ -21,15 +21,18 @@ pub struct Board {
 impl Board {
     pub fn new(
         commands: &mut Commands,
+        root_transform: Transform,
         config: &BoardConfig,
         cell_meshes: &CellMeshes,
         game_colors: &GameColors,
         text_settings: &TextSettings,
     ) -> Self {
         let cells = &config.cells;
-        let hints = &config.hints;
+        let _hints = &config.hints;
         let width = config.width;
         let height = config.height;
+
+        let mut cell_entities = Vec::new();
 
         let (w, h) = calc_dimensions(width, height);
 
@@ -103,8 +106,15 @@ impl Board {
                         .entity(text_entity)
                         .insert(Visibility { is_visible: true });
                 }
+                cell_entities.push(cell);
             }
         }
+        commands
+            .spawn()
+            .push_children(&cell_entities)
+            .insert_bundle(SpatialBundle::from_transform(root_transform))
+            .insert(RootComponent);
+
         Self {
             cells: cells.clone(),
             width,

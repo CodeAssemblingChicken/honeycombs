@@ -8,7 +8,7 @@ use crate::{
 use bevy::{
     hierarchy::BuildChildren,
     math::Vec3,
-    prelude::{default, Commands, Transform},
+    prelude::{default, Commands, Entity, SpatialBundle, Transform},
 };
 
 pub fn spawn_cluster(
@@ -19,22 +19,22 @@ pub fn spawn_cluster(
     text_settings: &TextSettings,
     stage_cluster: StageCluster,
     (x, y): (f32, f32),
-) {
+) -> Entity {
     let unlocked = profile.get_points() >= stage_cluster.unlock_required;
 
-    let mut big_transform = Transform::from_translation(Vec3::new(x, y, Z_INDEX_CELL_BACK));
+    let mut big_transform = Transform::from_xyz(x, y, Z_INDEX_CELL_BACK);
     big_transform.rotate_z(f32::to_radians(90.0));
 
+    let mut ls_cells = Vec::new();
     for (id, (dx, dy)) in [(0, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0)]
         .into_iter()
         .take(stage_cluster.num_levels as usize)
         .enumerate()
     {
         let (tx, ty) = calc_translation(dx, dy, 0., 0.);
-        let mut big_transform =
-            Transform::from_translation(Vec3::new(x + tx, y + ty, Z_INDEX_CELL_BACK));
+        let mut big_transform = Transform::from_xyz(x + tx, y + ty, Z_INDEX_CELL_BACK);
         big_transform.rotate_z(f32::to_radians(90.0));
-        spawn_level_selection_cell(
+        ls_cells.push(spawn_level_selection_cell(
             commands,
             cell_meshes,
             game_colors,
@@ -42,13 +42,12 @@ pub fn spawn_cluster(
             text_settings,
             big_transform,
             (id as u8, stage_cluster.stage_no, unlocked),
-        );
+        ));
     }
     let (tx, ty) = calc_translation(0, 0, 0., 0.);
-    let mut big_transform =
-        Transform::from_translation(Vec3::new(x + tx, y + ty, Z_INDEX_CELL_BACK));
+    let mut big_transform = Transform::from_xyz(x + tx, y + ty, Z_INDEX_CELL_BACK);
     big_transform.rotate_z(f32::to_radians(90.0));
-    spawn_cluster_cell(
+    let cluster_cell = spawn_cluster_cell(
         commands,
         cell_meshes,
         game_colors,
@@ -56,6 +55,12 @@ pub fn spawn_cluster(
         big_transform,
         (stage_cluster.unlock_required, unlocked),
     );
+    commands
+        .spawn()
+        .push_children(&ls_cells)
+        .push_children(&[cluster_cell])
+        .insert_bundle(SpatialBundle::default())
+        .id()
 }
 
 fn spawn_level_selection_cell(
@@ -66,7 +71,7 @@ fn spawn_level_selection_cell(
     text_settings: &TextSettings,
     big_transform: Transform,
     (level_id, stage_id, unlocked): (u8, u8, bool),
-) {
+) -> Entity {
     let cell = commands.spawn().id();
 
     let colors = if unlocked {
@@ -136,6 +141,7 @@ fn spawn_level_selection_cell(
             stage: stage_id,
             level: level_id,
         });
+    cell
 }
 
 fn spawn_cluster_cell(
@@ -145,7 +151,7 @@ fn spawn_cluster_cell(
     text_settings: &TextSettings,
     big_transform: Transform,
     (unlock_required, unlocked): (u16, bool),
-) {
+) -> Entity {
     let cell = commands.spawn().id();
     let colors = if unlocked {
         (
@@ -179,4 +185,5 @@ fn spawn_cluster_cell(
         text_settings.alignment,
     );
     commands.entity(cell).add_child(text_entity);
+    cell
 }

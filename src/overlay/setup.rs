@@ -18,7 +18,7 @@ pub fn setup(
     text_settings: Res<TextSettings>,
     viewport: Res<Viewport>,
 ) {
-    let mut transform = Transform::from_translation(Vec3::new(0., 0., Z_INDEX_UI));
+    let mut transform = Transform::from_xyz(0., 0., Z_INDEX_UI);
     let s = (5. * viewport.width / 1920.).max(5. * viewport.height / 1080.);
     transform.scale = Vec3::new(s, s, 1.);
     commands
@@ -38,14 +38,14 @@ pub fn setup(
                         .add(Mesh::from(Quad::new(Vec2::new(640.0, 540.0))))
                         .into(),
                     material: colors.add(ColorMaterial::from(Color::rgba(0.8, 0.8, 0.8, 0.9))),
-                    transform: Transform::from_translation(Vec3::new(0., 0., Z_INDEX_UI + 1.)),
+                    transform: Transform::from_xyz(0., 0., Z_INDEX_UI + 1.),
                     ..default()
                 })
                 .insert(UiRootNode)
                 .with_children(|parent| {
                     parent.spawn_bundle(Text2dBundle {
                         text: Text::from_section("Pause", text_settings.style_menu.clone()),
-                        transform: Transform::from_translation(Vec3::new(0., 0., Z_INDEX_UI + 2.)),
+                        transform: Transform::from_xyz(0., 0., Z_INDEX_UI + 2.),
                         ..default()
                     });
                 });

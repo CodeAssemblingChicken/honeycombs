@@ -5,7 +5,7 @@ use crate::{
     resources::{CellMeshes, GameColors, LoadState, TextSettings, Viewport},
 };
 use bevy::{
-    prelude::{Camera, Commands, Query, Res, ResMut, Transform, With},
+    prelude::{Commands, Res, ResMut, Transform},
     window::Windows,
 };
 
@@ -19,7 +19,6 @@ pub fn setup(
     ),
     mut load_state: ResMut<LoadState>,
     mut viewport: ResMut<Viewport>,
-    mut camera_query: Query<&mut Transform, With<Camera>>,
 ) {
     if load_state.filename.is_none() {
         panic!("No level specified.");
@@ -27,25 +26,26 @@ pub fn setup(
     let config = parser::board_from_file(load_state.filename.as_ref().unwrap());
     load_state.filename = None;
 
+    let mut root_transform = Transform::identity();
+    for wnd in wnds.iter() {
+        // TODO: Remove hard-coded width/height
+        rescale_board(
+            config.width,
+            config.height,
+            4,
+            wnd.width(),
+            wnd.height(),
+            &mut root_transform,
+        );
+    }
     let board = Board::new(
         &mut commands,
+        root_transform,
         &config,
-        &text_settings,
-        &cell_meshes,
-        &game_colors,
+        (&cell_meshes, &game_colors, &text_settings),
         &mut viewport,
         load_state.ids.unwrap(),
     );
 
-    for wnd in wnds.iter() {
-        rescale_board(
-            board.width,
-            board.height,
-            4,
-            wnd.width(),
-            wnd.height(),
-            &mut camera_query,
-        );
-    }
     commands.insert_resource(board);
 }

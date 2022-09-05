@@ -1,13 +1,15 @@
 use super::functions::spawn_option_cell;
 use crate::{
+    components::RootComponent,
     constants::{MED_SCALE, RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_TEXT},
     functions::rescale_board,
     resources::{CellMeshes, GameColors, TextSettings},
     states::AppState,
 };
 use bevy::{
+    hierarchy::BuildChildren,
     math::Vec3,
-    prelude::{default, AssetServer, Camera, Commands, Query, Res, Transform, With},
+    prelude::{default, AssetServer, Commands, Res, SpatialBundle, Transform},
     sprite::SpriteBundle,
     window::Windows,
 };
@@ -19,12 +21,10 @@ pub fn setup(
     game_colors: Res<GameColors>,
     text_settings: Res<TextSettings>,
     asset_server: Res<AssetServer>,
-    mut camera_query: Query<&mut Transform, With<Camera>>,
 ) {
-    let mut big_transform =
-        Transform::from_translation(Vec3::new(0., -2. * RADIUS * MED_SCALE, Z_INDEX_CELL_BACK));
+    let mut big_transform = Transform::from_xyz(0., -2. * RADIUS * MED_SCALE, Z_INDEX_CELL_BACK);
     big_transform.rotate_z(f32::to_radians(90.0));
-    spawn_option_cell(
+    let start_cell = spawn_option_cell(
         &mut commands,
         &cell_meshes,
         &game_colors,
@@ -38,7 +38,7 @@ pub fn setup(
         -RADIUS * MED_SCALE,
         Z_INDEX_CELL_BACK,
     );
-    spawn_option_cell(
+    let editor_cell = spawn_option_cell(
         &mut commands,
         &cell_meshes,
         &game_colors,
@@ -52,7 +52,7 @@ pub fn setup(
         -RADIUS * MED_SCALE,
         Z_INDEX_CELL_BACK,
     );
-    spawn_option_cell(
+    let settings_cell = spawn_option_cell(
         &mut commands,
         &cell_meshes,
         &game_colors,
@@ -62,18 +62,23 @@ pub fn setup(
         "Options",
     );
 
-    commands.spawn_bundle(SpriteBundle {
-        texture: asset_server.load("branding/logo.png"),
-        transform: Transform::from_translation(Vec3::new(
-            0.,
-            2. * RADIUS * MED_SCALE,
-            Z_INDEX_TEXT,
-        )),
-        ..default()
-    });
+    let logo_entity = commands
+        .spawn_bundle(SpriteBundle {
+            texture: asset_server.load("branding/logo.png"),
+            transform: Transform::from_xyz(0., 2. * RADIUS * MED_SCALE, Z_INDEX_TEXT),
+            ..default()
+        })
+        .id();
 
+    let mut root_transform = Transform::identity();
     for wnd in wnds.iter() {
         // TODO: Remove hard-coded width/height
-        rescale_board(10, 6, 1, wnd.width(), wnd.height(), &mut camera_query);
+        rescale_board(10, 6, 1, wnd.width(), wnd.height(), &mut root_transform);
     }
+
+    commands
+        .spawn()
+        .push_children(&[start_cell, editor_cell, settings_cell, logo_entity])
+        .insert_bundle(SpatialBundle::from_transform(root_transform))
+        .insert(RootComponent);
 }

@@ -20,10 +20,8 @@ pub const Z_INDEX_UI: f32 = 20.0;
 pub const SCALE_NORMAL: Vec3 = Vec3::new(1., 1., 1.);
 pub const SCALE_ENLARGED: Vec3 = Vec3::new(1.04, 1.04, 1.);
 
-pub const OUTER_TRANSFORM: Transform =
-    Transform::from_translation(Vec3::new(0.0, 0.0, Z_INDEX_CELL_OUTER));
-pub const INNER_TRANSFORM: Transform =
-    Transform::from_translation(Vec3::new(0.0, 0.0, Z_INDEX_CELL_INNER));
+pub const OUTER_TRANSFORM: Transform = Transform::from_xyz(0.0, 0.0, Z_INDEX_CELL_OUTER);
+pub const INNER_TRANSFORM: Transform = Transform::from_xyz(0.0, 0.0, Z_INDEX_CELL_INNER);
 
 pub struct GameColor;
 impl GameColor {
