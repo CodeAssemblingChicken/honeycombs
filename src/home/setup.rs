@@ -90,8 +90,10 @@ pub fn setup(
         })
         .id();
 
-    let pos_en = (-140.0, -2. * RADIUS * MED_SCALE);
-    let pos_de = (140.0, -2. * RADIUS * MED_SCALE);
+    let pos_en = (-140.0, -2. * RADIUS * MED_SCALE + 0.8 * RADIUS);
+    let pos_de = (140.0, -2. * RADIUS * MED_SCALE + 0.8 * RADIUS);
+    let pos_fr = (-140.0, -2. * RADIUS * MED_SCALE - 0.8 * RADIUS);
+    let pos_es = (140.0, -2. * RADIUS * MED_SCALE - 0.8 * RADIUS);
     let lang_en = commands
         .spawn_bundle(SpriteBundle {
             texture: asset_server.load("lang/en.png"),
@@ -130,9 +132,49 @@ pub fn setup(
         })
         .insert(Language::DE)
         .id();
+    let lang_fr = commands
+        .spawn_bundle(SpriteBundle {
+            texture: asset_server.load("lang/fr.png"),
+            transform: Transform::from_xyz(pos_fr.0, pos_fr.1, Z_INDEX_TEXT),
+            ..default()
+        })
+        .insert(Clickable {
+            shape: Shape::Quad(interactable::shapes::Quad {
+                width: 200.,
+                height: 120.,
+            }),
+            mouse_actions: MouseActions {
+                left_released: true,
+                ..default()
+            },
+            ..default()
+        })
+        .insert(Language::FR)
+        .id();
+    let lang_es = commands
+        .spawn_bundle(SpriteBundle {
+            texture: asset_server.load("lang/es.png"),
+            transform: Transform::from_xyz(pos_es.0, pos_es.1, Z_INDEX_TEXT),
+            ..default()
+        })
+        .insert(Clickable {
+            shape: Shape::Quad(interactable::shapes::Quad {
+                width: 200.,
+                height: 120.,
+            }),
+            mouse_actions: MouseActions {
+                left_released: true,
+                ..default()
+            },
+            ..default()
+        })
+        .insert(Language::ES)
+        .id();
 
     let pos_lang_sel = match profile.lang.as_str() {
         "de" => pos_de,
+        "fr" => pos_fr,
+        "es" => pos_es,
         _ => pos_en,
     };
     let lang_selector = commands
@@ -164,6 +206,8 @@ pub fn setup(
             logo_entity,
             lang_en,
             lang_de,
+            lang_fr,
+            lang_es,
             lang_selector,
         ])
         .insert_bundle(SpatialBundle::from_transform(root_transform))

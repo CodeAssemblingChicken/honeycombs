@@ -233,7 +233,7 @@ pub fn cell_update_system(
                     board.cells[cell.y as usize][cell.x as usize].0 =
                         Some(CellType::NumberCell(HintType::Connected));
                 } else {
-                    ts.style_cell.color = Color::RED;
+                    ts.style_cell.color = Color::rgb(1.0, 0.4, 0.3);
                     board.cells[cell.y as usize][cell.x as usize].0 =
                         Some(CellType::NumberCell(HintType::Seperated));
                 }

@@ -12,8 +12,17 @@ use crate::{
 };
 use bevy::{
     hierarchy::BuildChildren,
-    prelude::{default, Color, Commands, Entity, SpatialBundle, Transform, Visibility},
+    math::Vec2,
+    prelude::{
+        default, shape::Quad, Assets, Color, Commands, Entity, Mesh, SpatialBundle, Transform,
+        Visibility,
+    },
+    sprite::{ColorMaterial, ColorMesh2dBundle},
     text::{Text, Text2dBundle},
+};
+use interactable::{
+    click::{Clickable, MouseActions},
+    shapes::Shape,
 };
 
 /// Board component storing common variables
@@ -38,6 +47,7 @@ impl Board {
         config: &BoardConfig,
         (cell_meshes, game_colors, text_settings): (&CellMeshes, &GameColors, &TextSettings),
         (stage_id, level_id): (u8, u8),
+        (meshes, colors): (&mut Assets<Mesh>, &mut Assets<ColorMaterial>),
     ) -> Self {
         let cells = &config.cells;
         let hints = &config.hints;
@@ -113,7 +123,7 @@ impl Board {
                         let mut ts = text_settings.style_cell.clone();
                         match ht {
                             HintType::Connected => ts.color = Color::GREEN,
-                            HintType::Seperated => ts.color = Color::RED,
+                            HintType::Seperated => ts.color = Color::rgb(1.0, 0.2, 0.2),
                             _ => (),
                         }
                         let text_entity = spawn_cell_text(
@@ -170,15 +180,42 @@ impl Board {
                 cell_entities.push(cell);
             }
         }
+        let line_color = colors.add(ColorMaterial::from(Color::rgba(1.0, 1.0, 1.0, 0.4)));
         for hint in hints {
-            text_entities.push(spawn_hint(
+            let (hint_entity, length) = spawn_hint(
                 commands,
                 *hint,
                 cells,
                 text_settings,
                 (w, h),
                 (width, height),
-            ));
+            );
+            let hint_line = commands
+                .spawn_bundle(ColorMesh2dBundle {
+                    mesh: meshes
+                        .add(Mesh::from(Quad::new(Vec2::new(16.0, length))))
+                        .into(),
+                    material: line_color.clone(),
+                    transform: Transform::from_xyz(0., -(length) / 2. - RADIUS / 3., 2.),
+                    visibility: Visibility { is_visible: false },
+                    ..default()
+                })
+                .id();
+            commands
+                .entity(hint_entity)
+                .insert(Clickable {
+                    shape: Shape::Quad(interactable::shapes::Quad {
+                        width: 0.6 * RADIUS,
+                        height: 0.6 * RADIUS,
+                    }),
+                    mouse_actions: MouseActions {
+                        left_released: true,
+                        ..default()
+                    },
+                    ..default()
+                })
+                .add_child(hint_line);
+            text_entities.push(hint_entity);
         }
         let texts = [
             TextSectionConfig::new("Hello ", None, false),
@@ -258,12 +295,12 @@ impl Board {
         }
     }
     pub fn uncover_empty(&mut self) {
-        if self.remaining.0 > u16::MIN {
+        if self.get_empty_remaining() > u16::MIN {
             self.remaining.0 -= 1;
         }
     }
     pub fn uncover_number(&mut self) {
-        if self.remaining.1 > u16::MIN {
+        if self.get_number_remaining() > u16::MIN {
             self.remaining.1 -= 1;
         }
     }
@@ -273,10 +310,10 @@ impl Board {
         }
     }
     pub fn is_solved(&self) -> bool {
-        self.remaining.0 == 0 && self.remaining.1 == 0
+        self.get_empty_remaining() == 0 && self.get_number_remaining() == 0
     }
     pub fn get_max_points(&self) -> u16 {
-        ((self.hidden as f32).powf(0.6) as u16).max(1).min(30)
+        ((self.get_hidden() as f32).powf(0.6) as u16).max(1).min(30)
     }
     pub fn get_points(&self) -> u16 {
         self.get_max_points().saturating_sub(self.mistakes)

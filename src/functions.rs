@@ -113,7 +113,7 @@ pub fn spawn_hint(
     text_settings: &TextSettings,
     (w, h): (f32, f32),
     (width, height): (usize, usize),
-) -> Entity {
+) -> (Entity, f32) {
     let (mut tx, mut ty) = calc_translation(hint.x as i32, hint.y as i32, w, h);
     let mut t = Transform::from_xyz(0., 0., Z_INDEX_TEXT);
     match hint.dir {
@@ -157,18 +157,32 @@ pub fn spawn_hint(
     let mut ts = text_settings.clone();
     match hint.hint_type {
         HintType::Connected => ts.style_cell.color = Color::GREEN,
-        HintType::Seperated => ts.style_cell.color = Color::RED,
+        HintType::Seperated => ts.style_cell.color = Color::rgb(1.0, 0.2, 0.2),
         _ => (),
     }
 
-    commands
-        .spawn_bundle(Text2dBundle {
-            text: Text::from_section(format!("{}", count), ts.style_cell)
-                .with_alignment(ts.alignment),
-            transform: t,
-            ..default()
-        })
-        .id()
+    let trimmed_col_len: u16 = column
+        .iter()
+        .skip_while(|(ct, _)| ct.is_none())
+        .collect::<Vec<&(Option<CellType>, bool)>>()
+        .iter()
+        .rev()
+        .skip_while(|(ct, _)| ct.is_none())
+        .map(|_| 1)
+        .sum();
+
+    (
+        commands
+            .spawn_bundle(Text2dBundle {
+                text: Text::from_section(format!("{}", count), ts.style_cell)
+                    .with_alignment(ts.alignment),
+                transform: t,
+                ..default()
+            })
+            .insert(hint)
+            .id(),
+        trimmed_col_len as f32 * RADIUS * 1.8,
+    )
 }
 
 pub fn rescale_board(

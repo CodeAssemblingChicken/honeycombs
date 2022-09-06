@@ -5,7 +5,8 @@ use crate::{
     resources::{CellMeshes, GameColors, LoadState, Locale, TextSettings},
 };
 use bevy::{
-    prelude::{Commands, Res, ResMut, Transform},
+    prelude::{Assets, Commands, Mesh, Res, ResMut, Transform},
+    sprite::ColorMaterial,
     window::Windows,
 };
 
@@ -18,7 +19,8 @@ pub fn setup(
         Res<Locale>,
         Res<TextSettings>,
     ),
-    mut load_state: ResMut<LoadState>,
+    load_state: ResMut<LoadState>,
+    (mut meshes, mut colors): (ResMut<Assets<Mesh>>, ResMut<Assets<ColorMaterial>>),
 ) {
     if load_state.filename.is_none() {
         panic!("No level specified.");
@@ -42,6 +44,7 @@ pub fn setup(
         &config,
         (&cell_meshes, &game_colors, &text_settings),
         load_state.ids.unwrap(),
+        (&mut meshes, &mut colors),
     );
 
     commands.insert_resource(board);

@@ -3,6 +3,7 @@
         "editor": "Editor",
         "start": "Start",
         "options": "Optionen",
+        "quit": "Beenden",
         "pause": "Pause",
         "complete": "Rätsel gelöst!",
         "highscore": "Highscore",
@@ -14,8 +15,18 @@
         "next": "Nächstes\nLevel"
     },
     text_sections: {
+        "intro": [
+            (text: "Willkommen zu ", color: None, interactable: false),
+            (text: "Honeycombs", color: Some(Rgba(red: 0.894, green: 0.627, blue: 0.125, alpha: 1.0)), interactable: false),
+            (text: "! Das Ziel ist, das Muster freizulegen.\n Die Zahl in einer grauen Zellen verrät, wie viele blaue Zellen angrenzen.", color: None, interactable: false),
+            (text: "\nKlicke auf gelbe Zellen: Links um blaue und rechts um graue Zellen aufzudecken.", color: None, interactable: false),
+        ],
+        "no-guess": [
+            (text: "Jedes Rätsel kann ohne Raten gelöst werden.\n", color: None, interactable: false),
+            (text: "Hoffe ich.", color: Some(Rgba(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.05)), interactable: false),
+        ],
         "esc": [
-            (text: "Ich war zu faul, Zurück-Knöpfe einzubauen. Um in Menüs zurück zu navigieren, drücke ", color: None, interactable: false),
+            (text: "Ich war zu faul, Zurück–Knöpfe einzubauen. Um in Menüs zurück zu navigieren, drücke ", color: None, interactable: false),
             (text: "Esc", color: Some(Rgba(red: 0.3, green: 1., blue: 0.5, alpha: 1.)), interactable: false),
             (text: ".\nProbiere es gerne jetzt aus: Drücke ein mal zum Öffnen und noch mal zum Schließen des Menüs.", color: None, interactable: false),
         ],
@@ -27,10 +38,55 @@
             (text: "Das ist das letzte Insekt. Versprochen.", color: None, interactable: false),
         ],
         "not-insect": [
-            (text: "Ich sagte das letzte ", color: None, interactable: false),
-            (text: "Insekt", color: Some(Rgba(red: 0.9, green: 0.4, blue: 0.3, alpha: 1.0)), interactable: false),
-            (text: ".\n", color: None, interactable: false),
             (text: "Niemand hat was von Spinnen gesagt.", color: Some(Rgba(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.05)), interactable: false),
+        ],
+        "remaining-counter": [
+            (text: "Hast du den ", color: None, interactable: false),
+            (text: "Übrig", color: Some(Rgba(red: 0.0, green: 0.627, blue: 0.941, alpha: 1.0)), interactable: false), 
+            (text: "–Zähler oben rechts bemerkt?\nManchmal kann er hilfreich sein.", color: None, interactable: false),         
+        ],
+        "column-tut1": [
+            (text: "Zahlen außerhalb des Felds verraten,\nwie viele blaue Zellen in einer Spalte sind.", color: None, interactable: false),
+        ],
+        "column-tut2": [
+            (text: "Die Orientierung der Zahlen ist wichtig. Klicke auf eine Zahl,\num eine Hilfslinie anzuzeigen. Klicke erneut, um sie zu verbergen.", color: None, interactable: false),
+        ],
+        "column-tut3": [
+            (text: "Grüne", color: Some(Rgba(red: 0.0, green: 1.0, blue: 0.0, alpha: 1.0)), interactable: false),
+            (text: " Zahlen geben den Hinweis,\ndass die blauen Zellen zusammenhängen.", color: None, interactable: false),
+        ],
+        "column-tut4": [
+            (text: "Rote", color: Some(Rgba(red: 1.0, green: 0.2, blue: 0.2, alpha: 1.0)), interactable: false),
+            (text: " Zahlen geben den Hinweis, dass die blauen Zellen\n", color: None, interactable: false),
+            (text: "nicht", color: Some(Rgba(red: 1.0, green: 0.2, blue: 0.2, alpha: 1.0)), interactable: false),
+            (text: " zusammenhängen. Nicht alle, jedenfalls.", color: None, interactable: false),
+        ],
+        "cell-tut1": [
+            (text: "Für Zellen gelten die gleichen Regeln: ", color: None, interactable: false),
+            (text: "Grüne", color: Some(Rgba(red: 0.0, green: 1.0, blue: 0.0, alpha: 1.0)), interactable: false),
+            (text: " Zahlen geben\nden Hinweis, dass die blauen Zellen zusammenhängen.", color: None, interactable: false),
+        ],
+        "cell-tut2": [
+            (text: "Nochmal: ", color: None, interactable: false),
+            (text: "Rote", color: Some(Rgba(red: 1.0, green: 0.2, blue: 0.2, alpha: 1.0)), interactable: false),
+            (text: " Zahlen geben den Hinweis, dass die\nblauen Zellen ", color: None, interactable: false),
+            (text: "nicht", color: Some(Rgba(red: 1.0, green: 0.2, blue: 0.2, alpha: 1.0)), interactable: false),
+            (text: " zusammenhängen. Nicht alle, jedenfalls.", color: None, interactable: false),
+            (text: "\nTotal verrückt, ich weiß.", color: Some(Rgba(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.05)), interactable: false),
+        ],
+        "suzanne": [
+            (text: "Sag hallo zu Suzanne.", color: None, interactable: false),
+            (text: "\nTut mir leid Suzanne, mit Sechsecken zu malen ist echt nicht einfach.", color: Some(Rgba(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.05)), interactable: false),
+        ],
+        "editor": [
+            (text: "Hast du schon den Editor gesehen? Viel Glück herauszufinden, wie er geht.", color: None, interactable: false),
+            (text: "\nIch bin mir selbst nicht sicher.", color: Some(Rgba(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.05)), interactable: false),
+        ],
+        "translation": [
+            (text: "Übrigens, Entschuldigung an alle, die diese Spiel auf Französisch oder Spanisch spielen.", color: None, interactable: false),
+        ],
+        "thanks": [
+            (text: "Danke für's Spielen :)", color: None, interactable: false),
         ],
         "nutella": [
             (text: "Der", color: Some(Rgba(red: 1., green: 1., blue: 1., alpha: 1.)), interactable: false),
@@ -38,7 +94,7 @@
             (text: "die", color: None, interactable: false),
             (text: " oder ", color: None, interactable: false),
             (text: "das", color: None, interactable: false),
-            (text: " Nutella", color: None, interactable: false),
+            (text: " Nutella?", color: None, interactable: false),
         ]
     }
 )

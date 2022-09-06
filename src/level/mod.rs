@@ -23,6 +23,7 @@ pub fn prepare_level(app: &mut App) {
                         .after(mouse_enter_cell)
                         .after(mouse_exit_cell),
                 )
+                .with_system(mouse_click_hint)
                 .with_system(check_solved)
                 .with_system(window_resize_system)
                 .with_system(hotkey_system),

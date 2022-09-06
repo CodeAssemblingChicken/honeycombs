@@ -1,0 +1,105 @@
+(
+    strings: {
+        "editor": "Éditeur",
+        "start": "Début",
+        "options": "Options",
+        "quit": "Quitter",
+        "pause": "Pause",
+        "complete": "Le puzzle est terminé!",
+        "highscore": "Highscore",
+        "mistakes": "Erreurs",
+        "remaining": "Restant",
+        "total": "Total",
+        "retry": "Redémarrer",
+        "menu": "Menu",
+        "next": "Niveau\nsuivant"
+    },
+    text_sections: {
+        "intro": [
+            (text: "Bienvenue à ", color: None, interactable: false),
+            (text: "Honeycombs", color: Some(Rgba(red: 0.894, green: 0.627, blue: 0.125, alpha: 1.0)), interactable: false),
+            (text: "! Votre objectif est de révéler le motif.\n Le nombre dans une cellule grise vous indique, combien de cellules bleues sont adjacentes à celle-ci.", color: None, interactable: false),
+            (text: "\nCliquez sur les cellules jaunes : à gauche pour découvrir une cellule bleue et à droite pour une cellule grise.", color: None, interactable: false),
+        ],
+        "no-guess": [
+            (text: "Chaque puzzle peut être résolu sans deviner.\n", color: None, interactable: false),
+            (text: "Du moins, je le pense.", color: Some(Rgba(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.05)), interactable: false),
+        ],
+        "esc": [
+            (text: "J'étais trop paresseux pour placer des boutons de retour. Pour revenir en arrière dans les menus, appuyez sur ", color: None, interactable: false),
+            (text: "Esc", color: Some(Rgba(red: 0.3, green: 1., blue: 0.5, alpha: 1.)), interactable: false),
+            (text: ".\nN'hésitez pas à l'essayer maintenant. Appuyez une fois pour ouvrir et une autre fois pour fermer le menu.", color: None, interactable: false),
+        ],
+        "game-name": [
+            (text: "The Name of the Game? ", color: None, interactable: false),
+            (text: "Honeycombs", color: Some(Rgba(red: 0.894, green: 0.627, blue: 0.125, alpha: 1.0)), interactable: false),
+        ],
+        "last-insect": [
+            (text: "C'est le dernier insecte. Je te le promets.", color: None, interactable: false),
+        ],
+        "not-insect": [
+            (text: "Personne n'a mentionné les araignées.", color: Some(Rgba(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.05)), interactable: false),
+        ],
+        "remaining-counter": [
+            (text: "Avez-vous remarqué le compteur ", color: None, interactable: false),
+            (text: "Restant", color: Some(Rgba(red: 0.0, green: 0.627, blue: 0.941, alpha: 1.0)), interactable: false), 
+            (text: " en haut à droite?\nIl peut être utile parfois.", color: None, interactable: false),         
+        ],
+        "column-tut1": [
+            (text: "Les chiffres en dehors du champ vous indiquent\nle nombre de cellules bleues dans une colonne.", color: None, interactable: false),
+        ],
+        "column-tut2": [
+            (text: "L'orientation des chiffres est importante.\nVous pouvez cliquer sur un chiffre pour faire apparaître\nune ligne utile. Cliquez à nouveau pour la masquer.", color: None, interactable: false),
+        ],
+        "column-tut3": [            
+            (text: "Les chiffres ", color: None, interactable: false),
+            (text: "verts", color: Some(Rgba(red: 0.0, green: 1.0, blue: 0.0, alpha: 1.0)), interactable: false),
+            (text: " vous donnent l'indice\nque les cellules bleues sont contiguës.", color: None, interactable: false),
+        ],
+        "column-tut4": [
+            (text: "Les chiffres ", color: None, interactable: false),
+            (text: "rouges", color: Some(Rgba(red: 1.0, green: 0.2, blue: 0.2, alpha: 1.0)), interactable: false),
+            (text: " vous donnent l'indice que les\ncellules bleues ", color: None, interactable: false),
+            (text: "ne", color: Some(Rgba(red: 1.0, green: 0.2, blue: 0.2, alpha: 1.0)), interactable: false),
+            (text: " sont pas contiguës. Du moins, pas toutes.", color: None, interactable: false),
+        ],
+        "cell-tut1": [
+            (text: "Les mêmes règles s'appliquent aux cellules: ", color: None, interactable: false),            
+            (text: "Les chiffres ", color: None, interactable: false),
+            (text: "verts", color: Some(Rgba(red: 0.0, green: 1.0, blue: 0.0, alpha: 1.0)), interactable: false),
+            (text: "\nvous donnent l'indice que les cellules bleues sont contiguës.", color: None, interactable: false),
+        ],
+        "cell-tut2": [
+            (text: "Encore une fois: ", color: None, interactable: false),
+            (text: "Les chiffres ", color: None, interactable: false),
+            (text: "rouges", color: Some(Rgba(red: 1.0, green: 0.2, blue: 0.2, alpha: 1.0)), interactable: false),
+            (text: " vous donnent l'indice que les\ncellules bleues ", color: None, interactable: false),
+            (text: "ne", color: Some(Rgba(red: 1.0, green: 0.2, blue: 0.2, alpha: 1.0)), interactable: false),
+            (text: " sont pas contiguës. Du moins, pas toutes.", color: None, interactable: false),
+            (text: "\nC'est complètement fou, je sais.", color: Some(Rgba(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.05)), interactable: false),
+        ],
+        "suzanne": [
+            (text: "Dites bonjour à Suzanne.", color: None, interactable: false),
+            (text: "\nJe suis désolée Suzanne, c'est vraiment difficile de dessiner avec des hexagones.", color: Some(Rgba(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.05)), interactable: false),
+        ],
+        "editor": [
+            (text: "Avez-vous vu l'éditeur ? Bonne chance pour comprendre comment il fonctionne.", color: None, interactable: false),
+            (text: "\nJe ne suis pas sûr moi-même.", color: Some(Rgba(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.05)), interactable: false),
+        ],
+        "translation": [
+            (text: "Au fait, je présente mes excuses à tous ceux qui jouent ce jeu en français ou en espagnol.", color: None, interactable: false),
+        ],
+        "thanks": [
+            (text: "Merci de jouer :)", color: None, interactable: false),
+        ],
+        "nutella": [
+            (text: "La", color: Some(Rgba(red: 1., green: 1., blue: 1., alpha: 1.)), interactable: false),
+            (text: ", ", color: None, interactable: false),
+            (text: "e", color: None, interactable: false),
+            (text: " ou ", color: None, interactable: false),
+            (text: "lu", color: None, interactable: false),
+            (text: " Nutella?", color: None, interactable: false),
+            (text: "\nAttends, ça n'a de sens qu'en allemand.", color: Some(Rgba(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.05)), interactable: false),
+        ]
+    }
+)

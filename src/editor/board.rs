@@ -170,7 +170,6 @@ impl Board {
             }
             if row_empty(&(&cells[0]).iter().step_by(2).map(|e| *e).collect()) {
                 // Pull up every 2n
-                println!("Shiftable 1");
                 let h = cells.len() - 1;
                 for x in (0..cells[0].len()).step_by(2) {
                     for y in 0..h {

@@ -176,7 +176,7 @@ pub fn setup(
                         .add(Mesh::from(Quad::new(Vec2::new(600., 580.))))
                         .into(),
                     material: colors.add(ColorMaterial::from(Color::rgba(0.7, 0.7, 0.7, 0.92))),
-                    transform: Transform::from_xyz(-310., 50., 1.),
+                    transform: Transform::from_xyz(-310., 50., 0.9),
                     ..default()
                 })
                 .push_children(&point_cells)
@@ -194,7 +194,7 @@ pub fn setup(
                         .add(Mesh::from(Quad::new(Vec2::new(600., 580.))))
                         .into(),
                     material: colors.add(ColorMaterial::from(Color::rgba(0.7, 0.7, 0.7, 0.92))),
-                    transform: Transform::from_xyz(310., 50., 1.),
+                    transform: Transform::from_xyz(310., 50., 0.9),
                     ..default()
                 })
                 .add_child(total_cell)
@@ -221,7 +221,7 @@ pub fn setup(
                         .add(Mesh::from(Quad::new(Vec2::new(240., 190.))))
                         .into(),
                     material: colors.add(ColorMaterial::from(Color::rgba(0.7, 0.7, 0.7, 0.92))),
-                    transform: Transform::from_xyz(-260., -355., 1.),
+                    transform: Transform::from_xyz(-260., -355., 0.9),
                     ..default()
                 })
                 .with_children(|parent| {
@@ -260,7 +260,7 @@ pub fn setup(
                             .add(Mesh::from(Quad::new(Vec2::new(240., 190.))))
                             .into(),
                         material: colors.add(ColorMaterial::from(Color::rgba(0.7, 0.7, 0.7, 0.92))),
-                        transform: Transform::from_xyz(0., -355., 1.),
+                        transform: Transform::from_xyz(0., -355., 0.9),
                         ..default()
                     })
                     .with_children(|parent| {
@@ -296,7 +296,7 @@ pub fn setup(
                         .add(Mesh::from(Quad::new(Vec2::new(240., 190.))))
                         .into(),
                     material: colors.add(ColorMaterial::from(Color::rgba(0.7, 0.7, 0.7, 0.92))),
-                    transform: Transform::from_xyz(260., -355., 1.),
+                    transform: Transform::from_xyz(260., -355., 0.9),
                     ..default()
                 })
                 .with_children(|parent| {

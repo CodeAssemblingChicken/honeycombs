@@ -14,7 +14,7 @@ use bevy::{
 };
 use interactable::{
     click::{ClickType, MouseLeftClickEvent},
-    hover::{MouseEnterEvent, MouseExitEvent, MouseOverEvent},
+    hover::{MouseEnterEvent, MouseExitEvent},
 };
 
 pub fn mouse_click_cell(

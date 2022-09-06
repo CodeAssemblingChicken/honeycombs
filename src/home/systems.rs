@@ -60,6 +60,8 @@ pub fn mouse_click_lang(
                 match lang {
                     Language::EN => "en",
                     Language::DE => "de",
+                    Language::FR => "fr",
+                    Language::ES => "es",
                 },
                 &mut profile,
             );

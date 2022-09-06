@@ -129,7 +129,7 @@ impl FromWorld for TextSettings {
         };
         let style_menu_dark = TextStyle {
             font: font2.clone(),
-            font_size: (RADIUS * 0.99).round(),
+            font_size: (RADIUS).round(),
             color: Color::BLACK,
         };
         Self {

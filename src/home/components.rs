@@ -52,7 +52,7 @@ impl OptionCell {
         let colors = get_colors_for_app_state(game_colors, self.app_state);
         cell.click(commands, None, colors.2, colors.1, color_query);
         // TODO: Remove
-        load_state.filename = Some("assets/levels/5/3.lvl".to_string());
+        load_state.filename = Some("assets/levels/5/4.lvl".to_string());
         switch_state(Some(self.app_state), app_state, load_state);
     }
 }
@@ -61,6 +61,8 @@ impl OptionCell {
 pub enum Language {
     EN,
     DE,
+    FR,
+    ES,
 }
 #[derive(Component)]
 pub struct LangSelector;

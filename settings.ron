@@ -1,12 +1,12 @@
 (
-    lang: "de",
+    lang: "es",
     sfx_volume: 0.5,
     level_points: (
-        (Some(5), Some(5), Some(2), Some(5), Some(11), None),
+        (Some(1000), Some(5), Some(6), Some(6), Some(11), None),
         (None, None, None, Some(6), None, None),
+        (Some(5), Some(8), Some(6), None, None, None),
         (None, None, None, None, None, None),
         (None, None, None, None, None, None),
-        (None, Some(16), None, None, None, None),
         (None, None, None, None, None, None),
     ),
 )

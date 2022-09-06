@@ -3,25 +3,26 @@ use super::{
     components::{EmptyCell, GameCell, MistakesText, NumberCell, RemainingText},
 };
 use crate::{
-    components::{Cell, RootComponent},
-    functions::{rescale_board, switch_state},
+    components::{Cell, ColumnHint, RootComponent},
+    functions::rescale_board,
     overlay::resources::{OverlaySettings, OverlayType},
-    resources::{GameColors, LoadState, Profile, SfxAssets, TextSettings},
+    resources::{GameColors, Profile, SfxAssets, TextSettings},
     states::AppState,
 };
 use bevy::{
     audio::{Audio, PlaybackSettings},
+    hierarchy::Children,
     input::Input,
     prelude::{
         ColorMaterial, Commands, EventReader, Handle, KeyCode, ParamSet, Query, Res, ResMut, State,
-        Transform, With, Without,
+        Transform, Visibility, With, Without,
     },
     text::Text,
     window::WindowResized,
 };
 use interactable::{
     click::{ClickType, MouseLeftClickEvent, MouseRightClickEvent},
-    hover::{MouseEnterEvent, MouseExitEvent, MouseOverEvent},
+    hover::{MouseEnterEvent, MouseExitEvent},
 };
 
 /// Calls uncover on a cell that is clicked by the mouse
@@ -110,6 +111,29 @@ pub fn mouse_exit_cell(
     }
 }
 
+pub fn mouse_click_hint(
+    hint_query: Query<&Children, With<ColumnHint>>,
+    mut hint_line_query: Query<&mut Visibility>,
+    mut ev_mouse_left_click: EventReader<MouseLeftClickEvent>,
+) {
+    for ev in ev_mouse_left_click
+        .iter()
+        .filter(|ev| ev.click_type == ClickType::Released)
+    {
+        if let Ok(hint) = hint_query.get(ev.entity) {
+            for line in hint.iter() {
+                if let Ok(mut visibility) = hint_line_query.get_mut(*line) {
+                    visibility.is_visible = !visibility.is_visible;
+                }
+                // get the health of each child unit
+                // let health = q_child.get(child);
+
+                // do something
+            }
+        }
+    }
+}
+
 /// On resizing the window, the board is resized too
 pub fn window_resize_system(
     mut ev_window_resize: EventReader<WindowResized>,
@@ -164,7 +188,6 @@ pub fn check_solved(
             );
         }
         if board.is_solved() {
-            println!("{},{}", board.get_stage_id(), board.get_level_id());
             profile.update_point(
                 board.get_points(),
                 board.get_stage_id(),
