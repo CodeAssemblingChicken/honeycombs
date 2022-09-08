@@ -122,7 +122,7 @@ impl FromWorld for TextSettings {
             font_size: (RADIUS * 0.75).round(),
             color: Color::WHITE,
         };
-        let style_menu = TextStyle {
+        let style_cell_large = TextStyle {
             font: font.clone(),
             font_size: (RADIUS * 0.9).round(),
             color: Color::WHITE,
@@ -134,7 +134,7 @@ impl FromWorld for TextSettings {
         };
         Self {
             style_cell,
-            style_cell_large: style_menu,
+            style_cell_large,
             style_menu_dark,
             alignment: TextAlignment::CENTER,
         }

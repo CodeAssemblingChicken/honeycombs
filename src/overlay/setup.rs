@@ -80,13 +80,12 @@ pub fn setup(
 
     let mut point_cells = Vec::new();
     for i in 0..overlay_settings.max_points {
-        let mut big_transform = Transform::from_xyz(
+        let big_transform = Transform::from_xyz(
             (i % 6) as f32 * RADIUS / 1.2 - 208.,
             (i / 6) as f32 * RADIUS / -1.2 + 117.,
             Z_INDEX_CELL_BACK,
         )
         .with_scale(Vec3::new(0.4, 0.4, 1.0));
-        big_transform.rotate_z(f32::to_radians(90.0));
         let colors = if i < points {
             (
                 game_colors.alpha2.clone(),
@@ -116,8 +115,7 @@ pub fn setup(
     }
 
     let total_cell = commands.spawn().id();
-    let mut tf = Transform::from_scale(Vec3::new(1.5, 1.5, 1.0));
-    tf.rotate_z(f32::to_radians(90.0));
+    let tf = Transform::from_scale(Vec3::new(1.5, 1.5, 1.0));
     spawn_cell(
         &mut commands,
         total_cell,
@@ -211,7 +209,7 @@ pub fn setup(
                             text_settings.style_menu_dark.clone(),
                         )
                         .with_alignment(text_settings.alignment),
-                        transform: Transform::from_xyz(0., -190., 10.),
+                        transform: Transform::from_xyz(0., -210., 10.),
                         ..default()
                     });
                 });
@@ -251,7 +249,6 @@ pub fn setup(
                     ..default()
                 });
             if overlay_settings.overlay_type == OverlayType::LevelComplete
-                && overlay_settings.stage_id < 5
                 && overlay_settings.level_id < 5
             {
                 parent

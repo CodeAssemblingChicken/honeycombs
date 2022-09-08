@@ -1,8 +1,8 @@
 use super::components::{MistakesText, RemainingText};
 use crate::{
     board_functions::{count_empty_cells, empty_connected, get_neighbours},
-    components::{BoardConfig, Cell, CellType, HintType, RootComponent, TextSectionConfig},
-    constants::{GameColor, RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_TEXT},
+    components::{BoardConfig, Cell, CellType, HintType, RootComponent},
+    constants::{RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_TEXT},
     functions::{
         calc_dimensions, calc_translation, make_cell_interactable, spawn_cell, spawn_cell_text,
         spawn_hint,
@@ -217,11 +217,6 @@ impl Board {
                 .add_child(hint_line);
             text_entities.push(hint_entity);
         }
-        let texts = [
-            TextSectionConfig::new("Hello ", None, false),
-            TextSectionConfig::new("World", Some(GameColor::BLUE_LIGHT), false),
-            TextSectionConfig::new("!\nOK", None, false),
-        ];
 
         let text1 = if let Some(text) = &config.text {
             Some(

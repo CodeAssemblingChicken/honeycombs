@@ -35,7 +35,6 @@ pub fn button_system(
             );
         }
         if let Ok(_) = next_button_query.get(ev.entity) {
-            assert!(overlay_settings.stage_id < 5);
             assert!(overlay_settings.level_id < 5);
             load_state.ids = Some((overlay_settings.stage_id, overlay_settings.level_id + 1));
             load_state.filename = Some(format!(

@@ -34,16 +34,16 @@
             (text: "The Name of the Game? ", color: None, interactable: false),
             (text: "Honeycombs", color: Some(Rgba(red: 0.894, green: 0.627, blue: 0.125, alpha: 1.0)), interactable: false),
         ],
+        "remaining-counter": [
+            (text: "Hast du den ", color: None, interactable: false),
+            (text: "Übrig", color: Some(Rgba(red: 0.0, green: 0.627, blue: 0.941, alpha: 1.0)), interactable: false), 
+            (text: "–Zähler oben rechts bemerkt?\nManchmal kann er hilfreich sein.", color: None, interactable: false),         
+        ],
         "last-insect": [
             (text: "Das ist das letzte Insekt. Versprochen.", color: None, interactable: false),
         ],
         "not-insect": [
             (text: "Niemand hat was von Spinnen gesagt.", color: Some(Rgba(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.05)), interactable: false),
-        ],
-        "remaining-counter": [
-            (text: "Hast du den ", color: None, interactable: false),
-            (text: "Übrig", color: Some(Rgba(red: 0.0, green: 0.627, blue: 0.941, alpha: 1.0)), interactable: false), 
-            (text: "–Zähler oben rechts bemerkt?\nManchmal kann er hilfreich sein.", color: None, interactable: false),         
         ],
         "column-tut1": [
             (text: "Zahlen außerhalb des Felds verraten,\nwie viele blaue Zellen in einer Spalte sind.", color: None, interactable: false),
@@ -75,8 +75,7 @@
             (text: "\nTotal verrückt, ich weiß.", color: Some(Rgba(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.05)), interactable: false),
         ],
         "suzanne": [
-            (text: "Sag hallo zu Suzanne.", color: None, interactable: false),
-            (text: "\nTut mir leid Suzanne, mit Sechsecken zu malen ist echt nicht einfach.", color: Some(Rgba(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.05)), interactable: false),
+            (text: "\nTut mir leid Suzanne, mit Sechsecken malen ist echt nicht einfach.", color: Some(Rgba(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.05)), interactable: false),
         ],
         "editor": [
             (text: "Hast du schon den Editor gesehen? Viel Glück herauszufinden, wie er geht.", color: None, interactable: false),
@@ -85,16 +84,20 @@
         "translation": [
             (text: "Übrigens, Entschuldigung an alle, die diese Spiel auf Französisch oder Spanisch spielen.", color: None, interactable: false),
         ],
-        "thanks": [
-            (text: "Danke für's Spielen :)", color: None, interactable: false),
+        "disturbing": [
+            (text: "Bin ich der einzige, den stört, dass die Maximalpunktzahl 447 ist?\nWarum nicht 450?", color: None, interactable: false),
         ],
         "nutella": [
-            (text: "Der", color: Some(Rgba(red: 1., green: 1., blue: 1., alpha: 1.)), interactable: false),
+            (text: "Der", color: None, interactable: false),
             (text: ", ", color: None, interactable: false),
             (text: "die", color: None, interactable: false),
             (text: " oder ", color: None, interactable: false),
-            (text: "das", color: None, interactable: false),
+            (text: "das", color: Some(Rgba(red: 0.0, green: 0.627, blue: 0.941, alpha: 1.)), interactable: false),
             (text: " Nutella?", color: None, interactable: false),
-        ]
+            (text: "\nHinweis: Es gibt nur eine richtige Antwort.", color: Some(Rgba(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.05)), interactable: false),
+        ],
+        "thanks": [
+            (text: "Danke für's Spielen :)", color: None, interactable: false),
+        ],
     }
 )
