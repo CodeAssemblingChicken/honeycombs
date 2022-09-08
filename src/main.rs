@@ -33,11 +33,13 @@ use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
 #[cfg(feature = "debug")]
 use components::Cell;
 use interactable::{InteractableCamera, InteractablePlugin};
+#[cfg(not(target_family = "wasm"))]
 use native_dialog::MessageDialog;
 use resources::{CellMeshes, GameColors, LoadState, Locale, Profile, SfxAssets, TextSettings};
 use states::AppState;
 
 fn main() {
+    #[cfg(not(target_family = "wasm"))]
     set_panic_hook();
     let mut app = App::new();
     app.insert_resource(Msaa { samples: 4 })
@@ -114,6 +116,7 @@ fn set_panic_hook() {
     panic::set_hook(Box::new(|info| {
         let mut w = Vec::new();
         let _ = writeln!(&mut w, "{}", info);
+        #[cfg(not(target_family = "wasm"))]
         MessageDialog::new()
             .set_type(native_dialog::MessageType::Error)
             .set_title("Error")

@@ -15,12 +15,14 @@ debug = ["bevy/dynamic", "bevy-inspector-egui"]
 
 [dependencies]
 bevy_easings = "0.8"
-native-dialog = "0.6.3"
 # chrono = "0.4"
 rand = "0.8"
 ron = "0.8"
 serde = { version = "1", features = ["derive"] }
 interactable = { path = "interactable" }
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+native-dialog = "0.6.3"
 
 [dependencies.bevy]
 version = "0.8"
@@ -35,8 +37,6 @@ version = "0.12"
 default-features = false
 features = ["bevy_sprite"]
 optional = true
-# perhaps: "bevy_ui"
-
 
 # Enable a small amount of optimization in debug mode
 [profile.dev]
