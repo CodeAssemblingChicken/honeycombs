@@ -182,7 +182,7 @@ pub struct Profile {
 }
 impl Profile {
     pub fn new() -> Self {
-        from_reader(File::open("settings.ron").expect("Failed opening file")).unwrap_or_default()
+        from_reader(File::open("./settings.ron").expect("Failed opening file")).unwrap_or_default()
     }
     pub fn get_points(&self) -> u16 {
         self.level_points
@@ -192,7 +192,7 @@ impl Profile {
     }
     pub fn save(&self) {
         to_writer_pretty(
-            File::create("settings.ron").expect("Failed opening file"),
+            File::create("./settings.ron").expect("Failed opening file"),
             self,
             PrettyConfig::new()
                 .depth_limit(2)
