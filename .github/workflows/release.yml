@@ -154,7 +154,7 @@ jobs:
           mkdir tmp
           mkdir dist
 
-          cp -r "assets/" "dist/assets/"
+          cp -r "assets/" "tmp/assets/"
 
           for dir in bins-* ; do
               platform=${dir#"bins-"}
