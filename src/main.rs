@@ -21,7 +21,9 @@ use bevy::{
     window::{WindowDescriptor, WindowResizeConstraints},
     DefaultPlugins,
 };
+use bevy_asset_loader::prelude::AssetCollectionApp;
 use bevy_easings::EasingsPlugin;
+use bevy_kira_audio::AudioPlugin;
 use overlay::resources::OverlaySettings;
 use std::{
     io::{self, Write},
@@ -60,6 +62,7 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(InteractablePlugin)
         .add_plugin(EasingsPlugin)
+        .add_plugin(AudioPlugin)
         // .add_plugin(LogDiagnosticsPlugin::default())
         // .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_startup_system(setup)
@@ -81,10 +84,10 @@ fn main() {
 
     app.init_resource::<CellMeshes>()
         .init_resource::<GameColors>()
-        .init_resource::<SfxAssets>()
         .init_resource::<TextSettings>()
         .insert_resource(Locale::new(&profile.lang))
         .insert_resource(profile)
+        .init_collection::<SfxAssets>()
         .run();
 }
 

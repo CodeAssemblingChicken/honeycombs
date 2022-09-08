@@ -6,11 +6,14 @@ use crate::{
     states::AppState,
 };
 use bevy::{
-    audio::AudioSource,
+    asset::HandleUntyped,
+    ecs::world::{Mut, World},
     prelude::{shape::RegularPolygon, AssetServer, Assets, Color, FromWorld, Handle, Mesh},
     sprite::ColorMaterial,
     text::{TextAlignment, TextStyle},
 };
+use bevy_asset_loader::prelude::AssetCollection;
+use bevy_kira_audio::AudioSource;
 use ron::{
     de::from_reader,
     ser::{to_writer_pretty, PrettyConfig},
@@ -90,17 +93,19 @@ impl FromWorld for GameColors {
 }
 
 /// Resource for hover sfx
+#[derive(AssetCollection)]
 pub struct SfxAssets {
+    #[asset(path = "sfx/hover.ogg")]
     pub sfx_hover: Handle<AudioSource>,
 }
 
-impl FromWorld for SfxAssets {
-    fn from_world(world: &mut bevy::prelude::World) -> Self {
-        let asset_server = world.get_resource::<AssetServer>().unwrap();
-        let sfx_hover: Handle<AudioSource> = asset_server.load("sfx/hover.ogg");
-        Self { sfx_hover }
-    }
-}
+// impl FromWorld for SfxAssets {
+//     fn from_world(world: &mut bevy::prelude::World) -> Self {
+//         let asset_server = world.get_resource::<AssetServer>().unwrap();
+//         let sfx_hover: Handle<AudioSource> = asset_server.load("sfx/hover.ogg");
+//         Self { sfx_hover }
+//     }
+// }
 
 /// Resource for text
 #[derive(Clone)]

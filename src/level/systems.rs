@@ -10,7 +10,6 @@ use crate::{
     states::AppState,
 };
 use bevy::{
-    audio::{Audio, PlaybackSettings},
     hierarchy::Children,
     input::Input,
     prelude::{
@@ -20,6 +19,7 @@ use bevy::{
     text::Text,
     window::WindowResized,
 };
+use bevy_kira_audio::{Audio, AudioControl};
 use interactable::{
     click::{ClickType, MouseLeftClickEvent, MouseRightClickEvent},
     hover::{MouseEnterEvent, MouseExitEvent},
@@ -87,10 +87,9 @@ pub fn mouse_enter_cell(
 ) {
     for ev in ev_mouse_enter.iter() {
         if let Ok((lc, mut cell)) = cell_query.get_mut(ev.0) {
-            audio.play_with_settings(
-                sfx_assets.sfx_hover.clone(),
-                PlaybackSettings::ONCE.with_volume(profile.sfx_volume),
-            );
+            audio
+                .play(sfx_assets.sfx_hover.clone())
+                .with_volume(profile.sfx_volume as f64);
             lc.hover(&mut cell, &mut commands, &mut color_query, &game_colors);
         }
     }
