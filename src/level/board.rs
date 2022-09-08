@@ -218,27 +218,23 @@ impl Board {
             text_entities.push(hint_entity);
         }
 
-        let text1 = if let Some(text) = &config.text {
-            Some(
-                commands
-                    .spawn_bundle(Text2dBundle {
-                        text: Text::from_sections(
-                            // texts
-                            //     .iter()
-                            //     .map(|tsc| tsc.to_text_section(&text_settings.style_cell)),
-                            text.2
-                                .iter()
-                                .map(|tsc| tsc.to_text_section(&text_settings.style_cell)),
-                        )
-                        .with_alignment(text_settings.alignment),
-                        transform: Transform::from_xyz(0., -h - 3. * RADIUS, Z_INDEX_TEXT),
-                        ..default()
-                    })
-                    .id(),
-            )
-        } else {
-            None
-        };
+        let text1 = config.text.as_ref().map(|text| {
+            commands
+                .spawn_bundle(Text2dBundle {
+                    text: Text::from_sections(
+                        // texts
+                        //     .iter()
+                        //     .map(|tsc| tsc.to_text_section(&text_settings.style_cell)),
+                        text.2
+                            .iter()
+                            .map(|tsc| tsc.to_text_section(&text_settings.style_cell)),
+                    )
+                    .with_alignment(text_settings.alignment),
+                    transform: Transform::from_xyz(0., -h - 3. * RADIUS, Z_INDEX_TEXT),
+                    ..default()
+                })
+                .id()
+        });
 
         let text2 = commands
             .spawn_bundle(Text2dBundle {

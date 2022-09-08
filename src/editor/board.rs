@@ -168,7 +168,7 @@ impl Board {
             for row in &mut cells {
                 *row = row.clone().into_iter().skip(1).collect();
             }
-            if row_empty(&(&cells[0]).iter().step_by(2).map(|e| *e).collect()) {
+            if row_empty(&(&cells[0]).iter().step_by(2).copied().collect()) {
                 // Pull up every 2n
                 let h = cells.len() - 1;
                 for x in (0..cells[0].len()).step_by(2) {

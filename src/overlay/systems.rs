@@ -27,14 +27,14 @@ pub fn button_system(
         .iter()
         .filter(|ev| ev.click_type == ClickType::Released)
     {
-        if let Ok(_) = menu_button_query.get(ev.entity) {
+        if menu_button_query.get(ev.entity).is_ok() {
             switch_state(
                 Some(AppState::LevelSelection),
                 &mut app_state,
                 &mut load_state,
             );
         }
-        if let Ok(_) = next_button_query.get(ev.entity) {
+        if next_button_query.get(ev.entity).is_ok() {
             assert!(overlay_settings.level_id < 5);
             load_state.ids = Some((overlay_settings.stage_id, overlay_settings.level_id + 1));
             load_state.filename = Some(format!(
@@ -44,7 +44,7 @@ pub fn button_system(
             ));
             switch_state(Some(AppState::Level), &mut app_state, &mut load_state);
         }
-        if let Ok(_) = retry_button_query.get(ev.entity) {
+        if retry_button_query.get(ev.entity).is_ok() {
             switch_state(Some(AppState::Level), &mut app_state, &mut load_state);
         }
     }
@@ -90,10 +90,9 @@ pub fn window_resize_system(
     }
 }
 
-pub fn cleanup(
-    mut commands: Commands,
-    entities: Query<Entity, Or<(With<UiRootNode>, With<UiBackground>)>>,
-) {
+type UiElement = Or<(With<UiRootNode>, With<UiBackground>)>;
+
+pub fn cleanup(mut commands: Commands, entities: Query<Entity, UiElement>) {
     for entity in &entities {
         commands.entity(entity).despawn_recursive();
     }

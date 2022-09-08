@@ -19,7 +19,7 @@ pub fn setup(
         Res<Locale>,
         Res<TextSettings>,
     ),
-    mut load_state: ResMut<LoadState>,
+    load_state: ResMut<LoadState>,
     mut ev_cell_update: EventWriter<CellUpdateEvent>,
 ) {
     let config = if let Some(filename) = load_state.filename.clone() {

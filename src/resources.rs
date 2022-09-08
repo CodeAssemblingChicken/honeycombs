@@ -123,12 +123,12 @@ impl FromWorld for TextSettings {
             color: Color::WHITE,
         };
         let style_cell_large = TextStyle {
-            font: font.clone(),
+            font,
             font_size: (RADIUS * 0.9).round(),
             color: Color::WHITE,
         };
         let style_menu_dark = TextStyle {
-            font: font2.clone(),
+            font: font2,
             font_size: (RADIUS).round(),
             color: Color::BLACK,
         };
