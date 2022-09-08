@@ -32,9 +32,9 @@ use std::{
     panic,
 };
 // use chrono::Utc;
-#[cfg(feature = "debug")]
+#[cfg(feature = "bevy-inspector-egui")]
 use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
-#[cfg(feature = "debug")]
+#[cfg(feature = "bevy-inspector-egui")]
 use components::Cell;
 use interactable::{InteractableCamera, InteractablePlugin};
 #[cfg(not(target_family = "wasm"))]
@@ -78,7 +78,7 @@ fn main() {
     editor::prepare_editor(&mut app);
     overlay::prepare_overlay(&mut app);
 
-    #[cfg(feature = "debug")]
+    #[cfg(feature = "bevy-inspector-egui")]
     app.add_plugin(WorldInspectorPlugin::new())
         .register_inspectable::<Cell>();
 

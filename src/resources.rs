@@ -1,4 +1,8 @@
-use std::{collections::HashMap, fs::File, path::Path};
+use std::{
+    collections::HashMap,
+    fs::{self, File},
+    path::Path,
+};
 
 use crate::{
     components::TextSectionConfig,
@@ -16,6 +20,7 @@ use bevy_asset_loader::prelude::AssetCollection;
 use bevy_kira_audio::AudioSource;
 use ron::{
     de::from_reader,
+    from_str,
     ser::{to_writer_pretty, PrettyConfig},
 };
 use serde::{Deserialize, Serialize};
@@ -182,15 +187,11 @@ pub struct Profile {
 }
 impl Profile {
     pub fn new() -> Self {
-        println!(
-            "{}",
-            Path::new("./settings.ron")
-                .canonicalize()
-                .unwrap()
-                .display()
-        );
-        // from_reader(File::open("./settings.ron").expect("Failed opening file")).unwrap_or_default()
-        Self::default()
+        if let Ok(file) = File::open("./settings.ron") {
+            from_reader(file).unwrap_or_default()
+        } else {
+            Self::default()
+        }
     }
     pub fn get_points(&self) -> u16 {
         self.level_points

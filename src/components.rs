@@ -12,7 +12,10 @@ use std::time::Duration;
 
 // TODO: This is probably way to big
 /// Cell component storing everythin cell related
-#[cfg_attr(feature = "debug", derive(bevy_inspector_egui::Inspectable))]
+#[cfg_attr(
+    feature = "bevy-inspector-egui",
+    derive(bevy_inspector_egui::Inspectable)
+)]
 #[derive(Component, Clone)]
 pub struct Cell {
     pub x: i32,
@@ -132,7 +135,10 @@ pub struct CellOuter;
 
 /// The type of cell.
 /// Used in cell component for uncover-handling
-#[cfg_attr(feature = "debug", derive(bevy_inspector_egui::Inspectable))]
+#[cfg_attr(
+    feature = "bevy-inspector-egui",
+    derive(bevy_inspector_egui::Inspectable)
+)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CellType {
     NumberCell(HintType),
@@ -161,7 +167,10 @@ pub enum HintDirection {
 }
 
 /// Indicator for special hints (connected or seperated cells)
-#[cfg_attr(feature = "debug", derive(bevy_inspector_egui::Inspectable))]
+#[cfg_attr(
+    feature = "bevy-inspector-egui",
+    derive(bevy_inspector_egui::Inspectable)
+)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HintType {
     None,
