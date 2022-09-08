@@ -189,7 +189,8 @@ impl Profile {
                 .unwrap()
                 .display()
         );
-        from_reader(File::open("./settings.ron").expect("Failed opening file")).unwrap_or_default()
+        // from_reader(File::open("./settings.ron").expect("Failed opening file")).unwrap_or_default()
+        Self::default()
     }
     pub fn get_points(&self) -> u16 {
         self.level_points
