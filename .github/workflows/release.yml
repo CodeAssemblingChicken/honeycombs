@@ -154,8 +154,6 @@ jobs:
           mkdir tmp
           mkdir dist
 
-          cp -r "assets/" "tmp/assets/"
-
           for dir in bins-* ; do
               platform=${dir#"bins-"}
               unset exe
@@ -165,6 +163,7 @@ jobs:
               pkgname=$PROJECT_NAME-$TAG-$platform
               mkdir tmp/$pkgname
               # cp LICENSE README.md tmp/$pkgname
+              cp -r assets/ tmp/$pkgname
               mv bins-$platform/$BIN_NAME$exe tmp/$pkgname
               chmod +x tmp/$pkgname/$BIN_NAME$exe
 
