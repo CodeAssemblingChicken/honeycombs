@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs::File};
+use std::{collections::HashMap, fs::File, path::Path};
 
 use crate::{
     components::TextSectionConfig,
@@ -182,6 +182,13 @@ pub struct Profile {
 }
 impl Profile {
     pub fn new() -> Self {
+        println!(
+            "{}",
+            Path::new("./settings.ron")
+                .canonicalize()
+                .unwrap()
+                .display()
+        );
         from_reader(File::open("./settings.ron").expect("Failed opening file")).unwrap_or_default()
     }
     pub fn get_points(&self) -> u16 {
