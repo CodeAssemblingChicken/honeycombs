@@ -227,7 +227,7 @@ impl Default for Profile {
     fn default() -> Self {
         Self {
             lang: "en".to_string(),
-            sfx_volume: 0.0,
+            sfx_volume: 0.5,
             level_points: Default::default(),
         }
     }
