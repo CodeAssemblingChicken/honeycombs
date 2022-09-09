@@ -7,5 +7,6 @@ pub enum AppState {
     Overlay,
     Editor,
     Settings,
-    Loading,
+    StateChange,
+    AssetLoading,
 }

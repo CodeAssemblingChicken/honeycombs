@@ -1,31 +1,28 @@
 use super::{board::Board, components::CellUpdateEvent};
 use crate::{
-    assets::LocaleAsset,
     components::BoardConfig,
     functions::rescale_board,
     parser,
-    resources::{CellMeshes, GameColors, LoadState, LocaleAssets, TextSettings},
+    resources::{CellMeshes, GameColors, LoadState, TextSettings},
 };
 use bevy::{
-    prelude::{Assets, Commands, EventWriter, Res, ResMut, Transform},
+    prelude::{Commands, EventWriter, Res, ResMut, Transform},
     window::Windows,
 };
 
 pub fn setup(
     mut commands: Commands,
     wnds: Res<Windows>,
-    (cell_meshes, game_colors, locale, text_settings): (
+    (cell_meshes, game_colors, text_settings): (
         Res<CellMeshes>,
         Res<GameColors>,
-        Res<LocaleAssets>,
         Res<TextSettings>,
     ),
     load_state: ResMut<LoadState>,
     mut ev_cell_update: EventWriter<CellUpdateEvent>,
-    locales: Res<Assets<LocaleAsset>>,
 ) {
     let config = if let Some(filename) = load_state.filename.clone() {
-        parser::board_from_file(&filename, &locale, &locales)
+        parser::board_from_file(&filename)
     } else {
         // TODO: Think about these hardcoded values
         BoardConfig {

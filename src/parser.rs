@@ -1,9 +1,4 @@
-use crate::{
-    assets::LocaleAsset,
-    components::{BoardConfig, CellType, ColumnHint, HintDirection, HintType, TextSectionConfig},
-    resources::LocaleAssets,
-};
-use bevy::prelude::Assets;
+use crate::components::{BoardConfig, CellType, ColumnHint, HintDirection, HintType};
 use std::{fs, str::Lines};
 
 const DONT_MESS: &str = "Please don't mess with my files";
@@ -11,11 +6,7 @@ const EXPECTED_NO: &str = "Expected a number";
 const TOO_FEW_ARGS: &str = "Expected more arguments";
 
 /// Receives a file and creates a BoardConfig from it
-pub fn board_from_file(
-    filename: &str,
-    locale: &LocaleAssets,
-    locale_assets: &Assets<LocaleAsset>,
-) -> BoardConfig {
+pub fn board_from_file(filename: &str) -> BoardConfig {
     let mut cells = Vec::new();
     let file =
         fs::read_to_string(filename).unwrap_or_else(|_| panic!("File \"{}\" not found!", filename));
@@ -64,16 +55,11 @@ pub fn board_from_file(
         height,
         cells,
         hints,
-        text: parse_level_text(&mut lines, line_no, locale, locale_assets),
+        text: parse_level_text(&mut lines, line_no),
     }
 }
 
-fn parse_level_text(
-    lines: &mut Lines,
-    line_no: usize,
-    locale: &LocaleAssets,
-    locale_assets: &Assets<LocaleAsset>,
-) -> Option<(i32, i32, String)> {
+fn parse_level_text(lines: &mut Lines, line_no: usize) -> Option<(i32, i32, String)> {
     let line = lines.next();
     line?;
     let (x, y) = parse_tuple(line.unwrap(), line_no);

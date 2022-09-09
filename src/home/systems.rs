@@ -1,13 +1,11 @@
 use crate::{
-    components::{Cell, RootComponent},
+    components::{Cell, Language, RootComponent},
     functions::{rescale_board, switch_state},
-    resources::{GameColors, LoadState, LocaleAssets, Profile, SfxAssets},
+    resources::{GameColors, LoadState, Profile, SfxAssets},
     states::AppState,
 };
 use bevy::{
-    prelude::{
-        AssetServer, Commands, EventReader, Handle, Query, Res, ResMut, State, Transform, With,
-    },
+    prelude::{Commands, EventReader, Handle, Query, Res, ResMut, State, Transform, With},
     sprite::ColorMaterial,
     window::WindowResized,
 };
@@ -17,7 +15,7 @@ use interactable::{
     hover::{MouseEnterEvent, MouseExitEvent},
 };
 
-use super::components::{Language, OptionCell};
+use super::components::OptionCell;
 
 pub fn mouse_click_cell(
     mut commands: Commands,
@@ -45,13 +43,11 @@ pub fn mouse_click_cell(
 
 pub fn mouse_click_lang(
     level_cell_query: Query<&Language>,
-    (mut app_state, mut load_state, mut locale, mut profile): (
+    (mut app_state, mut load_state, mut profile): (
         ResMut<State<AppState>>,
         ResMut<LoadState>,
-        ResMut<LocaleAssets>,
         ResMut<Profile>,
     ),
-    asset_server: Res<AssetServer>,
     mut ev_mouse_left_click: EventReader<MouseLeftClickEvent>,
 ) {
     for ev in ev_mouse_left_click
@@ -59,22 +55,7 @@ pub fn mouse_click_lang(
         .filter(|ev| ev.click_type == ClickType::Released)
     {
         if let Ok(lang) = level_cell_query.get(ev.entity) {
-            // locale.set_lang(
-            //     match lang {
-            //         Language::EN => "en",
-            //         Language::DE => "de",
-            //         Language::FR => "fr",
-            //         Language::ES => "es",
-            //     },
-            //     &mut profile,
-            //     &asset_server,
-            // );
-            profile.lang = match lang {
-                Language::EN => "en".to_string(),
-                Language::DE => "de".to_string(),
-                Language::FR => "fr".to_string(),
-                Language::ES => "es".to_string(),
-            };
+            profile.lang = *lang;
             switch_state(Some(AppState::Home), &mut app_state, &mut load_state);
         }
     }

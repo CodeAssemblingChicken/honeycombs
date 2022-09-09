@@ -1,10 +1,7 @@
-use super::{
-    components::{LangSelector, Language},
-    functions::spawn_option_cell,
-};
+use super::{components::LangSelector, functions::spawn_option_cell};
 use crate::{
     assets::LocaleAsset,
-    components::RootComponent,
+    components::{Language, RootComponent},
     constants::{MED_SCALE, RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_TEXT},
     functions::rescale_board,
     resources::{CellMeshes, GameColors, LocaleAssets, Profile, TextSettings},
@@ -176,10 +173,10 @@ pub fn setup(
         .insert(Language::ES)
         .id();
 
-    let pos_lang_sel = match profile.lang.as_str() {
-        "de" => pos_de,
-        "fr" => pos_fr,
-        "es" => pos_es,
+    let pos_lang_sel = match profile.lang {
+        Language::DE => pos_de,
+        Language::FR => pos_fr,
+        Language::ES => pos_es,
         _ => pos_en,
     };
     let lang_selector = commands

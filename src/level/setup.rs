@@ -31,7 +31,7 @@ pub fn setup(
     if load_state.filename.is_none() {
         panic!("No level specified.");
     }
-    let config = parser::board_from_file(load_state.filename.as_ref().unwrap(), &locale, &locales);
+    let config = parser::board_from_file(load_state.filename.as_ref().unwrap());
 
     let mut root_transform = Transform::identity();
     for wnd in wnds.iter() {

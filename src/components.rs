@@ -7,7 +7,7 @@ use bevy::{
 };
 use bevy_easings::{Ease, EaseFunction, EasingType};
 use interactable::{click::Clickable, hover::Hoverable};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
 // TODO: This is probably way to big
@@ -225,3 +225,11 @@ impl TextSectionConfig {
 
 #[derive(Component)]
 pub struct RootComponent;
+
+#[derive(Debug, Clone, Copy, Component, Serialize, Deserialize)]
+pub enum Language {
+    EN,
+    DE,
+    FR,
+    ES,
+}

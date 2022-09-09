@@ -225,5 +225,5 @@ pub fn switch_state(
     mut load_state: &mut LoadState,
 ) {
     load_state.next_state = next_state;
-    app_state.replace(AppState::Loading).unwrap();
+    app_state.replace(AppState::StateChange).unwrap();
 }

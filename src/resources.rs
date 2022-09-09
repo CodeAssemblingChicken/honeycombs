@@ -1,6 +1,6 @@
 use crate::{
     assets::LocaleAsset,
-    components::TextSectionConfig,
+    components::{Language, TextSectionConfig},
     constants::{GameColor, MED_SCALE, RADIUS},
     states::AppState,
 };
@@ -192,10 +192,10 @@ impl LocaleAssets {
         }
     }
     pub fn get_handle(&self, profile: &Profile) -> Handle<LocaleAsset> {
-        match profile.lang.as_str() {
-            "de" => self.de.clone_weak(),
-            "fr" => self.fr.clone_weak(),
-            "es" => self.es.clone_weak(),
+        match profile.lang {
+            Language::DE => self.de.clone_weak(),
+            Language::FR => self.fr.clone_weak(),
+            Language::ES => self.es.clone_weak(),
             _ => self.en.clone_weak(),
         }
     }
@@ -203,7 +203,7 @@ impl LocaleAssets {
 
 #[derive(Serialize, Deserialize)]
 pub struct Profile {
-    pub lang: String,
+    pub lang: Language,
     pub sfx_volume: f32,
     pub level_points: [[Option<u16>; 6]; 6],
 }
@@ -222,15 +222,15 @@ impl Profile {
             .sum()
     }
     pub fn save(&self) {
-        // to_writer_pretty(
-        //     File::create("./settings.ron").expect("Failed opening file"),
-        //     self,
-        //     PrettyConfig::new()
-        //         .depth_limit(2)
-        //         .separate_tuple_members(true)
-        //         .enumerate_arrays(true),
-        // )
-        // .expect("Error saving profile");
+        to_writer_pretty(
+            File::create("./settings.ron").expect("Failed opening file"),
+            self,
+            PrettyConfig::new()
+                .depth_limit(2)
+                .separate_tuple_members(true)
+                .enumerate_arrays(true),
+        )
+        .expect("Error saving profile");
     }
     pub fn update_point(
         &mut self,
@@ -248,7 +248,7 @@ impl Profile {
 impl Default for Profile {
     fn default() -> Self {
         Self {
-            lang: "en".to_string(),
+            lang: Language::EN,
             sfx_volume: 0.5,
             level_points: Default::default(),
         }

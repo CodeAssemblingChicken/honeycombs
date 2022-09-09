@@ -19,13 +19,13 @@ use bevy::{
     app::App,
     hierarchy::DespawnRecursiveExt,
     prelude::{
-        default, AddAsset, AssetServer, Camera, Camera2dBundle, ClearColor, Color, Commands,
-        Entity, Msaa, Query, Res, ResMut, State, SystemSet, Without,
+        default, AddAsset, Camera, Camera2dBundle, ClearColor, Color, Commands, Entity, Msaa,
+        Query, Res, ResMut, State, SystemSet, Without,
     },
     window::{WindowDescriptor, WindowResizeConstraints},
     DefaultPlugins,
 };
-use bevy_asset_loader::prelude::AssetCollectionApp;
+use bevy_asset_loader::prelude::{LoadingState, LoadingStateAppExt};
 use bevy_easings::EasingsPlugin;
 use bevy_kira_audio::AudioPlugin;
 use overlay::resources::OverlaySettings;
@@ -63,8 +63,9 @@ fn main() {
             ..default()
         })
         .insert_resource(ClearColor(Color::rgb(0.15, 0.15, 0.15)))
-        .insert_resource(LoadState::default())
-        .insert_resource(OverlaySettings::default())
+        .init_resource::<LoadState>()
+        .init_resource::<OverlaySettings>()
+        .insert_resource(Profile::new())
         .add_plugins(DefaultPlugins)
         .add_plugin(InteractablePlugin)
         .add_plugin(EasingsPlugin)
@@ -73,8 +74,21 @@ fn main() {
         // .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_startup_system(setup)
         .add_system(save_profile_system)
-        .add_state(AppState::Loading)
-        .add_system_set(SystemSet::on_update(AppState::Loading).with_system(load_complete));
+        // .add_state(AppState::Loading)
+        .add_asset::<LocaleAsset>()
+        .init_asset_loader::<LocaleAssetLoader>()
+        .add_loading_state(
+            LoadingState::new(AppState::AssetLoading)
+                .continue_to_state(AppState::StateChange)
+                .init_resource::<CellMeshes>()
+                .init_resource::<GameColors>()
+                .init_resource::<TextSettings>()
+                // .init_resource::<Profile>()
+                .with_collection::<SfxAssets>()
+                .with_collection::<LocaleAssets>(),
+        )
+        .add_state(AppState::AssetLoading)
+        .add_system_set(SystemSet::on_update(AppState::StateChange).with_system(load_complete));
 
     home::prepare_home(&mut app);
     level_selection::prepare_level_selection(&mut app);
@@ -86,17 +100,7 @@ fn main() {
     app.add_plugin(WorldInspectorPlugin::new())
         .register_inspectable::<Cell>();
 
-    let profile = Profile::new();
-
-    app.init_resource::<CellMeshes>()
-        .init_resource::<GameColors>()
-        .init_resource::<TextSettings>()
-        .insert_resource(profile)
-        .init_collection::<SfxAssets>()
-        .add_asset::<LocaleAsset>()
-        .init_asset_loader::<LocaleAssetLoader>()
-        .init_collection::<LocaleAssets>()
-        .run();
+    app.run();
 }
 
 fn setup(mut commands: Commands) {
