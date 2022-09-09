@@ -3,10 +3,11 @@ use super::{
     functions::spawn_option_cell,
 };
 use crate::{
+    assets::LocaleAsset,
     components::RootComponent,
     constants::{MED_SCALE, RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_TEXT},
     functions::rescale_board,
-    resources::{CellMeshes, GameColors, Locale, Profile, TextSettings},
+    resources::{CellMeshes, GameColors, LocaleAssets, Profile, TextSettings},
     states::AppState,
 };
 use bevy::{
@@ -29,12 +30,16 @@ pub fn setup(
     (cell_meshes, game_colors, locale, profile, text_settings): (
         Res<CellMeshes>,
         Res<GameColors>,
-        Res<Locale>,
+        Res<LocaleAssets>,
         Res<Profile>,
         Res<TextSettings>,
     ),
     asset_server: Res<AssetServer>,
-    (mut meshes, mut colors): (ResMut<Assets<Mesh>>, ResMut<Assets<ColorMaterial>>),
+    (mut meshes, mut colors, locales): (
+        ResMut<Assets<Mesh>>,
+        ResMut<Assets<ColorMaterial>>,
+        Res<Assets<LocaleAsset>>,
+    ),
 ) {
     let mut big_transform = Transform::from_xyz(0., 0., Z_INDEX_CELL_BACK);
     big_transform.rotate_z(f32::to_radians(90.0));
@@ -46,7 +51,7 @@ pub fn setup(
         big_transform,
         AppState::LevelSelection,
         locale
-            .get_string("start")
+            .get_string("start", &locales, &profile)
             .unwrap_or(&"String not found".to_string()),
     );
     big_transform.translation = Vec3::new(
@@ -62,7 +67,7 @@ pub fn setup(
         big_transform,
         AppState::Editor,
         locale
-            .get_string("editor")
+            .get_string("editor", &locales, &profile)
             .unwrap_or(&"String not found".to_string()),
     );
     big_transform.translation = Vec3::new(
@@ -78,7 +83,7 @@ pub fn setup(
         big_transform,
         AppState::Settings,
         locale
-            .get_string("options")
+            .get_string("options", &locales, &profile)
             .unwrap_or(&"String not found".to_string()),
     );
 

@@ -1,10 +1,5 @@
-use std::{
-    collections::HashMap,
-    fs::{self, File},
-    path::Path,
-};
-
 use crate::{
+    assets::LocaleAsset,
     components::TextSectionConfig,
     constants::{GameColor, MED_SCALE, RADIUS},
     states::AppState,
@@ -20,10 +15,10 @@ use bevy_asset_loader::prelude::AssetCollection;
 use bevy_kira_audio::AudioSource;
 use ron::{
     de::from_reader,
-    from_str,
     ser::{to_writer_pretty, PrettyConfig},
 };
 use serde::{Deserialize, Serialize};
+use std::fs::File;
 
 #[derive(Debug, Default)]
 pub struct LoadState {
@@ -151,31 +146,58 @@ impl FromWorld for TextSettings {
     }
 }
 
-#[derive(Deserialize)]
-pub struct Locale {
-    pub strings: HashMap<String, String>,
-    pub text_sections: HashMap<String, Vec<TextSectionConfig>>,
+#[derive(Default, AssetCollection)]
+pub struct LocaleAssets {
+    // handles: HashMap<String, Handle<LocaleAsset>>,
+    #[asset(path = "lang/en.lang")]
+    en: Handle<LocaleAsset>,
+    #[asset(path = "lang/de.lang")]
+    de: Handle<LocaleAsset>,
+    #[asset(path = "lang/fr.lang")]
+    fr: Handle<LocaleAsset>,
+    #[asset(path = "lang/es.lang")]
+    es: Handle<LocaleAsset>,
 }
-
-impl Locale {
-    pub fn new(lang: &str) -> Self {
-        from_reader(File::open(format!("assets/lang/{}.ron", lang)).expect("Failed opening file"))
-            .unwrap()
+impl LocaleAssets {
+    // pub fn load_langs(&mut self, langs: &[&str], asset_server: &AssetServer) {
+    //     langs.into_iter().for_each(|l| {
+    //         self.handles.insert(
+    //             l.to_string(),
+    //             asset_server.load(&format!("lang/{}.lang", l)),
+    //         );
+    //     })
+    // }
+    pub fn get_string<'a>(
+        &'a self,
+        key: &str,
+        locale_assets: &'a Assets<LocaleAsset>,
+        profile: &Profile,
+    ) -> Option<&String> {
+        if let Some(la) = locale_assets.get(&self.get_handle(profile)) {
+            la.strings.get(key)
+        } else {
+            None
+        }
     }
-    pub fn set_lang(&mut self, lang: &str, profile: &mut Profile) {
-        profile.lang = lang.into();
-        let load: Self = from_reader(
-            File::open(format!("assets/lang/{}.ron", lang)).expect("Failed opening file"),
-        )
-        .unwrap();
-        self.strings = load.strings;
-        self.text_sections = load.text_sections;
+    pub fn get_text_section<'a>(
+        &'a self,
+        key: &str,
+        locale_assets: &'a Assets<LocaleAsset>,
+        profile: &Profile,
+    ) -> Option<&Vec<TextSectionConfig>> {
+        if let Some(la) = locale_assets.get(&self.get_handle(profile)) {
+            la.text_sections.get(key)
+        } else {
+            None
+        }
     }
-    pub fn get_string(&self, key: &str) -> Option<&String> {
-        self.strings.get(key)
-    }
-    pub fn get_text_section(&self, key: &str) -> Option<&Vec<TextSectionConfig>> {
-        self.text_sections.get(key)
+    pub fn get_handle(&self, profile: &Profile) -> Handle<LocaleAsset> {
+        match profile.lang.as_str() {
+            "de" => self.de.clone_weak(),
+            "fr" => self.fr.clone_weak(),
+            "es" => self.es.clone_weak(),
+            _ => self.en.clone_weak(),
+        }
     }
 }
 
@@ -200,15 +222,15 @@ impl Profile {
             .sum()
     }
     pub fn save(&self) {
-        to_writer_pretty(
-            File::create("./settings.ron").expect("Failed opening file"),
-            self,
-            PrettyConfig::new()
-                .depth_limit(2)
-                .separate_tuple_members(true)
-                .enumerate_arrays(true),
-        )
-        .expect("Error saving profile");
+        // to_writer_pretty(
+        //     File::create("./settings.ron").expect("Failed opening file"),
+        //     self,
+        //     PrettyConfig::new()
+        //         .depth_limit(2)
+        //         .separate_tuple_members(true)
+        //         .enumerate_arrays(true),
+        // )
+        // .expect("Error saving profile");
     }
     pub fn update_point(
         &mut self,

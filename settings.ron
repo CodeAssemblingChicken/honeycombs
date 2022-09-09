@@ -1,5 +1,5 @@
 (
-    lang: "en",
+    lang: "de",
     sfx_volume: 0.5,
     level_points: (
         (Some(5), Some(5), Some(6), Some(6), Some(11), Some(17)),

@@ -3,9 +3,10 @@ use super::{
     resources::{OverlaySettings, OverlayType},
 };
 use crate::{
+    assets::LocaleAsset,
     constants::{RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_UI},
     functions::spawn_cell,
-    resources::{CellMeshes, GameColors, Locale, Profile, TextSettings},
+    resources::{CellMeshes, GameColors, LocaleAssets, Profile, TextSettings},
 };
 use bevy::{
     hierarchy::BuildChildren,
@@ -22,11 +23,15 @@ use interactable::{
 
 pub fn setup(
     mut commands: Commands,
-    (mut meshes, mut colors): (ResMut<Assets<Mesh>>, ResMut<Assets<ColorMaterial>>),
+    (mut meshes, mut colors, locales): (
+        ResMut<Assets<Mesh>>,
+        ResMut<Assets<ColorMaterial>>,
+        Res<Assets<LocaleAsset>>,
+    ),
     (cell_meshes, game_colors, locale, overlay_settings, profile, text_settings): (
         Res<CellMeshes>,
         Res<GameColors>,
-        Res<Locale>,
+        Res<LocaleAssets>,
         Res<OverlaySettings>,
         Res<Profile>,
         Res<TextSettings>,
@@ -39,7 +44,7 @@ pub fn setup(
         OverlayType::LevelComplete => (
             overlay_settings.points,
             locale
-                .get_string("complete")
+                .get_string("complete", &locales, &profile)
                 .unwrap_or(&"String not found".to_string())
                 .clone(),
         ),
@@ -48,7 +53,7 @@ pub fn setup(
                 [overlay_settings.level_id as usize]
                 .unwrap_or_default(),
             locale
-                .get_string("pause")
+                .get_string("pause", &locales, &profile)
                 .unwrap_or(&"String not found".to_string())
                 .clone(),
         ),
@@ -57,14 +62,14 @@ pub fn setup(
         OverlayType::LevelComplete => format!(
             "{}: {}",
             locale
-                .get_string("mistakes")
+                .get_string("mistakes", &locales, &profile)
                 .unwrap_or(&"String not found".to_string()),
             overlay_settings.mistakes
         ),
         OverlayType::Pause => format!(
             "{}: {}",
             locale
-                .get_string("highscore")
+                .get_string("highscore", &locales, &profile)
                 .unwrap_or(&"String not found".to_string()),
             profile.level_points[overlay_settings.stage_id as usize]
                 [overlay_settings.level_id as usize]
@@ -74,7 +79,7 @@ pub fn setup(
     let total_text = format!(
         "{}:",
         locale
-            .get_string("total")
+            .get_string("total", &locales, &profile)
             .unwrap_or(&"String not found".to_string())
     );
 
@@ -226,7 +231,7 @@ pub fn setup(
                     parent.spawn_bundle(Text2dBundle {
                         text: Text::from_section(
                             locale
-                                .get_string("retry")
+                                .get_string("retry", &locales, &profile)
                                 .unwrap_or(&"String not found".to_string()),
                             text_settings.style_menu_dark.clone(),
                         )
@@ -264,7 +269,7 @@ pub fn setup(
                         parent.spawn_bundle(Text2dBundle {
                             text: Text::from_section(
                                 locale
-                                    .get_string("next")
+                                    .get_string("next", &locales, &profile)
                                     .unwrap_or(&"String not found".to_string()),
                                 text_settings.style_menu_dark.clone(),
                             )
@@ -300,7 +305,7 @@ pub fn setup(
                     parent.spawn_bundle(Text2dBundle {
                         text: Text::from_section(
                             locale
-                                .get_string("menu")
+                                .get_string("menu", &locales, &profile)
                                 .unwrap_or(&"String not found".to_string()),
                             text_settings.style_menu_dark.clone(),
                         )

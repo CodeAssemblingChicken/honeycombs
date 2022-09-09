@@ -1,5 +1,6 @@
 use super::components::{MistakesText, RemainingText};
 use crate::{
+    assets::LocaleAsset,
     board_functions::{count_empty_cells, empty_connected, get_neighbours},
     components::{BoardConfig, Cell, CellType, HintType, RootComponent},
     constants::{RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_TEXT},
@@ -8,7 +9,7 @@ use crate::{
         spawn_hint,
     },
     level::components::{EmptyCell, GameCell, NumberCell},
-    resources::{CellMeshes, GameColors, TextSettings},
+    resources::{CellMeshes, GameColors, LocaleAssets, Profile, TextSettings},
 };
 use bevy::{
     hierarchy::BuildChildren,
@@ -45,9 +46,19 @@ impl Board {
         commands: &mut Commands,
         root_transform: Transform,
         config: &BoardConfig,
-        (cell_meshes, game_colors, text_settings): (&CellMeshes, &GameColors, &TextSettings),
+        (cell_meshes, game_colors, locale, profile, text_settings): (
+            &CellMeshes,
+            &GameColors,
+            &LocaleAssets,
+            &Profile,
+            &TextSettings,
+        ),
         (stage_id, level_id): (u8, u8),
-        (meshes, colors): (&mut Assets<Mesh>, &mut Assets<ColorMaterial>),
+        (meshes, colors, locales): (
+            &mut Assets<Mesh>,
+            &mut Assets<ColorMaterial>,
+            &Assets<LocaleAsset>,
+        ),
     ) -> Self {
         let cells = &config.cells;
         let hints = &config.hints;
@@ -225,7 +236,10 @@ impl Board {
                         // texts
                         //     .iter()
                         //     .map(|tsc| tsc.to_text_section(&text_settings.style_cell)),
-                        text.2
+                        locale
+                            .get_text_section(text.2.as_str(), locales, profile)
+                            .unwrap()
+                            .to_vec()
                             .iter()
                             .map(|tsc| tsc.to_text_section(&text_settings.style_cell)),
                     )

@@ -1,5 +1,6 @@
 #![windows_subsystem = "windows"]
 
+mod assets;
 mod board_functions;
 mod components;
 mod constants;
@@ -13,12 +14,13 @@ mod parser;
 mod resources;
 mod states;
 
+use assets::{LocaleAsset, LocaleAssetLoader};
 use bevy::{
     app::App,
     hierarchy::DespawnRecursiveExt,
     prelude::{
-        default, Camera, Camera2dBundle, ClearColor, Color, Commands, Entity, Msaa, Query, Res,
-        ResMut, State, SystemSet, Without,
+        default, AddAsset, AssetServer, Camera, Camera2dBundle, ClearColor, Color, Commands,
+        Entity, Msaa, Query, Res, ResMut, State, SystemSet, Without,
     },
     window::{WindowDescriptor, WindowResizeConstraints},
     DefaultPlugins,
@@ -39,7 +41,9 @@ use components::Cell;
 use interactable::{InteractableCamera, InteractablePlugin};
 #[cfg(not(target_family = "wasm"))]
 use native_dialog::MessageDialog;
-use resources::{CellMeshes, GameColors, LoadState, Locale, Profile, SfxAssets, TextSettings};
+use resources::{
+    CellMeshes, GameColors, LoadState, LocaleAssets, Profile, SfxAssets, TextSettings,
+};
 use states::AppState;
 
 fn main() {
@@ -87,9 +91,11 @@ fn main() {
     app.init_resource::<CellMeshes>()
         .init_resource::<GameColors>()
         .init_resource::<TextSettings>()
-        .insert_resource(Locale::new(&profile.lang))
         .insert_resource(profile)
         .init_collection::<SfxAssets>()
+        .add_asset::<LocaleAsset>()
+        .init_asset_loader::<LocaleAssetLoader>()
+        .init_collection::<LocaleAssets>()
         .run();
 }
 

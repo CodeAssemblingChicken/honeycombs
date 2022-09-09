@@ -1,11 +1,13 @@
 use crate::{
     components::{Cell, RootComponent},
     functions::{rescale_board, switch_state},
-    resources::{GameColors, LoadState, Locale, Profile, SfxAssets},
+    resources::{GameColors, LoadState, LocaleAssets, Profile, SfxAssets},
     states::AppState,
 };
 use bevy::{
-    prelude::{Commands, EventReader, Handle, Query, Res, ResMut, State, Transform, With},
+    prelude::{
+        AssetServer, Commands, EventReader, Handle, Query, Res, ResMut, State, Transform, With,
+    },
     sprite::ColorMaterial,
     window::WindowResized,
 };
@@ -46,9 +48,10 @@ pub fn mouse_click_lang(
     (mut app_state, mut load_state, mut locale, mut profile): (
         ResMut<State<AppState>>,
         ResMut<LoadState>,
-        ResMut<Locale>,
+        ResMut<LocaleAssets>,
         ResMut<Profile>,
     ),
+    asset_server: Res<AssetServer>,
     mut ev_mouse_left_click: EventReader<MouseLeftClickEvent>,
 ) {
     for ev in ev_mouse_left_click
@@ -56,15 +59,22 @@ pub fn mouse_click_lang(
         .filter(|ev| ev.click_type == ClickType::Released)
     {
         if let Ok(lang) = level_cell_query.get(ev.entity) {
-            locale.set_lang(
-                match lang {
-                    Language::EN => "en",
-                    Language::DE => "de",
-                    Language::FR => "fr",
-                    Language::ES => "es",
-                },
-                &mut profile,
-            );
+            // locale.set_lang(
+            //     match lang {
+            //         Language::EN => "en",
+            //         Language::DE => "de",
+            //         Language::FR => "fr",
+            //         Language::ES => "es",
+            //     },
+            //     &mut profile,
+            //     &asset_server,
+            // );
+            profile.lang = match lang {
+                Language::EN => "en".to_string(),
+                Language::DE => "de".to_string(),
+                Language::FR => "fr".to_string(),
+                Language::ES => "es".to_string(),
+            };
             switch_state(Some(AppState::Home), &mut app_state, &mut load_state);
         }
     }

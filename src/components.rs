@@ -196,7 +196,7 @@ pub struct BoardConfig {
     pub height: usize,
     pub cells: Vec<Vec<(Option<CellType>, bool)>>,
     pub hints: Vec<ColumnHint>,
-    pub text: Option<(i32, i32, Vec<TextSectionConfig>)>,
+    pub text: Option<(i32, i32, String)>,
 }
 
 #[derive(Debug, Deserialize, Clone)]
