@@ -7,7 +7,7 @@ use bevy::{
 };
 use bevy_easings::{Ease, EaseFunction, EasingType};
 use interactable::{click::Clickable, hover::Hoverable};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
 // TODO: This is probably way to big
@@ -196,7 +196,7 @@ pub struct BoardConfig {
     pub height: usize,
     pub cells: Vec<Vec<(Option<CellType>, bool)>>,
     pub hints: Vec<ColumnHint>,
-    pub text: Option<(i32, i32, Vec<TextSectionConfig>)>,
+    pub text: Option<(i32, i32, String)>,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -225,3 +225,11 @@ impl TextSectionConfig {
 
 #[derive(Component)]
 pub struct RootComponent;
+
+#[derive(Debug, Clone, Copy, Component, Serialize, Deserialize)]
+pub enum Language {
+    EN,
+    DE,
+    FR,
+    ES,
+}

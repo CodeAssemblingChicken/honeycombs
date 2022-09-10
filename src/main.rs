@@ -1,5 +1,6 @@
 #![windows_subsystem = "windows"]
 
+mod assets;
 mod board_functions;
 mod components;
 mod constants;
@@ -13,38 +14,45 @@ mod parser;
 mod resources;
 mod states;
 
+use assets::{LocaleAsset, LocaleAssetLoader};
 use bevy::{
-    app::App,
+    app::{App, AppExit},
     hierarchy::DespawnRecursiveExt,
     prelude::{
-        default, Camera, Camera2dBundle, ClearColor, Color, Commands, Entity, Msaa, Query, Res,
-        ResMut, State, SystemSet, Without,
+        default, AddAsset, Camera, Camera2dBundle, ClearColor, Color, Commands, Entity,
+        EventWriter, Msaa, Query, Res, ResMut, State, SystemSet, Without,
     },
     window::{WindowDescriptor, WindowResizeConstraints},
     DefaultPlugins,
 };
-use bevy_asset_loader::prelude::AssetCollectionApp;
+use bevy_asset_loader::prelude::{LoadingState, LoadingStateAppExt};
 use bevy_easings::EasingsPlugin;
+#[cfg(feature = "bevy-inspector-egui")]
+use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
 use bevy_kira_audio::AudioPlugin;
+#[cfg(feature = "bevy-inspector-egui")]
+use components::Cell;
+use interactable::{InteractableCamera, InteractablePlugin};
+#[cfg(not(target_arch = "wasm32"))]
+use native_dialog::MessageDialog;
 use overlay::resources::OverlaySettings;
+use resources::{
+    CellMeshes, GameColors, LoadState, LocaleAssets, Profile, SfxAssets, TextSettings,
+};
+use states::AppState;
 use std::{
     io::{self, Write},
     panic,
 };
-// use chrono::Utc;
-#[cfg(feature = "bevy-inspector-egui")]
-use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
-#[cfg(feature = "bevy-inspector-egui")]
-use components::Cell;
-use interactable::{InteractableCamera, InteractablePlugin};
-#[cfg(not(target_family = "wasm"))]
-use native_dialog::MessageDialog;
-use resources::{CellMeshes, GameColors, LoadState, Locale, Profile, SfxAssets, TextSettings};
-use states::AppState;
 
 fn main() {
-    #[cfg(not(target_family = "wasm"))]
+    // When building for native apps, use the native message dialog for panics
+    #[cfg(not(target_arch = "wasm32"))]
     set_panic_hook();
+    // When building for WASM, print panics to the browser console
+    #[cfg(target_arch = "wasm32")]
+    console_error_panic_hook::set_once();
+
     let mut app = App::new();
     app.insert_resource(Msaa { samples: 4 })
         .insert_resource(WindowDescriptor {
@@ -59,8 +67,9 @@ fn main() {
             ..default()
         })
         .insert_resource(ClearColor(Color::rgb(0.15, 0.15, 0.15)))
-        .insert_resource(LoadState::default())
-        .insert_resource(OverlaySettings::default())
+        .init_resource::<LoadState>()
+        .init_resource::<OverlaySettings>()
+        .insert_resource(Profile::new())
         .add_plugins(DefaultPlugins)
         .add_plugin(InteractablePlugin)
         .add_plugin(EasingsPlugin)
@@ -69,8 +78,22 @@ fn main() {
         // .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_startup_system(setup)
         .add_system(save_profile_system)
-        .add_state(AppState::Loading)
-        .add_system_set(SystemSet::on_update(AppState::Loading).with_system(load_complete));
+        // .add_state(AppState::Loading)
+        .add_asset::<LocaleAsset>()
+        .init_asset_loader::<LocaleAssetLoader>()
+        .add_loading_state(
+            LoadingState::new(AppState::AssetLoading)
+                .continue_to_state(AppState::StateChange)
+                .init_resource::<CellMeshes>()
+                .init_resource::<GameColors>()
+                .init_resource::<TextSettings>()
+                // .init_resource::<Profile>()
+                .with_collection::<SfxAssets>()
+                .with_collection::<LocaleAssets>(),
+        )
+        .add_state(AppState::AssetLoading)
+        .add_system_set(SystemSet::on_update(AppState::StateChange).with_system(load_complete))
+        .add_system_set(SystemSet::on_enter(AppState::Settings).with_system(quit_system));
 
     home::prepare_home(&mut app);
     level_selection::prepare_level_selection(&mut app);
@@ -82,15 +105,7 @@ fn main() {
     app.add_plugin(WorldInspectorPlugin::new())
         .register_inspectable::<Cell>();
 
-    let profile = Profile::new();
-
-    app.init_resource::<CellMeshes>()
-        .init_resource::<GameColors>()
-        .init_resource::<TextSettings>()
-        .insert_resource(Locale::new(&profile.lang))
-        .insert_resource(profile)
-        .init_collection::<SfxAssets>()
-        .run();
+    app.run();
 }
 
 fn setup(mut commands: Commands) {
@@ -117,11 +132,15 @@ pub fn cleanup(mut commands: Commands, entities: Query<Entity, Without<Camera>>)
     }
 }
 
+fn quit_system(mut exit: EventWriter<AppExit>) {
+    exit.send(AppExit);
+}
+
 fn set_panic_hook() {
     panic::set_hook(Box::new(|info| {
         let mut w = Vec::new();
         let _ = writeln!(&mut w, "{}", info);
-        #[cfg(not(target_family = "wasm"))]
+        #[cfg(not(target_arch = "wasm32"))]
         MessageDialog::new()
             .set_type(native_dialog::MessageType::Error)
             .set_title("Error")

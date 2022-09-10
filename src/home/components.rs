@@ -56,11 +56,4 @@ impl OptionCell {
 }
 
 #[derive(Component)]
-pub enum Language {
-    EN,
-    DE,
-    FR,
-    ES,
-}
-#[derive(Component)]
 pub struct LangSelector;

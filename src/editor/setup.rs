@@ -3,7 +3,7 @@ use crate::{
     components::BoardConfig,
     functions::rescale_board,
     parser,
-    resources::{CellMeshes, GameColors, LoadState, Locale, TextSettings},
+    resources::{CellMeshes, GameColors, LoadState, TextSettings},
 };
 use bevy::{
     prelude::{Commands, EventWriter, Res, ResMut, Transform},
@@ -13,17 +13,16 @@ use bevy::{
 pub fn setup(
     mut commands: Commands,
     wnds: Res<Windows>,
-    (cell_meshes, game_colors, locale, text_settings): (
+    (cell_meshes, game_colors, text_settings): (
         Res<CellMeshes>,
         Res<GameColors>,
-        Res<Locale>,
         Res<TextSettings>,
     ),
     load_state: ResMut<LoadState>,
     mut ev_cell_update: EventWriter<CellUpdateEvent>,
 ) {
     let config = if let Some(filename) = load_state.filename.clone() {
-        parser::board_from_file(&filename, &locale)
+        parser::board_from_file(&filename)
     } else {
         // TODO: Think about these hardcoded values
         BoardConfig {

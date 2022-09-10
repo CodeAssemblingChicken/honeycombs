@@ -1,7 +1,6 @@
-use std::{collections::HashMap, fs::File};
-
 use crate::{
-    components::TextSectionConfig,
+    assets::LocaleAsset,
+    components::{Language, TextSectionConfig},
     constants::{GameColor, MED_SCALE, RADIUS},
     states::AppState,
 };
@@ -19,6 +18,7 @@ use ron::{
     ser::{to_writer_pretty, PrettyConfig},
 };
 use serde::{Deserialize, Serialize};
+use std::fs::File;
 
 #[derive(Debug, Default)]
 pub struct LoadState {
@@ -146,37 +146,64 @@ impl FromWorld for TextSettings {
     }
 }
 
-#[derive(Deserialize)]
-pub struct Locale {
-    pub strings: HashMap<String, String>,
-    pub text_sections: HashMap<String, Vec<TextSectionConfig>>,
+#[derive(Default, AssetCollection)]
+pub struct LocaleAssets {
+    // handles: HashMap<String, Handle<LocaleAsset>>,
+    #[asset(path = "lang/en.lang")]
+    en: Handle<LocaleAsset>,
+    #[asset(path = "lang/de.lang")]
+    de: Handle<LocaleAsset>,
+    #[asset(path = "lang/fr.lang")]
+    fr: Handle<LocaleAsset>,
+    #[asset(path = "lang/es.lang")]
+    es: Handle<LocaleAsset>,
 }
-
-impl Locale {
-    pub fn new(lang: &str) -> Self {
-        from_reader(File::open(format!("assets/lang/{}.ron", lang)).expect("Failed opening file"))
-            .unwrap()
+impl LocaleAssets {
+    // pub fn load_langs(&mut self, langs: &[&str], asset_server: &AssetServer) {
+    //     langs.into_iter().for_each(|l| {
+    //         self.handles.insert(
+    //             l.to_string(),
+    //             asset_server.load(&format!("lang/{}.lang", l)),
+    //         );
+    //     })
+    // }
+    pub fn get_string<'a>(
+        &'a self,
+        key: &str,
+        locale_assets: &'a Assets<LocaleAsset>,
+        profile: &Profile,
+    ) -> Option<&String> {
+        if let Some(la) = locale_assets.get(&self.get_handle(profile)) {
+            la.strings.get(key)
+        } else {
+            None
+        }
     }
-    pub fn set_lang(&mut self, lang: &str, profile: &mut Profile) {
-        profile.lang = lang.into();
-        let load: Self = from_reader(
-            File::open(format!("assets/lang/{}.ron", lang)).expect("Failed opening file"),
-        )
-        .unwrap();
-        self.strings = load.strings;
-        self.text_sections = load.text_sections;
+    pub fn get_text_section<'a>(
+        &'a self,
+        key: &str,
+        locale_assets: &'a Assets<LocaleAsset>,
+        profile: &Profile,
+    ) -> Option<&Vec<TextSectionConfig>> {
+        if let Some(la) = locale_assets.get(&self.get_handle(profile)) {
+            la.text_sections.get(key)
+        } else {
+            None
+        }
     }
-    pub fn get_string(&self, key: &str) -> Option<&String> {
-        self.strings.get(key)
-    }
-    pub fn get_text_section(&self, key: &str) -> Option<&Vec<TextSectionConfig>> {
-        self.text_sections.get(key)
+    pub fn get_handle(&self, profile: &Profile) -> Handle<LocaleAsset> {
+        match profile.lang {
+            Language::DE => self.de.clone_weak(),
+            Language::FR => self.fr.clone_weak(),
+            Language::ES => self.es.clone_weak(),
+            _ => self.en.clone_weak(),
+        }
     }
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct Profile {
-    pub lang: String,
+    pub lang: Language,
     pub sfx_volume: f32,
     pub level_points: [[Option<u16>; 6]; 6],
 }
@@ -221,7 +248,7 @@ impl Profile {
 impl Default for Profile {
     fn default() -> Self {
         Self {
-            lang: "en".to_string(),
+            lang: Language::EN,
             sfx_volume: 0.5,
             level_points: Default::default(),
         }

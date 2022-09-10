@@ -1,8 +1,9 @@
 use super::board::Board;
 use crate::{
+    assets::LocaleAsset,
     functions::rescale_board,
     parser,
-    resources::{CellMeshes, GameColors, LoadState, Locale, TextSettings},
+    resources::{CellMeshes, GameColors, LoadState, LocaleAssets, Profile, TextSettings},
 };
 use bevy::{
     prelude::{Assets, Commands, Mesh, Res, ResMut, Transform},
@@ -13,19 +14,24 @@ use bevy::{
 pub fn setup(
     mut commands: Commands,
     wnds: Res<Windows>,
-    (cell_meshes, game_colors, locale, text_settings): (
+    (cell_meshes, game_colors, locale, profile, text_settings): (
         Res<CellMeshes>,
         Res<GameColors>,
-        Res<Locale>,
+        Res<LocaleAssets>,
+        Res<Profile>,
         Res<TextSettings>,
     ),
     load_state: ResMut<LoadState>,
-    (mut meshes, mut colors): (ResMut<Assets<Mesh>>, ResMut<Assets<ColorMaterial>>),
+    (mut meshes, mut colors, locales): (
+        ResMut<Assets<Mesh>>,
+        ResMut<Assets<ColorMaterial>>,
+        Res<Assets<LocaleAsset>>,
+    ),
 ) {
     if load_state.filename.is_none() {
         panic!("No level specified.");
     }
-    let config = parser::board_from_file(load_state.filename.as_ref().unwrap(), &locale);
+    let config = parser::board_from_file(load_state.filename.as_ref().unwrap());
 
     let mut root_transform = Transform::identity();
     for wnd in wnds.iter() {
@@ -42,9 +48,15 @@ pub fn setup(
         &mut commands,
         root_transform,
         &config,
-        (&cell_meshes, &game_colors, &text_settings),
+        (
+            &cell_meshes,
+            &game_colors,
+            &locale,
+            &profile,
+            &text_settings,
+        ),
         load_state.ids.unwrap(),
-        (&mut meshes, &mut colors),
+        (&mut meshes, &mut colors, &locales),
     );
 
     commands.insert_resource(board);

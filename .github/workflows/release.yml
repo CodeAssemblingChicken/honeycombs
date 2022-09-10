@@ -164,7 +164,6 @@ jobs:
               mkdir tmp/$pkgname
               # cp LICENSE README.md tmp/$pkgname
               cp -r assets/ tmp/$pkgname
-              touch tmp/$pkgname/settings.ron
               mv bins-$platform/$BIN_NAME$exe tmp/$pkgname
               chmod +x tmp/$pkgname/$BIN_NAME$exe
 

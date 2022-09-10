@@ -1,7 +1,7 @@
 use crate::{
-    components::{Cell, RootComponent},
+    components::{Cell, Language, RootComponent},
     functions::{rescale_board, switch_state},
-    resources::{GameColors, LoadState, Locale, Profile, SfxAssets},
+    resources::{GameColors, LoadState, Profile, SfxAssets},
     states::AppState,
 };
 use bevy::{
@@ -15,7 +15,7 @@ use interactable::{
     hover::{MouseEnterEvent, MouseExitEvent},
 };
 
-use super::components::{Language, OptionCell};
+use super::components::OptionCell;
 
 pub fn mouse_click_cell(
     mut commands: Commands,
@@ -43,10 +43,9 @@ pub fn mouse_click_cell(
 
 pub fn mouse_click_lang(
     level_cell_query: Query<&Language>,
-    (mut app_state, mut load_state, mut locale, mut profile): (
+    (mut app_state, mut load_state, mut profile): (
         ResMut<State<AppState>>,
         ResMut<LoadState>,
-        ResMut<Locale>,
         ResMut<Profile>,
     ),
     mut ev_mouse_left_click: EventReader<MouseLeftClickEvent>,
@@ -56,15 +55,7 @@ pub fn mouse_click_lang(
         .filter(|ev| ev.click_type == ClickType::Released)
     {
         if let Ok(lang) = level_cell_query.get(ev.entity) {
-            locale.set_lang(
-                match lang {
-                    Language::EN => "en",
-                    Language::DE => "de",
-                    Language::FR => "fr",
-                    Language::ES => "es",
-                },
-                &mut profile,
-            );
+            profile.lang = *lang;
             switch_state(Some(AppState::Home), &mut app_state, &mut load_state);
         }
     }
