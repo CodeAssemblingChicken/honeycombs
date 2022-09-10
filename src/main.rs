@@ -16,39 +16,43 @@ mod states;
 
 use assets::{LocaleAsset, LocaleAssetLoader};
 use bevy::{
-    app::App,
+    app::{App, AppExit},
     hierarchy::DespawnRecursiveExt,
     prelude::{
-        default, AddAsset, Camera, Camera2dBundle, ClearColor, Color, Commands, Entity, Msaa,
-        Query, Res, ResMut, State, SystemSet, Without,
+        default, AddAsset, Camera, Camera2dBundle, ClearColor, Color, Commands, Entity,
+        EventWriter, Msaa, Query, Res, ResMut, State, SystemSet, Without,
     },
     window::{WindowDescriptor, WindowResizeConstraints},
     DefaultPlugins,
 };
 use bevy_asset_loader::prelude::{LoadingState, LoadingStateAppExt};
 use bevy_easings::EasingsPlugin;
-use bevy_kira_audio::AudioPlugin;
-use overlay::resources::OverlaySettings;
-use std::{
-    io::{self, Write},
-    panic,
-};
-// use chrono::Utc;
 #[cfg(feature = "bevy-inspector-egui")]
 use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
+use bevy_kira_audio::AudioPlugin;
 #[cfg(feature = "bevy-inspector-egui")]
 use components::Cell;
 use interactable::{InteractableCamera, InteractablePlugin};
-#[cfg(not(target_family = "wasm"))]
+#[cfg(not(target_arch = "wasm32"))]
 use native_dialog::MessageDialog;
+use overlay::resources::OverlaySettings;
 use resources::{
     CellMeshes, GameColors, LoadState, LocaleAssets, Profile, SfxAssets, TextSettings,
 };
 use states::AppState;
+use std::{
+    io::{self, Write},
+    panic,
+};
 
 fn main() {
-    #[cfg(not(target_family = "wasm"))]
+    // When building for native apps, use the native message dialog for panics
+    #[cfg(not(target_arch = "wasm32"))]
     set_panic_hook();
+    // When building for WASM, print panics to the browser console
+    #[cfg(target_arch = "wasm32")]
+    console_error_panic_hook::set_once();
+
     let mut app = App::new();
     app.insert_resource(Msaa { samples: 4 })
         .insert_resource(WindowDescriptor {
@@ -88,7 +92,8 @@ fn main() {
                 .with_collection::<LocaleAssets>(),
         )
         .add_state(AppState::AssetLoading)
-        .add_system_set(SystemSet::on_update(AppState::StateChange).with_system(load_complete));
+        .add_system_set(SystemSet::on_update(AppState::StateChange).with_system(load_complete))
+        .add_system_set(SystemSet::on_enter(AppState::Settings).with_system(quit_system));
 
     home::prepare_home(&mut app);
     level_selection::prepare_level_selection(&mut app);
@@ -127,11 +132,15 @@ pub fn cleanup(mut commands: Commands, entities: Query<Entity, Without<Camera>>)
     }
 }
 
+fn quit_system(mut exit: EventWriter<AppExit>) {
+    exit.send(AppExit);
+}
+
 fn set_panic_hook() {
     panic::set_hook(Box::new(|info| {
         let mut w = Vec::new();
         let _ = writeln!(&mut w, "{}", info);
-        #[cfg(not(target_family = "wasm"))]
+        #[cfg(not(target_arch = "wasm32"))]
         MessageDialog::new()
             .set_type(native_dialog::MessageType::Error)
             .set_title("Error")

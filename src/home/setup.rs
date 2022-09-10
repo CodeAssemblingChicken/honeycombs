@@ -80,7 +80,7 @@ pub fn setup(
         big_transform,
         AppState::Settings,
         locale
-            .get_string("options", &locales, &profile)
+            .get_string("quit", &locales, &profile)
             .unwrap_or(&"String not found".to_string()),
     );
 

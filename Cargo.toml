@@ -17,13 +17,12 @@ debug = ["bevy/dynamic", "bevy-inspector-egui"]
 bevy_asset_loader = "0.12.1"
 bevy_easings = "0.8"
 bevy_kira_audio = "0.12"
-# chrono = "0.4"
 rand = "0.8"
 ron = "0.8"
 serde = { version = "1", features = ["derive"] }
 interactable = { path = "interactable" }
 
-[target.'cfg(not(target_family = "wasm"))'.dependencies]
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 native-dialog = "0.6.3"
 
 [dependencies.bevy]
