@@ -1,8 +1,4 @@
-use std::{
-    collections::HashMap,
-    fs::{self, File},
-    path::Path,
-};
+use std::{collections::HashMap, fs::File};
 
 use crate::{
     components::TextSectionConfig,
@@ -20,7 +16,6 @@ use bevy_asset_loader::prelude::AssetCollection;
 use bevy_kira_audio::AudioSource;
 use ron::{
     de::from_reader,
-    from_str,
     ser::{to_writer_pretty, PrettyConfig},
 };
 use serde::{Deserialize, Serialize};
