@@ -1,17 +1,16 @@
 use crate::constants::{SCALE_ENLARGED, SCALE_NORMAL};
 use bevy::{
     math::Vec3,
-    prelude::{Bundle, Color, Commands, Component, Entity, Handle, Query, Transform},
+    prelude::{Color, Commands, Component, Entity, Handle, Query, Transform},
     sprite::ColorMaterial,
     text::{TextSection, TextStyle},
 };
 use bevy_easings::{Ease, EaseFunction, EasingType};
-use interactable::{click::Clickable, hover::Hoverable};
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
 // TODO: This is probably way to big
-/// Cell component storing everythin cell related
+/// Cell component storing everything cell related
 #[cfg_attr(
     feature = "bevy-inspector-egui",
     derive(bevy_inspector_egui::Inspectable)
@@ -24,11 +23,8 @@ pub struct Cell {
     pub outer_hexagon: Entity,
     pub inner_hexagon: Entity,
     pub orig: Transform,
-    pub hovering: bool,
 }
 
-// TODO: Maybe use systems and events instead?
-// e.g. CellHoverEvent(entity)
 impl Cell {
     pub fn hover(
         &mut self,
@@ -38,10 +34,6 @@ impl Cell {
         dark: Handle<ColorMaterial>,
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
     ) {
-        if self.hovering {
-            return;
-        }
-        self.hovering = true;
         // Enlarge
         self.rescale(commands, SCALE_ENLARGED);
         // Set colors to hovering
@@ -56,10 +48,6 @@ impl Cell {
         dark: Handle<ColorMaterial>,
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
     ) {
-        if !self.hovering {
-            return;
-        }
-        self.hovering = false;
         // Normal scale
         self.rescale(commands, SCALE_NORMAL);
         // Set colors to normal
@@ -117,13 +105,6 @@ impl Cell {
         }
         // unwrap should be fine, because if the children exist they're also in the query
     }
-}
-
-/// Only hidden cells are Hoverable and Clickable
-#[derive(Bundle)]
-pub struct InteractableCell {
-    pub hoverable: Hoverable,
-    pub clickable: Clickable,
 }
 
 /// Used for querying only the inner hexes

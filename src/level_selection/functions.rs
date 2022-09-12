@@ -7,7 +7,7 @@ use crate::{
 };
 use bevy::{
     hierarchy::BuildChildren,
-    prelude::{default, Commands, Entity, SpatialBundle, Transform},
+    prelude::{Commands, Entity, SpatialBundle, Transform},
 };
 
 pub fn spawn_cluster(
@@ -74,15 +74,7 @@ fn spawn_level_selection_cell(
     let cell = commands.spawn().id();
 
     let colors = if unlocked {
-        make_cell_interactable(
-            commands,
-            cell,
-            interactable::click::MouseActions {
-                left_released: true,
-                ..default()
-            },
-            RADIUS,
-        );
+        make_cell_interactable(commands, cell, RADIUS);
         if profile.level_points[stage_id as usize][level_id as usize].is_some() {
             (
                 game_colors.white.clone(),
@@ -131,7 +123,6 @@ fn spawn_level_selection_cell(
         outer_hexagon: child1,
         inner_hexagon: child2,
         orig: big_transform,
-        hovering: false,
     };
     commands
         .entity(cell)

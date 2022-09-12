@@ -17,6 +17,15 @@ impl ContainsPoint for Shape {
     }
 }
 
+impl Default for Shape {
+    fn default() -> Self {
+        Self::Quad(Quad {
+            width: 1.,
+            height: 1.,
+        })
+    }
+}
+
 pub struct Quad {
     pub width: f32,
     pub height: f32,

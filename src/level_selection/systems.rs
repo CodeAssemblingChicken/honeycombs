@@ -12,81 +12,66 @@ use bevy::{
     window::WindowResized,
 };
 use bevy_kira_audio::{Audio, AudioControl};
-use interactable::{
-    click::{ClickType, MouseLeftClickEvent},
-    hover::{MouseEnterEvent, MouseExitEvent},
-};
+use interactable::components::{Entered, Exited, ReleasedLeft};
 
 pub fn mouse_click_cell(
     mut commands: Commands,
-    mut level_cell_query: Query<(&LevelSelectionCell, &mut Cell)>,
+    mut level_cell_query: Query<(&LevelSelectionCell, &mut Cell), With<ReleasedLeft>>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     game_colors: Res<GameColors>,
     (mut app_state, mut load_state): (ResMut<State<AppState>>, ResMut<LoadState>),
-    mut ev_mouse_left_click: EventReader<MouseLeftClickEvent>,
 ) {
-    for ev in ev_mouse_left_click
-        .iter()
-        .filter(|ev| ev.click_type == ClickType::Released)
-    {
-        if let Ok((lsc, mut cell)) = level_cell_query.get_mut(ev.entity) {
-            lsc.click(
-                &mut cell,
-                &mut commands,
-                &mut color_query,
-                &game_colors,
-                &mut app_state,
-                &mut load_state,
-            );
-        }
+    for (lsc, mut cell) in level_cell_query.iter_mut() {
+        lsc.click(
+            &mut cell,
+            &mut commands,
+            &mut color_query,
+            &game_colors,
+            &mut app_state,
+            &mut load_state,
+        );
     }
 }
 
 /// Calls hover on a cell that is entered by the mouse
 pub fn mouse_enter_cell(
     mut commands: Commands,
-    mut level_cell_query: Query<(&LevelSelectionCell, &mut Cell)>,
+    mut level_cell_query: Query<(&LevelSelectionCell, &mut Cell), With<Entered>>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     (game_colors, profile): (Res<GameColors>, Res<Profile>),
-    mut ev_mouse_enter: EventReader<MouseEnterEvent>,
     audio: Res<Audio>,
     sfx_assets: Res<SfxAssets>,
 ) {
-    for ev in ev_mouse_enter.iter() {
-        if let Ok((lsc, mut cell)) = level_cell_query.get_mut(ev.0) {
-            audio
-                .play(sfx_assets.sfx_hover.clone())
-                .with_volume(profile.sfx_volume as f64);
-            lsc.hover(
-                &mut cell,
-                &mut commands,
-                &mut color_query,
-                &game_colors,
-                &profile,
-            );
-        }
+    for (lsc, mut cell) in level_cell_query.iter_mut() {
+        audio
+            .play(sfx_assets.sfx_hover.clone())
+            .with_volume(profile.sfx_volume as f64);
+        lsc.hover(
+            &mut cell,
+            &mut commands,
+            &mut color_query,
+            &game_colors,
+            &profile,
+        );
     }
 }
 
 /// Calls unhover on a cell that is exited by the mouse
 pub fn mouse_exit_cell(
     mut commands: Commands,
-    mut level_cell_query: Query<(&LevelSelectionCell, &mut Cell)>,
+    mut level_cell_query: Query<(&LevelSelectionCell, &mut Cell), With<Exited>>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     game_colors: Res<GameColors>,
     profile: Res<Profile>,
-    mut ev_mouse_exit: EventReader<MouseExitEvent>,
 ) {
-    for ev in ev_mouse_exit.iter() {
-        if let Ok((lsc, mut cell)) = level_cell_query.get_mut(ev.0) {
-            lsc.unhover(
-                &mut cell,
-                &mut commands,
-                &mut color_query,
-                &game_colors,
-                &profile,
-            );
-        }
+    for (lsc, mut cell) in level_cell_query.iter_mut() {
+        lsc.unhover(
+            &mut cell,
+            &mut commands,
+            &mut color_query,
+            &game_colors,
+            &profile,
+        );
     }
 }
 

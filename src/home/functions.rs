@@ -7,7 +7,7 @@ use crate::{
 };
 use bevy::{
     hierarchy::BuildChildren,
-    prelude::{default, Commands, Entity, Handle, Transform},
+    prelude::{Commands, Entity, Handle, Transform},
     sprite::ColorMaterial,
 };
 
@@ -44,15 +44,7 @@ pub fn spawn_option_cell(
     );
     commands.entity(cell).add_child(text_entity);
 
-    make_cell_interactable(
-        commands,
-        cell,
-        interactable::click::MouseActions {
-            left_released: true,
-            ..default()
-        },
-        RADIUS * MED_SCALE,
-    );
+    make_cell_interactable(commands, cell, RADIUS * MED_SCALE);
 
     let cell_component = Cell {
         x: -1,
@@ -61,7 +53,6 @@ pub fn spawn_option_cell(
         outer_hexagon: child1,
         inner_hexagon: child2,
         orig: big_transform,
-        hovering: false,
     };
     commands
         .entity(cell)

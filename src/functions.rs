@@ -1,8 +1,6 @@
 use crate::{
     board_functions::{count_empty_cells, empty_connected, get_column},
-    components::{
-        CellInner, CellOuter, CellType, ColumnHint, HintDirection, HintType, InteractableCell,
-    },
+    components::{CellInner, CellOuter, CellType, ColumnHint, HintDirection, HintType},
     constants::{INNER_TRANSFORM, OUTER_TRANSFORM, RADIUS, Z_INDEX_TEXT},
     resources::{LoadState, TextSettings},
     states::AppState,
@@ -15,35 +13,17 @@ use bevy::{
     text::{Text, Text2dBundle, TextAlignment, TextStyle},
 };
 use interactable::{
-    click::{Clickable, MouseActions},
-    hover::Hoverable,
+    components::Interactable,
     shapes::{Hexagon, Shape},
 };
 
-pub fn make_cell_interactable(
-    commands: &mut Commands,
-    cell: Entity,
-    mouse_actions: MouseActions,
-    radius: f32,
-) {
-    commands.entity(cell).insert_bundle(InteractableCell {
-        hoverable: Hoverable {
-            ignore_scale: false,
-            shape: Shape::Hexagon(Hexagon {
-                radius,
-                point_up: false,
-            }),
-            ..default()
-        },
-        clickable: Clickable {
-            ignore_scale: false,
-            shape: Shape::Hexagon(Hexagon {
-                radius,
-                point_up: false,
-            }),
-            mouse_actions,
-            ..default()
-        },
+pub fn make_cell_interactable(commands: &mut Commands, cell: Entity, radius: f32) {
+    commands.entity(cell).insert(Interactable {
+        shape: Shape::Hexagon(Hexagon {
+            radius,
+            point_up: false,
+        }),
+        ..default()
     });
 }
 

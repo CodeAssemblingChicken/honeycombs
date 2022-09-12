@@ -16,10 +16,7 @@ use bevy::{
     sprite::{ColorMaterial, ColorMesh2dBundle, SpriteBundle},
     window::Windows,
 };
-use interactable::{
-    click::{Clickable, MouseActions},
-    shapes::Shape,
-};
+use interactable::{components::Interactable, shapes::Shape};
 
 pub fn setup(
     mut commands: Commands,
@@ -102,15 +99,11 @@ pub fn setup(
             transform: Transform::from_xyz(pos_en.0, pos_en.1, Z_INDEX_TEXT),
             ..default()
         })
-        .insert(Clickable {
+        .insert(Interactable {
             shape: Shape::Quad(interactable::shapes::Quad {
                 width: 200.,
                 height: 120.,
             }),
-            mouse_actions: MouseActions {
-                left_released: true,
-                ..default()
-            },
             ..default()
         })
         .insert(Language::EN)
@@ -121,15 +114,11 @@ pub fn setup(
             transform: Transform::from_xyz(pos_de.0, pos_de.1, Z_INDEX_TEXT),
             ..default()
         })
-        .insert(Clickable {
+        .insert(Interactable {
             shape: Shape::Quad(interactable::shapes::Quad {
                 width: 200.,
                 height: 120.,
             }),
-            mouse_actions: MouseActions {
-                left_released: true,
-                ..default()
-            },
             ..default()
         })
         .insert(Language::DE)
@@ -140,15 +129,11 @@ pub fn setup(
             transform: Transform::from_xyz(pos_fr.0, pos_fr.1, Z_INDEX_TEXT),
             ..default()
         })
-        .insert(Clickable {
+        .insert(Interactable {
             shape: Shape::Quad(interactable::shapes::Quad {
                 width: 200.,
                 height: 120.,
             }),
-            mouse_actions: MouseActions {
-                left_released: true,
-                ..default()
-            },
             ..default()
         })
         .insert(Language::FR)
@@ -159,15 +144,11 @@ pub fn setup(
             transform: Transform::from_xyz(pos_es.0, pos_es.1, Z_INDEX_TEXT),
             ..default()
         })
-        .insert(Clickable {
+        .insert(Interactable {
             shape: Shape::Quad(interactable::shapes::Quad {
                 width: 200.,
                 height: 120.,
             }),
-            mouse_actions: MouseActions {
-                left_released: true,
-                ..default()
-            },
             ..default()
         })
         .insert(Language::ES)

@@ -1,11 +1,13 @@
-pub mod click;
 mod common;
-pub mod hover;
+pub mod components;
 pub mod shapes;
+mod systems;
 
-use bevy::prelude::{Component, Plugin};
-use click::{click_system, MouseLeftClickEvent, MouseMiddleClickEvent, MouseRightClickEvent};
-use hover::{hover_system, MouseEnterEvent, MouseExitEvent, MouseOverEvent};
+use bevy::prelude::{
+    Commands, Component, Entity, ParallelSystemDescriptorCoercion, Plugin, SystemLabel,
+};
+use components::*;
+use systems::interact_system;
 
 #[derive(Component)]
 pub struct InteractableCamera;
@@ -14,13 +16,29 @@ pub struct InteractablePlugin;
 
 impl Plugin for InteractablePlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app.add_event::<MouseOverEvent>()
-            .add_event::<MouseEnterEvent>()
-            .add_event::<MouseExitEvent>()
-            .add_event::<MouseLeftClickEvent>()
-            .add_event::<MouseRightClickEvent>()
-            .add_event::<MouseMiddleClickEvent>()
-            .add_system(hover_system)
-            .add_system(click_system);
+        app.add_system(interact_system.label(InteractLabel::Interact));
     }
+}
+
+pub fn remove_interactable(commands: &mut Commands, e: Entity) {
+    commands
+        .entity(e)
+        .remove::<Entered>()
+        .remove::<Hovered>()
+        .remove::<Exited>()
+        .remove::<JustPressedLeft>()
+        .remove::<PressedLeft>()
+        .remove::<ReleasedLeft>()
+        .remove::<JustPressedRight>()
+        .remove::<PressedRight>()
+        .remove::<ReleasedRight>()
+        .remove::<JustPressedMiddle>()
+        .remove::<PressedMiddle>()
+        .remove::<ReleasedMiddle>()
+        .remove::<Interactable>();
+}
+
+#[derive(SystemLabel)]
+pub enum InteractLabel {
+    Interact,
 }

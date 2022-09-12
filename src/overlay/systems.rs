@@ -13,40 +13,34 @@ use bevy::{
     },
     window::WindowResized,
 };
-use interactable::click::{ClickType, MouseLeftClickEvent};
+use interactable::components::ReleasedLeft;
 
 pub fn button_system(
-    menu_button_query: Query<&ButtonMenu>,
-    next_button_query: Query<&ButtonNext>,
-    retry_button_query: Query<&ButtonRetry>,
+    menu_button_query: Query<&ButtonMenu, With<ReleasedLeft>>,
+    next_button_query: Query<&ButtonNext, With<ReleasedLeft>>,
+    retry_button_query: Query<&ButtonRetry, With<ReleasedLeft>>,
     (mut app_state, mut load_state): (ResMut<State<AppState>>, ResMut<LoadState>),
     overlay_settings: Res<OverlaySettings>,
-    mut ev_mouse_left_click: EventReader<MouseLeftClickEvent>,
 ) {
-    for ev in ev_mouse_left_click
-        .iter()
-        .filter(|ev| ev.click_type == ClickType::Released)
-    {
-        if menu_button_query.get(ev.entity).is_ok() {
-            switch_state(
-                Some(AppState::LevelSelection),
-                &mut app_state,
-                &mut load_state,
-            );
-        }
-        if next_button_query.get(ev.entity).is_ok() {
-            assert!(overlay_settings.level_id < 5);
-            load_state.ids = Some((overlay_settings.stage_id, overlay_settings.level_id + 1));
-            load_state.filename = Some(format!(
-                "assets/levels/{}/{}.lvl",
-                overlay_settings.stage_id + 1,
-                overlay_settings.level_id + 2
-            ));
-            switch_state(Some(AppState::Level), &mut app_state, &mut load_state);
-        }
-        if retry_button_query.get(ev.entity).is_ok() {
-            switch_state(Some(AppState::Level), &mut app_state, &mut load_state);
-        }
+    if !menu_button_query.is_empty() {
+        switch_state(
+            Some(AppState::LevelSelection),
+            &mut app_state,
+            &mut load_state,
+        );
+    }
+    if !next_button_query.is_empty() {
+        assert!(overlay_settings.level_id < 5);
+        load_state.ids = Some((overlay_settings.stage_id, overlay_settings.level_id + 1));
+        load_state.filename = Some(format!(
+            "assets/levels/{}/{}.lvl",
+            overlay_settings.stage_id + 1,
+            overlay_settings.level_id + 2
+        ));
+        switch_state(Some(AppState::Level), &mut app_state, &mut load_state);
+    }
+    if !retry_button_query.is_empty() {
+        switch_state(Some(AppState::Level), &mut app_state, &mut load_state);
     }
 }
 

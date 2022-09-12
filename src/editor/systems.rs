@@ -14,54 +14,49 @@ use crate::{
 use bevy::{
     input::Input,
     prelude::{
-        Color, Commands, EventReader, EventWriter, Handle, KeyCode, Query, Res, ResMut, State,
-        Transform, With,
+        Color, Commands, Entity, EventReader, EventWriter, Handle, KeyCode, Query, Res, ResMut,
+        State, Transform, With,
     },
     sprite::ColorMaterial,
     text::Text,
     window::WindowResized,
 };
-use interactable::{
-    click::{ClickType, MouseLeftClickEvent, MouseMiddleClickEvent, MouseRightClickEvent},
-    hover::{MouseEnterEvent, MouseExitEvent},
+use interactable::components::{
+    Entered, Exited, JustPressedLeft, JustPressedRight, PressedLeft, PressedMiddle, PressedRight,
 };
 
 pub fn mouse_click_unset_cell(
     mut commands: Commands,
-    mut cell_query: Query<(&mut EditorCell, &mut Cell), With<UnsetCell>>,
+    mut cell_query: Query<
+        (
+            Entity,
+            &mut EditorCell,
+            &mut Cell,
+            Option<&PressedLeft>,
+            Option<&PressedRight>,
+        ),
+        With<UnsetCell>,
+    >,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     game_colors: Res<GameColors>,
     mut board: ResMut<Board>,
-    (mut ev_mouse_left_click, mut ev_mouse_right_click): (
-        EventReader<MouseLeftClickEvent>,
-        EventReader<MouseRightClickEvent>,
-    ),
     mut ev_cell_update: EventWriter<CellUpdateEvent>,
 ) {
-    for ev in ev_mouse_left_click
-        .iter()
-        .filter(|ev| ev.click_type == ClickType::Pressed)
-    {
-        if let Ok((mut ec, mut cell)) = cell_query.get_mut(ev.entity) {
+    for (e, mut ec, mut cell, left, right) in cell_query.iter_mut() {
+        if left.is_some() {
             set_empty_cell(
                 &mut commands,
-                ev.entity,
+                e,
                 (&mut cell, &mut ec),
                 &mut color_query,
                 &game_colors,
                 &mut board,
                 &mut ev_cell_update,
             )
-        }
-    }
-    for ev in ev_mouse_right_click
-        .iter()
-        .filter(|ev| ev.click_type == ClickType::Pressed)
-    {
-        if let Ok((mut ec, mut cell)) = cell_query.get_mut(ev.entity) {
+        } else if right.is_some() {
             set_number_cell(
                 &mut commands,
-                ev.entity,
+                e,
                 (&mut cell, &mut ec),
                 &mut color_query,
                 &game_colors,
@@ -70,27 +65,27 @@ pub fn mouse_click_unset_cell(
             );
         }
     }
-    ev_mouse_left_click.clear();
-    ev_mouse_right_click.clear();
 }
 
 pub fn mouse_click_empty_cell(
     mut commands: Commands,
-    mut cell_query: Query<(&mut EditorCell, &mut Cell), With<EmptyCell>>,
+    mut cell_query: Query<
+        (
+            Entity,
+            &mut EditorCell,
+            &mut Cell,
+            Option<&JustPressedLeft>,
+            Option<&PressedMiddle>,
+        ),
+        With<EmptyCell>,
+    >,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     game_colors: Res<GameColors>,
     mut board: ResMut<Board>,
-    (mut ev_mouse_left_click, mut ev_mouse_middle_click): (
-        EventReader<MouseLeftClickEvent>,
-        EventReader<MouseMiddleClickEvent>,
-    ),
     mut ev_cell_update: EventWriter<CellUpdateEvent>,
 ) {
-    for ev in ev_mouse_left_click
-        .iter()
-        .filter(|ev| ev.click_type == ClickType::Just)
-    {
-        if let Ok((mut ec, mut cell)) = cell_query.get_mut(ev.entity) {
+    for (e, mut ec, mut cell, left, middle) in cell_query.iter_mut() {
+        if left.is_some() {
             ec.toggle_hidden(
                 &mut cell,
                 &mut commands,
@@ -99,17 +94,11 @@ pub fn mouse_click_empty_cell(
                 &mut board,
                 &mut ev_cell_update,
             );
-        }
-    }
-    for ev in ev_mouse_middle_click
-        .iter()
-        .filter(|ev| ev.click_type == ClickType::Pressed)
-    {
-        if let Ok((mut ec, mut cell)) = cell_query.get_mut(ev.entity) {
-            commands.entity(ev.entity).remove::<EmptyCell>();
+        } else if middle.is_some() {
+            commands.entity(e).remove::<EmptyCell>();
             unset_cell(
                 &mut commands,
-                ev.entity,
+                e,
                 (&mut cell, &mut ec),
                 &mut color_query,
                 &game_colors,
@@ -118,28 +107,26 @@ pub fn mouse_click_empty_cell(
             );
         }
     }
-    ev_mouse_left_click.clear();
-    ev_mouse_middle_click.clear();
 }
 
 pub fn mouse_click_number_cell(
     mut commands: Commands,
-    mut cell_query: Query<(&mut EditorCell, &mut Cell, &mut NumberCell)>,
+    mut cell_query: Query<(
+        Entity,
+        &mut EditorCell,
+        &mut Cell,
+        &mut NumberCell,
+        Option<&JustPressedLeft>,
+        Option<&JustPressedRight>,
+        Option<&PressedMiddle>,
+    )>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     game_colors: Res<GameColors>,
     mut board: ResMut<Board>,
-    (mut ev_mouse_left_click, mut ev_mouse_right_click, mut ev_mouse_middle_click): (
-        EventReader<MouseLeftClickEvent>,
-        EventReader<MouseRightClickEvent>,
-        EventReader<MouseMiddleClickEvent>,
-    ),
     mut ev_cell_update: EventWriter<CellUpdateEvent>,
 ) {
-    for ev in ev_mouse_left_click
-        .iter()
-        .filter(|ev| ev.click_type == ClickType::Just)
-    {
-        if let Ok((mut ec, mut cell, _nc)) = cell_query.get_mut(ev.entity) {
+    for (e, mut ec, mut cell, mut nc, left, right, middle) in cell_query.iter_mut() {
+        if left.is_some() {
             ec.toggle_hidden(
                 &mut cell,
                 &mut commands,
@@ -148,26 +135,14 @@ pub fn mouse_click_number_cell(
                 &mut board,
                 &mut ev_cell_update,
             );
-        }
-    }
-    for ev in ev_mouse_right_click
-        .iter()
-        .filter(|ev| ev.click_type == ClickType::Just)
-    {
-        if let Ok((_ec, _cell, mut nc)) = cell_query.get_mut(ev.entity) {
+        } else if right.is_some() {
             nc.special_hint = !nc.special_hint;
             ev_cell_update.send(CellUpdateEvent);
-        }
-    }
-    for ev in ev_mouse_middle_click
-        .iter()
-        .filter(|ev| ev.click_type == ClickType::Pressed)
-    {
-        if let Ok((mut ec, mut cell, _nc)) = cell_query.get_mut(ev.entity) {
-            commands.entity(ev.entity).remove::<NumberCell>();
+        } else if middle.is_some() {
+            commands.entity(e).remove::<NumberCell>();
             unset_cell(
                 &mut commands,
-                ev.entity,
+                e,
                 (&mut cell, &mut ec),
                 &mut color_query,
                 &game_colors,
@@ -176,40 +151,29 @@ pub fn mouse_click_number_cell(
             );
         }
     }
-    ev_mouse_left_click.clear();
-    ev_mouse_right_click.clear();
-    ev_mouse_middle_click.clear();
 }
 
 /// Calls hover on a cell that is entered by the mouse
 pub fn mouse_enter_cell(
     mut commands: Commands,
-    mut cell_query: Query<(&EditorCell, &mut Cell)>,
+    mut cell_query: Query<(&EditorCell, &mut Cell), With<Entered>>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     game_colors: Res<GameColors>,
-    mut ev_mouse_enter: EventReader<MouseEnterEvent>,
-    // audio: Res<Audio>,
-    // sfx_assets: Res<SfxAssets>,
 ) {
-    for ev in ev_mouse_enter.iter() {
-        if let Ok((ec, mut cell)) = cell_query.get_mut(ev.0) {
-            ec.hover(&mut cell, &mut commands, &mut color_query, &game_colors);
-        }
+    for (ec, mut cell) in cell_query.iter_mut() {
+        ec.hover(&mut cell, &mut commands, &mut color_query, &game_colors);
     }
 }
 
 /// Calls unhover on a cell that is exited by the mouse
 pub fn mouse_exit_cell(
     mut commands: Commands,
-    mut cell_query: Query<(&EditorCell, &mut Cell)>,
+    mut cell_query: Query<(&EditorCell, &mut Cell), With<Exited>>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     game_colors: Res<GameColors>,
-    mut ev_mouse_exit: EventReader<MouseExitEvent>,
 ) {
-    for ev in ev_mouse_exit.iter() {
-        if let Ok((ec, mut cell)) = cell_query.get_mut(ev.0) {
-            ec.unhover(&mut cell, &mut commands, &mut color_query, &game_colors);
-        }
+    for (ec, mut cell) in cell_query.iter_mut() {
+        ec.unhover(&mut cell, &mut commands, &mut color_query, &game_colors);
     }
 }
 

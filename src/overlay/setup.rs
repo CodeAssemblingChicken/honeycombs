@@ -16,10 +16,7 @@ use bevy::{
     text::{Text, Text2dBundle},
     window::Windows,
 };
-use interactable::{
-    click::{Clickable, MouseActions},
-    shapes::Shape,
-};
+use interactable::{components::Interactable, shapes::Shape};
 
 pub fn setup(
     mut commands: Commands,
@@ -242,15 +239,11 @@ pub fn setup(
                     });
                 })
                 .insert(ButtonRetry)
-                .insert(Clickable {
+                .insert(Interactable {
                     shape: Shape::Quad(interactable::shapes::Quad {
                         width: 240.,
                         height: 190.,
                     }),
-                    mouse_actions: MouseActions {
-                        left_released: true,
-                        ..default()
-                    },
                     ..default()
                 });
             if overlay_settings.overlay_type == OverlayType::LevelComplete
@@ -280,15 +273,11 @@ pub fn setup(
                         });
                     })
                     .insert(ButtonNext)
-                    .insert(Clickable {
+                    .insert(Interactable {
                         shape: Shape::Quad(interactable::shapes::Quad {
                             width: 240.,
                             height: 190.,
                         }),
-                        mouse_actions: MouseActions {
-                            left_released: true,
-                            ..default()
-                        },
                         ..default()
                     });
             }
@@ -316,15 +305,11 @@ pub fn setup(
                     });
                 })
                 .insert(ButtonMenu)
-                .insert(Clickable {
+                .insert(Interactable {
                     shape: Shape::Quad(interactable::shapes::Quad {
                         width: 240.,
                         height: 190.,
                     }),
-                    mouse_actions: MouseActions {
-                        left_released: true,
-                        ..default()
-                    },
                     ..default()
                 });
         });

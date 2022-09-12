@@ -68,9 +68,6 @@ impl LevelSelectionCell {
         app_state: &mut ResMut<State<AppState>>,
         load_state: &mut ResMut<LoadState>,
     ) {
-        if cell.hovering {
-            cell.hovering = false;
-        }
         cell.click(
             commands,
             None,

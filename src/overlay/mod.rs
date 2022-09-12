@@ -5,7 +5,8 @@ mod systems;
 
 use self::{setup::setup, systems::*};
 use crate::states::AppState;
-use bevy::prelude::{App, SystemSet};
+use bevy::prelude::{App, ParallelSystemDescriptorCoercion, SystemSet};
+use interactable::InteractLabel;
 
 const STATE: AppState = AppState::Overlay;
 
@@ -13,7 +14,7 @@ pub fn prepare_overlay(app: &mut App) {
     app.add_system_set(SystemSet::on_enter(STATE).with_system(setup))
         .add_system_set(
             SystemSet::on_update(STATE)
-                .with_system(button_system)
+                .with_system(button_system.after(InteractLabel::Interact))
                 .with_system(hotkey_system)
                 .with_system(window_resize_system),
         )

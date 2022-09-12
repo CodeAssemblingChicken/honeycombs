@@ -21,10 +21,7 @@ use bevy::{
     sprite::{ColorMaterial, ColorMesh2dBundle},
     text::{Text, Text2dBundle},
 };
-use interactable::{
-    click::{Clickable, MouseActions},
-    shapes::Shape,
-};
+use interactable::{components::Interactable, shapes::Shape};
 
 /// Board component storing common variables
 pub struct Board {
@@ -163,16 +160,7 @@ impl Board {
                     }
                 }
                 if hidden {
-                    make_cell_interactable(
-                        commands,
-                        cell,
-                        interactable::click::MouseActions {
-                            left_released: true,
-                            right_released: true,
-                            ..default()
-                        },
-                        RADIUS,
-                    );
+                    make_cell_interactable(commands, cell, RADIUS);
                 }
 
                 let cell_component = Cell {
@@ -182,7 +170,6 @@ impl Board {
                     outer_hexagon: child1,
                     inner_hexagon: child2,
                     orig: big_transform,
-                    hovering: false,
                 };
                 commands
                     .entity(cell)
@@ -214,15 +201,11 @@ impl Board {
                 .id();
             commands
                 .entity(hint_entity)
-                .insert(Clickable {
+                .insert(Interactable {
                     shape: Shape::Quad(interactable::shapes::Quad {
                         width: 0.6 * RADIUS,
                         height: 0.6 * RADIUS,
                     }),
-                    mouse_actions: MouseActions {
-                        left_released: true,
-                        ..default()
-                    },
                     ..default()
                 })
                 .add_child(hint_line);
