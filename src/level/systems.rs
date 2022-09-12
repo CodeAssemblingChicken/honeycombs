@@ -20,32 +20,52 @@ use bevy::{
     window::WindowResized,
 };
 use bevy_kira_audio::{Audio, AudioControl};
-use interactable::{
-    click::{ClickType, MouseLeftClickEvent, MouseRightClickEvent},
-    hover::{MouseEnterEvent, MouseExitEvent},
-};
+use interactable::components::{Entered, Exited, ReleasedLeft, ReleasedRight};
 
 /// Calls uncover on a cell that is clicked by the mouse
 pub fn mouse_click_cell(
     mut commands: Commands,
-    mut number_cell_query: Query<(&mut GameCell, &mut Cell, &NumberCell), Without<EmptyCell>>,
-    mut empty_cell_query: Query<(&mut GameCell, &mut Cell), With<EmptyCell>>,
+    mut number_cell_query: Query<
+        (
+            &mut GameCell,
+            &mut Cell,
+            &NumberCell,
+            Option<&ReleasedLeft>,
+            Option<&ReleasedRight>,
+        ),
+        Without<EmptyCell>,
+    >,
+    mut empty_cell_query: Query<
+        (
+            &mut GameCell,
+            &mut Cell,
+            Option<&ReleasedLeft>,
+            Option<&ReleasedRight>,
+        ),
+        With<EmptyCell>,
+    >,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     game_colors: Res<GameColors>,
     mut board: ResMut<Board>,
-    (mut ev_mouse_left_click, mut ev_mouse_right_click): (
-        EventReader<MouseLeftClickEvent>,
-        EventReader<MouseRightClickEvent>,
-    ),
 ) {
-    for ev in ev_mouse_left_click
-        .iter()
-        .filter(|ev| ev.click_type == ClickType::Released)
-    {
-        if let Ok((lc, cell, _nc)) = number_cell_query.get(ev.entity) {
-            lc.uncover_fail(cell, &mut commands, &mut board);
+    for (mut lc, mut cell, nc, left, right) in number_cell_query.iter_mut() {
+        if left.is_some() {
+            lc.uncover_fail(&cell, &mut commands, &mut board);
+        } else if right.is_some() {
+            lc.uncover(
+                &mut cell,
+                &mut commands,
+                &mut color_query,
+                game_colors.as_ref(),
+                Some(nc),
+                &mut board,
+            );
         }
-        if let Ok((mut lc, mut cell)) = empty_cell_query.get_mut(ev.entity) {
+    }
+    for (mut lc, mut cell, left, right) in empty_cell_query.iter_mut() {
+        if right.is_some() {
+            lc.uncover_fail(&cell, &mut commands, &mut board);
+        } else if left.is_some() {
             lc.uncover(
                 &mut cell,
                 &mut commands,
@@ -56,78 +76,44 @@ pub fn mouse_click_cell(
             );
         }
     }
-    for ev in ev_mouse_right_click
-        .iter()
-        .filter(|ev| ev.click_type == ClickType::Released)
-    {
-        if let Ok((mut lc, mut cell, nc)) = number_cell_query.get_mut(ev.entity) {
-            lc.uncover(
-                &mut cell,
-                &mut commands,
-                &mut color_query,
-                game_colors.as_ref(),
-                Some(nc),
-                &mut board,
-            );
-        }
-        if let Ok((lc, cell)) = empty_cell_query.get(ev.entity) {
-            lc.uncover_fail(cell, &mut commands, &mut board);
-        }
-    }
 }
 
 /// Calls hover on a cell that is entered by the mouse
 pub fn mouse_enter_cell(
     mut commands: Commands,
-    mut cell_query: Query<(&GameCell, &mut Cell)>,
+    mut cell_query: Query<(&GameCell, &mut Cell), With<Entered>>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     game_colors: Res<GameColors>,
-    mut ev_mouse_enter: EventReader<MouseEnterEvent>,
     (audio, sfx_assets, profile): (Res<Audio>, Res<SfxAssets>, Res<Profile>),
 ) {
-    for ev in ev_mouse_enter.iter() {
-        if let Ok((lc, mut cell)) = cell_query.get_mut(ev.0) {
-            audio
-                .play(sfx_assets.sfx_hover.clone())
-                .with_volume(profile.sfx_volume as f64);
-            lc.hover(&mut cell, &mut commands, &mut color_query, &game_colors);
-        }
+    for (lc, mut cell) in cell_query.iter_mut() {
+        audio
+            .play(sfx_assets.sfx_hover.clone())
+            .with_volume(profile.sfx_volume as f64);
+        lc.hover(&mut cell, &mut commands, &mut color_query, &game_colors);
     }
 }
 
 /// Calls unhover on a cell that is exited by the mouse
 pub fn mouse_exit_cell(
     mut commands: Commands,
-    mut cell_query: Query<(&GameCell, &mut Cell)>,
+    mut cell_query: Query<(&GameCell, &mut Cell), With<Exited>>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     game_colors: Res<GameColors>,
-    mut ev_mouse_exit: EventReader<MouseExitEvent>,
 ) {
-    for ev in ev_mouse_exit.iter() {
-        if let Ok((lc, mut cell)) = cell_query.get_mut(ev.0) {
-            lc.unhover(&mut cell, &mut commands, &mut color_query, &game_colors);
-        }
+    for (lc, mut cell) in cell_query.iter_mut() {
+        lc.unhover(&mut cell, &mut commands, &mut color_query, &game_colors);
     }
 }
 
 pub fn mouse_click_hint(
-    hint_query: Query<&Children, With<ColumnHint>>,
+    hint_query: Query<&Children, (With<ColumnHint>, With<ReleasedLeft>)>,
     mut hint_line_query: Query<&mut Visibility>,
-    mut ev_mouse_left_click: EventReader<MouseLeftClickEvent>,
 ) {
-    for ev in ev_mouse_left_click
-        .iter()
-        .filter(|ev| ev.click_type == ClickType::Released)
-    {
-        if let Ok(hint) = hint_query.get(ev.entity) {
-            for line in hint.iter() {
-                if let Ok(mut visibility) = hint_line_query.get_mut(*line) {
-                    visibility.is_visible = !visibility.is_visible;
-                }
-                // get the health of each child unit
-                // let health = q_child.get(child);
-
-                // do something
+    for hint in hint_query.iter() {
+        for line in hint.iter() {
+            if let Ok(mut visibility) = hint_line_query.get_mut(*line) {
+                visibility.is_visible = !visibility.is_visible;
             }
         }
     }

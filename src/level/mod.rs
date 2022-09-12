@@ -9,6 +9,7 @@ use bevy::{
     app::App,
     prelude::{ParallelSystemDescriptorCoercion, SystemSet},
 };
+use interactable::InteractLabel;
 
 const STATE: AppState = AppState::Level;
 
@@ -17,13 +18,13 @@ pub fn prepare_level(app: &mut App) {
         .add_system_set(
             SystemSet::on_update(STATE)
                 .with_system(mouse_enter_cell)
-                .with_system(mouse_exit_cell.before(mouse_enter_cell))
                 .with_system(
-                    mouse_click_cell
-                        .after(mouse_enter_cell)
-                        .after(mouse_exit_cell),
+                    mouse_exit_cell
+                        .before(mouse_enter_cell)
+                        .after(InteractLabel::Interact),
                 )
-                .with_system(mouse_click_hint)
+                .with_system(mouse_click_cell.after(mouse_enter_cell))
+                .with_system(mouse_click_hint.after(InteractLabel::Interact))
                 .with_system(check_solved)
                 .with_system(window_resize_system)
                 .with_system(hotkey_system),

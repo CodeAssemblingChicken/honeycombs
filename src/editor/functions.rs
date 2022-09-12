@@ -10,7 +10,7 @@ use crate::{
 };
 use bevy::{
     hierarchy::BuildChildren,
-    prelude::{default, Commands, Entity, EventWriter, Handle, Query, Transform, Visibility},
+    prelude::{Commands, Entity, EventWriter, Handle, Query, Transform, Visibility},
     sprite::ColorMaterial,
 };
 
@@ -52,19 +52,7 @@ pub fn spawn_cell_common(
         big_transform,
     );
 
-    make_cell_interactable(
-        commands,
-        cell,
-        interactable::click::MouseActions {
-            left_just: true,
-            left_pressed: true,
-            right_just: true,
-            right_pressed: true,
-            middle_pressed: true,
-            ..default()
-        },
-        RADIUS,
-    );
+    make_cell_interactable(commands, cell, RADIUS);
 
     let cell_component = Cell {
         x,
@@ -73,7 +61,6 @@ pub fn spawn_cell_common(
         outer_hexagon: child1,
         inner_hexagon: child2,
         orig: big_transform,
-        hovering: false,
     };
 
     let text_entity = spawn_cell_text(

@@ -1,6 +1,6 @@
 use super::board::Board;
 use crate::{
-    components::{Cell, CellType, InteractableCell},
+    components::{Cell, CellType},
     constants::RADIUS,
     resources::GameColors,
 };
@@ -71,9 +71,6 @@ impl GameCell {
     ) {
         self.hidden = false;
         // TODO: Uncover animation/particles
-        if cell.hovering {
-            cell.hovering = false;
-        }
         let (dark, light) = match self.cell_type {
             CellType::NumberCell(_) => {
                 board.uncover_number();
@@ -94,10 +91,9 @@ impl GameCell {
                 )
             }
         };
-
-        commands
-            .entity(cell.entity)
-            .remove_bundle::<InteractableCell>();
+        // TODO: Could break
+        // commands.entity(cell.entity).remove::<Interactable>();
+        interactable::remove_interactable(commands, cell.entity);
         // Normal scale
         cell.click(commands, None, light, dark, color_query);
     }

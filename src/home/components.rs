@@ -46,9 +46,6 @@ impl OptionCell {
         game_colors: &GameColors,
         (app_state, load_state): (&mut State<AppState>, &mut LoadState),
     ) {
-        if cell.hovering {
-            cell.hovering = false;
-        }
         let colors = get_colors_for_app_state(game_colors, self.app_state);
         cell.click(commands, None, colors.2, colors.1, color_query);
         switch_state(Some(self.app_state), app_state, load_state);

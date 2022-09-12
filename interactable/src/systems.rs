@@ -1,3 +1,12 @@
+use crate::{
+    common::mouse_to_world_pos,
+    components::{
+        Entered, Exited, Hovered, Interactable, JustPressedLeft, JustPressedMiddle,
+        JustPressedRight, PressedLeft, PressedMiddle, PressedRight, ReleasedLeft, ReleasedMiddle,
+        ReleasedRight,
+    },
+    InteractableCamera,
+};
 use bevy::{
     input::Input,
     prelude::{
@@ -7,11 +16,11 @@ use bevy::{
     window::Windows,
 };
 
-use crate::{common::mouse_to_world_pos, structs::Interactable, InteractableCamera};
+type Hover<'a> = (Option<&'a Entered>, Option<&'a Hovered>, Option<&'a Exited>);
 
 pub fn interact_system(
     mut commands: Commands,
-    mut interactable_query: Query<(Entity, &GlobalTransform, &mut Interactable)>,
+    interactable_query: Query<(Entity, &GlobalTransform, &Interactable, Hover)>,
     q_camera: Query<(&Camera, &Transform), With<InteractableCamera>>,
     wnds: Res<Windows>,
     mouse_buttons: Res<Input<MouseButton>>,
@@ -20,50 +29,112 @@ pub fn interact_system(
         let mut interacted = Vec::new();
         let mut not_interacted = Vec::new();
 
-        for (e, t, int) in interactable_query.iter() {
+        for (e, t, int, _) in interactable_query.iter() {
+            if interactable_query.get_component::<Exited>(e).is_ok() {
+                commands.entity(e).remove::<Exited>();
+            }
             if int.contains_point(pos, t) {
-                interacted.push((e, FloatOrd(t.translation().z)));
+                interacted.push((e, int, FloatOrd(t.translation().z)));
             } else {
-                not_interacted.push((e, FloatOrd(t.translation().z)));
+                not_interacted.push((e, int, FloatOrd(t.translation().z)));
             }
         }
-        interacted.sort_by_key(|(_, z)| -*z);
+        interacted.sort_by_key(|(_, _, z)| -*z);
 
-        for (e, _) in &interacted {
-            let (_, _, mut int) = interactable_query.get_mut(*e).unwrap();
-
-            if !int.hovers.entered {
-                int.hovers.entered = true;
+        for (i, (e, int, _)) in interacted.clone().into_iter().enumerate() {
+            if interactable_query.get_component::<Hovered>(e).is_err() {
+                commands.entity(e).remove::<Exited>();
+                commands.entity(e).insert(Entered).insert(Hovered);
             } else {
-                int.hovers.entered = false;
+                commands.entity(e).remove::<Entered>();
             }
-            int.hovers.hovered = true;
-            int.hovers.exited = false;
 
-            int.clicks.left_just = mouse_buttons.just_pressed(MouseButton::Left);
-            int.clicks.left_pressed = mouse_buttons.pressed(MouseButton::Left);
-            int.clicks.left_released = mouse_buttons.just_released(MouseButton::Left);
+            if mouse_buttons.just_pressed(MouseButton::Left) {
+                commands.entity(e).insert(JustPressedLeft);
+            } else {
+                commands.entity(e).remove::<JustPressedLeft>();
+            }
+            if mouse_buttons.pressed(MouseButton::Left) {
+                commands.entity(e).insert(PressedLeft);
+            } else {
+                commands.entity(e).remove::<PressedLeft>();
+            }
+            if mouse_buttons.just_released(MouseButton::Left) {
+                commands.entity(e).insert(ReleasedLeft);
+            } else {
+                commands.entity(e).remove::<ReleasedLeft>();
+            }
 
-            int.clicks.right_just = mouse_buttons.just_pressed(MouseButton::Right);
-            int.clicks.right_pressed = mouse_buttons.pressed(MouseButton::Right);
-            int.clicks.right_released = mouse_buttons.just_released(MouseButton::Right);
+            if mouse_buttons.just_pressed(MouseButton::Right) {
+                commands.entity(e).insert(JustPressedRight);
+            } else {
+                commands.entity(e).remove::<JustPressedRight>();
+            }
+            if mouse_buttons.pressed(MouseButton::Right) {
+                commands.entity(e).insert(PressedRight);
+            } else {
+                commands.entity(e).remove::<PressedRight>();
+            }
+            if mouse_buttons.just_released(MouseButton::Right) {
+                commands.entity(e).insert(ReleasedRight);
+            } else {
+                commands.entity(e).remove::<ReleasedRight>();
+            }
 
-            int.clicks.middle_just = mouse_buttons.just_pressed(MouseButton::Middle);
-            int.clicks.middle_pressed = mouse_buttons.pressed(MouseButton::Middle);
-            int.clicks.middle_released = mouse_buttons.just_released(MouseButton::Middle);
+            if mouse_buttons.just_pressed(MouseButton::Middle) {
+                commands.entity(e).insert(JustPressedMiddle);
+            } else {
+                commands.entity(e).remove::<JustPressedMiddle>();
+            }
+            if mouse_buttons.pressed(MouseButton::Middle) {
+                commands.entity(e).insert(PressedMiddle);
+            } else {
+                commands.entity(e).remove::<PressedMiddle>();
+            }
+            if mouse_buttons.just_released(MouseButton::Middle) {
+                commands.entity(e).insert(ReleasedMiddle);
+            } else {
+                commands.entity(e).remove::<ReleasedMiddle>();
+            }
 
             if !int.pass_through {
-                not_interacted.extend(interacted);
+                not_interacted.extend(interacted.into_iter().skip(i + 1));
                 break;
             }
         }
-        for (e, _) in &not_interacted {
-            let (_, _, mut int) = interactable_query.get_mut(*e).unwrap();
-            let hovered = int.hovers.hovered;
-            int.reset();
-            if hovered {
-                int.hovers.exited = true;
+        for (e, _, _) in &not_interacted {
+            if interactable_query.get_component::<Hovered>(*e).is_ok() {
+                commands.entity(*e).insert(Exited);
             }
+            commands
+                .entity(*e)
+                .remove::<Entered>()
+                .remove::<Hovered>()
+                .remove::<JustPressedLeft>()
+                .remove::<PressedLeft>()
+                .remove::<ReleasedLeft>()
+                .remove::<JustPressedRight>()
+                .remove::<PressedRight>()
+                .remove::<ReleasedRight>()
+                .remove::<JustPressedMiddle>()
+                .remove::<PressedMiddle>()
+                .remove::<ReleasedMiddle>();
+        }
+    } else {
+        for (e, _, _, _) in interactable_query.iter() {
+            commands
+                .entity(e)
+                .remove::<Entered>()
+                // .remove::<Hovered>()
+                .remove::<JustPressedLeft>()
+                .remove::<PressedLeft>()
+                .remove::<ReleasedLeft>()
+                .remove::<JustPressedRight>()
+                .remove::<PressedRight>()
+                .remove::<ReleasedRight>()
+                .remove::<JustPressedMiddle>()
+                .remove::<PressedMiddle>()
+                .remove::<ReleasedMiddle>();
         }
     }
 }

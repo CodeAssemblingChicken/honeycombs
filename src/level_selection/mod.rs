@@ -6,6 +6,7 @@ mod systems;
 use self::{setup::setup, systems::*};
 use crate::{cleanup, states::AppState};
 use bevy::prelude::{App, ParallelSystemDescriptorCoercion, SystemSet};
+use interactable::InteractLabel;
 
 const STATE: AppState = AppState::LevelSelection;
 
@@ -14,7 +15,11 @@ pub fn prepare_level_selection(app: &mut App) {
         .add_system_set(
             SystemSet::on_update(STATE)
                 .with_system(mouse_enter_cell)
-                .with_system(mouse_exit_cell.before(mouse_enter_cell))
+                .with_system(
+                    mouse_exit_cell
+                        .before(mouse_enter_cell)
+                        .after(InteractLabel::Interact),
+                )
                 .with_system(mouse_click_cell.after(mouse_enter_cell))
                 .with_system(hotkey_system)
                 .with_system(window_resize_system),
