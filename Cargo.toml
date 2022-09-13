@@ -44,6 +44,7 @@ optional = true
 # Windows app icon
 [build-dependencies]
 embed-resource = "1.6.3"
+static_vcruntime = "2.0"
 
 # Enable a small amount of optimization in debug mode
 [profile.dev]
