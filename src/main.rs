@@ -20,9 +20,10 @@ use bevy::{
     hierarchy::DespawnRecursiveExt,
     prelude::{
         default, AddAsset, Camera, Camera2dBundle, ClearColor, Color, Commands, Entity,
-        EventWriter, Msaa, Query, Res, ResMut, State, SystemSet, Without,
+        EventWriter, Msaa, NonSend, Query, Res, ResMut, State, SystemSet, Without,
     },
-    window::{WindowDescriptor, WindowResizeConstraints},
+    window::{WindowDescriptor, WindowId, WindowResizeConstraints, Windows},
+    winit::WinitWindows,
     DefaultPlugins,
 };
 use bevy_asset_loader::prelude::{LoadingState, LoadingStateAppExt};
@@ -44,6 +45,7 @@ use std::{
     io::{self, Write},
     panic,
 };
+use winit::window::Icon;
 
 fn main() {
     // When building for native apps, use the native message dialog for panics
@@ -77,6 +79,7 @@ fn main() {
         // .add_plugin(LogDiagnosticsPlugin::default())
         // .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_startup_system(setup)
+        .add_startup_system(set_window_icon)
         .add_system(save_profile_system)
         // .add_state(AppState::Loading)
         .add_asset::<LocaleAsset>()
@@ -108,10 +111,13 @@ fn main() {
     app.run();
 }
 
-fn setup(mut commands: Commands) {
+fn setup(mut commands: Commands, mut wnds: ResMut<Windows>) {
     commands
         .spawn_bundle(Camera2dBundle::default())
         .insert(InteractableCamera);
+    for wnd in wnds.iter_mut() {
+        wnd.set_maximized(true);
+    }
 }
 
 fn save_profile_system(profile: Res<Profile>) {
@@ -152,4 +158,22 @@ fn set_panic_hook() {
             .unwrap();
         let _ = writeln!(io::stderr(), "{}", info);
     }));
+}
+
+fn set_window_icon(windows: NonSend<WinitWindows>) {
+    let primary = windows.get_window(WindowId::primary()).unwrap();
+
+    // here we use the `image` crate to load our icon data from a png file
+    // this is not a very bevy-native solution, but it will do
+    let (icon_rgba, icon_width, icon_height) = {
+        let image = image::open("assets/branding/icon.png")
+            .expect("Failed to open icon path")
+            .into_rgba8();
+        let (width, height) = image.dimensions();
+        let rgba = image.into_raw();
+        (rgba, width, height)
+    };
+    let icon = Icon::from_rgba(icon_rgba, icon_width, icon_height).unwrap();
+
+    primary.set_window_icon(Some(icon));
 }

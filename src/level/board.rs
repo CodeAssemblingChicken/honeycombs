@@ -19,7 +19,7 @@ use bevy::{
         Visibility,
     },
     sprite::{ColorMaterial, ColorMesh2dBundle},
-    text::{Text, Text2dBundle},
+    text::{Text, Text2dBundle, TextAlignment},
 };
 use interactable::{components::Interactable, shapes::Shape};
 
@@ -216,9 +216,6 @@ impl Board {
             commands
                 .spawn_bundle(Text2dBundle {
                     text: Text::from_sections(
-                        // texts
-                        //     .iter()
-                        //     .map(|tsc| tsc.to_text_section(&text_settings.style_cell)),
                         locale
                             .get_text_section(text.2.as_str(), locales, profile)
                             .unwrap()
@@ -239,8 +236,8 @@ impl Board {
                     format!("{}: {}", "Remaining", empty_remaining),
                     text_settings.style_cell.clone(),
                 )
-                .with_alignment(text_settings.alignment),
-                transform: Transform::from_xyz(w + 3. * RADIUS, h, Z_INDEX_TEXT),
+                .with_alignment(TextAlignment::CENTER_LEFT),
+                transform: Transform::from_xyz(w, h + 3.5 * RADIUS, Z_INDEX_TEXT),
                 ..default()
             })
             .insert(RemainingText)
@@ -251,8 +248,8 @@ impl Board {
                     format!("{}: {}", "Mistakes", empty_remaining),
                     text_settings.style_cell.clone(),
                 )
-                .with_alignment(text_settings.alignment),
-                transform: Transform::from_xyz(w + 3. * RADIUS, h - RADIUS, Z_INDEX_TEXT),
+                .with_alignment(TextAlignment::CENTER_LEFT),
+                transform: Transform::from_xyz(w, h + 2.5 * RADIUS, Z_INDEX_TEXT),
                 ..default()
             })
             .insert(MistakesText)

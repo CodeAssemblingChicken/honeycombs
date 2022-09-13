@@ -17,9 +17,11 @@ debug = ["bevy/dynamic", "bevy-inspector-egui"]
 bevy_asset_loader = "0.12.1"
 bevy_easings = "0.8"
 bevy_kira_audio = "0.12"
+image = "0.24"
 rand = "0.8"
 ron = "0.8"
 serde = { version = "1", features = ["derive"] }
+winit = "0.26.1"
 interactable = { path = "interactable" }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
@@ -38,6 +40,10 @@ version = "0.12"
 default-features = false
 features = ["bevy_sprite"]
 optional = true
+
+# Windows app icon
+[build-dependencies]
+embed-resource = "1.6.3"
 
 # Enable a small amount of optimization in debug mode
 [profile.dev]
