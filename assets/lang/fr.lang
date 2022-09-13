@@ -31,8 +31,8 @@
             (text: ".\nN'hésitez pas à l'essayer maintenant. Appuyez une fois pour ouvrir et une autre fois pour fermer le menu.", color: None, interactable: false),
         ],
         "game-name": [
-            (text: "The Name of the Game ? ", color: None, interactable: false),
             (text: "Honeycombs", color: Some(Rgba(red: 0.894, green: 0.627, blue: 0.125, alpha: 1.0)), interactable: false),
+            (text: ". The Name of the Game", color: None, interactable: false),
         ],
         "remaining-counter": [
             (text: "Avez-vous remarqué le compteur ", color: None, interactable: false),
