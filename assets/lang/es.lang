@@ -21,6 +21,9 @@
             (text: "! Tu objetivo es revelar el patrón.\n El número de una celda gris te indica cuántas celdas azules están adyacentes a ella.", color: None, interactable: false),
             (text: "\nHaz clic en las celdas amarillas: Izquierda para descubrir una celda azul y derecha para una celda gris.", color: None, interactable: false),
         ],
+        "mistakes": [
+            (text: "Todo el mundo comete errores. Pero no hagas\ndemasiados para poder desbloquear los otros niveles.", color: None, interactable: false),
+        ],
         "no-guess": [
             (text: "Todos los rompecabezas pueden resolverse sin necesidad de adivinar.\n", color: None, interactable: false),
             (text: "Al menos eso creo.", color: Some(Rgba(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.05)), interactable: false),

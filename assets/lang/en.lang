@@ -21,6 +21,9 @@
             (text: "! Your goal is to reveal the pattern.\n The number in a gray cell tells you, how many blue cells are adjacent to it.", color: None, interactable: false),
             (text: "\nClick on the yellow cells: Left to uncover a blue cell and right for a gray cell.", color: None, interactable: false),
         ],
+        "mistakes": [
+            (text: "Everyone makes mistakes. But don't make too many\nso that you can unlock the other levels.", color: None, interactable: false),
+        ],
         "no-guess": [
             (text: "Every puzzle can be solved without guessing.\n", color: None, interactable: false),
             (text: "At least I think so.", color: Some(Rgba(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.05)), interactable: false),

@@ -21,6 +21,9 @@
             (text: "! Das Ziel ist, das Muster freizulegen.\n Die Zahl in einer grauen Zellen verrät, wie viele blaue Zellen angrenzen.", color: None, interactable: false),
             (text: "\nKlicke auf gelbe Zellen: Links um blaue und rechts um graue Zellen aufzudecken.", color: None, interactable: false),
         ],
+        "mistakes": [
+            (text: "Jeder macht mal Fehler. Aber mach nicht zu viele,\ndamit du die anderen Level freischalten kannst.", color: None, interactable: false),
+        ],
         "no-guess": [
             (text: "Jedes Rätsel kann ohne Raten gelöst werden.\n", color: None, interactable: false),
             (text: "Hoffe ich.", color: Some(Rgba(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.05)), interactable: false),

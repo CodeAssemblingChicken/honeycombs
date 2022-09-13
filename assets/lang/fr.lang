@@ -21,6 +21,9 @@
             (text: " ! Votre objectif est de révéler le motif.\n Le nombre dans une cellule grise vous indique, combien de cellules bleues sont adjacentes à celle-ci.", color: None, interactable: false),
             (text: "\nCliquez sur les cellules jaunes : à gauche pour découvrir une cellule bleue et à droite pour une cellule grise.", color: None, interactable: false),
         ],
+        "mistakes": [
+            (text: "Tout le monde fait des erreurs. Mais n'en fais pas\ntrop pour pouvoir débloquer les autres niveaux.", color: None, interactable: false),
+        ],
         "no-guess": [
             (text: "Chaque puzzle peut être résolu sans deviner.\n", color: None, interactable: false),
             (text: "Du moins, je le pense.", color: Some(Rgba(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.05)), interactable: false),
