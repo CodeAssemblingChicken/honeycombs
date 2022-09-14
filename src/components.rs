@@ -128,8 +128,9 @@ pub struct ColumnHint {
 #[derive(Component)]
 pub struct RootComponent;
 
-#[derive(Debug, Clone, Copy, Component, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Copy, Component, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Language {
+    #[default]
     EN,
     DE,
     FR,

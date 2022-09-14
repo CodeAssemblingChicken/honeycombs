@@ -1,12 +1,13 @@
 #[derive(Debug, Default, Clone, Copy, Eq, PartialEq, Hash)]
 pub enum AppState {
+    AssetLoading,
+    Editor,
     #[default]
     Home,
-    LevelSelection,
     Level,
+    LevelSelection,
+    Options,
     Overlay,
-    Editor,
-    Settings,
     StateChange,
-    AssetLoading,
+    Quit,
 }

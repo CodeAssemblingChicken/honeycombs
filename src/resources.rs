@@ -100,14 +100,6 @@ pub struct SfxAssets {
     pub sfx_hover: Handle<AudioSource>,
 }
 
-// impl FromWorld for SfxAssets {
-//     fn from_world(world: &mut bevy::prelude::World) -> Self {
-//         let asset_server = world.get_resource::<AssetServer>().unwrap();
-//         let sfx_hover: Handle<AudioSource> = asset_server.load("sfx/hover.ogg");
-//         Self { sfx_hover }
-//     }
-// }
-
 /// Resource for text
 #[derive(Clone)]
 pub struct TextSettings {
@@ -149,7 +141,6 @@ impl FromWorld for TextSettings {
 
 #[derive(Default, AssetCollection)]
 pub struct LocaleAssets {
-    // handles: HashMap<String, Handle<LocaleAsset>>,
     #[asset(path = "lang/en.lang")]
     en: Handle<LocaleAsset>,
     #[asset(path = "lang/de.lang")]
@@ -160,14 +151,6 @@ pub struct LocaleAssets {
     es: Handle<LocaleAsset>,
 }
 impl LocaleAssets {
-    // pub fn load_langs(&mut self, langs: &[&str], asset_server: &AssetServer) {
-    //     langs.into_iter().for_each(|l| {
-    //         self.handles.insert(
-    //             l.to_string(),
-    //             asset_server.load(&format!("lang/{}.lang", l)),
-    //         );
-    //     })
-    // }
     pub fn get_string<'a>(
         &'a self,
         key: &str,
@@ -204,14 +187,19 @@ impl LocaleAssets {
 
 #[derive(Serialize, Deserialize)]
 pub struct Profile {
+    #[serde(default)]
     pub lang: Language,
+    #[serde(default)]
+    pub mouse_inverted: bool,
+    #[serde(default)]
     pub sfx_volume: f32,
+    #[serde(default)]
     pub level_points: [[Option<u16>; 6]; 6],
 }
 impl Profile {
     pub fn new() -> Self {
         if let Ok(file) = File::open("./settings.ron") {
-            from_reader(file).unwrap_or_default()
+            from_reader(file).unwrap()
         } else {
             Self::default()
         }
@@ -250,6 +238,7 @@ impl Default for Profile {
     fn default() -> Self {
         Self {
             lang: Language::EN,
+            mouse_inverted: false,
             sfx_volume: 0.5,
             level_points: Default::default(),
         }

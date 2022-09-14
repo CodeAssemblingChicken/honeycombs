@@ -13,6 +13,7 @@ mod level_selection;
 mod overlay;
 mod parser;
 mod resources;
+mod settings;
 mod states;
 mod structs;
 
@@ -21,8 +22,8 @@ use bevy::{
     app::{App, AppExit},
     hierarchy::DespawnRecursiveExt,
     prelude::{
-        default, AddAsset, Camera, Camera2dBundle, ClearColor, Color, Commands, Entity,
-        EventWriter, Msaa, NonSend, Query, Res, ResMut, State, SystemSet, Without,
+        default, AddAsset, Camera2dBundle, ClearColor, Color, Commands, Component, Entity,
+        EventWriter, Msaa, NonSend, Query, Res, ResMut, State, SystemSet, With,
     },
     window::{WindowDescriptor, WindowId, WindowResizeConstraints, Windows},
     winit::WinitWindows,
@@ -98,13 +99,14 @@ fn main() {
         )
         .add_state(AppState::AssetLoading)
         .add_system_set(SystemSet::on_update(AppState::StateChange).with_system(load_complete))
-        .add_system_set(SystemSet::on_enter(AppState::Settings).with_system(quit_system));
+        .add_system_set(SystemSet::on_enter(AppState::Quit).with_system(quit_system));
 
-    home::prepare_home(&mut app);
-    level_selection::prepare_level_selection(&mut app);
-    level::prepare_level(&mut app);
     editor::prepare_editor(&mut app);
+    home::prepare_home(&mut app);
+    level::prepare_level(&mut app);
+    level_selection::prepare_level_selection(&mut app);
     overlay::prepare_overlay(&mut app);
+    settings::prepare_settings(&mut app);
 
     #[cfg(feature = "bevy-inspector-egui")]
     app.add_plugin(WorldInspectorPlugin::new())
@@ -134,7 +136,7 @@ fn load_complete(mut app_state: ResMut<State<AppState>>, load_state: Res<LoadSta
         .unwrap();
 }
 
-pub fn cleanup(mut commands: Commands, entities: Query<Entity, Without<Camera>>) {
+pub fn cleanup_system<T: Component>(mut commands: Commands, entities: Query<Entity, With<T>>) {
     for entity in &entities {
         commands.entity(entity).despawn_recursive();
     }

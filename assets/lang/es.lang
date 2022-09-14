@@ -12,7 +12,10 @@
         "total": "Total",
         "retry": "Reiniciar",
         "menu": "Menú",
-        "next": "Próximo\nnivel"
+        "next": "Próximo\nnivel",
+        "language": "Idioma",
+        "mouse-buttons": "Botones del ratón",
+        "sfx-volume": "Volumen del efecto de sonido",
     },
     text_sections: {
         "intro": [

@@ -5,7 +5,7 @@ mod setup;
 mod systems;
 
 use self::{components::CellUpdateEvent, setup::setup, systems::*};
-use crate::{cleanup, states::AppState};
+use crate::{cleanup_system, components::RootComponent, states::AppState};
 use bevy::prelude::{App, ParallelSystemDescriptorCoercion, SystemSet};
 use interactable::InteractLabel;
 
@@ -40,6 +40,6 @@ pub fn prepare_editor(app: &mut App) {
                 .with_system(hotkey_system)
                 .with_system(window_resize_system),
         )
-        .add_system_set(SystemSet::on_exit(STATE).with_system(cleanup))
+        .add_system_set(SystemSet::on_exit(STATE).with_system(cleanup_system::<RootComponent>))
         .add_event::<CellUpdateEvent>();
 }

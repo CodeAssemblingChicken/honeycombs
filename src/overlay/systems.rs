@@ -4,13 +4,9 @@ use super::{
 };
 use crate::{functions::switch_state, resources::LoadState, states::AppState};
 use bevy::{
-    hierarchy::DespawnRecursiveExt,
     input::Input,
     math::Vec3,
-    prelude::{
-        Commands, Entity, EventReader, KeyCode, Or, Query, Res, ResMut, State, Transform, With,
-        Without,
-    },
+    prelude::{EventReader, KeyCode, Query, Res, ResMut, State, Transform, With, Without},
     window::WindowResized,
 };
 use interactable::components::ReleasedLeft;
@@ -81,13 +77,5 @@ pub fn window_resize_system(
         if let Ok(mut background) = background_query.get_single_mut() {
             background.scale = Vec3::new(ev.width, ev.height, 1.0);
         }
-    }
-}
-
-type UiElement = Or<(With<UiRootNode>, With<UiBackground>)>;
-
-pub fn cleanup(mut commands: Commands, entities: Query<Entity, UiElement>) {
-    for entity in &entities {
-        commands.entity(entity).despawn_recursive();
     }
 }

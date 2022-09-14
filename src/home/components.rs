@@ -51,6 +51,3 @@ impl OptionCell {
         switch_state(Some(self.app_state), app_state, load_state);
     }
 }
-
-#[derive(Component)]
-pub struct LangSelector;
