@@ -2,14 +2,16 @@ use super::components::{MistakesText, RemainingText};
 use crate::{
     assets::LocaleAsset,
     board_functions::{count_empty_cells, empty_connected, get_neighbours},
-    components::{BoardConfig, Cell, CellType, HintType, RootComponent},
+    components::{Cell, RootComponent},
     constants::{RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_TEXT},
+    enums::{CellType, HintType},
     functions::{
         calc_dimensions, calc_translation, make_cell_interactable, spawn_cell, spawn_cell_text,
         spawn_hint,
     },
     level::components::{EmptyCell, GameCell, NumberCell},
     resources::{CellMeshes, GameColors, LocaleAssets, Profile, TextSettings},
+    structs::BoardConfig,
 };
 use bevy::{
     hierarchy::BuildChildren,

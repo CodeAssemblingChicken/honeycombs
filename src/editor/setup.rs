@@ -1,9 +1,9 @@
 use super::{board::Board, components::CellUpdateEvent};
 use crate::{
-    components::BoardConfig,
     functions::rescale_board,
     parser,
     resources::{CellMeshes, GameColors, LoadState, TextSettings},
+    structs::BoardConfig,
 };
 use bevy::{
     prelude::{Commands, EventWriter, Res, ResMut, Transform},

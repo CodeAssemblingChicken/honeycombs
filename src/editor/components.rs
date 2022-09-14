@@ -1,8 +1,5 @@
 use super::board::Board;
-use crate::{
-    components::{Cell, CellType},
-    resources::GameColors,
-};
+use crate::{components::Cell, enums::CellType, resources::GameColors};
 use bevy::{
     prelude::{Commands, Component, Entity, EventWriter, Handle, Query},
     sprite::ColorMaterial,

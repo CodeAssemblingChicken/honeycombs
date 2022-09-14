@@ -1,9 +1,11 @@
-use crate::constants::{SCALE_ENLARGED, SCALE_NORMAL};
+use crate::{
+    constants::{SCALE_ENLARGED, SCALE_NORMAL},
+    enums::{HintDirection, HintType},
+};
 use bevy::{
     math::Vec3,
-    prelude::{Color, Commands, Component, Entity, Handle, Query, Transform},
+    prelude::{Commands, Component, Entity, Handle, Query, Transform},
     sprite::ColorMaterial,
-    text::{TextSection, TextStyle},
 };
 use bevy_easings::{Ease, EaseFunction, EasingType};
 use serde::{Deserialize, Serialize};
@@ -114,18 +116,6 @@ pub struct CellInner;
 #[derive(Debug, Component)]
 pub struct CellOuter;
 
-/// The type of cell.
-/// Used in cell component for uncover-handling
-#[cfg_attr(
-    feature = "bevy-inspector-egui",
-    derive(bevy_inspector_egui::Inspectable)
-)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum CellType {
-    NumberCell(HintType),
-    EmptyCell,
-}
-
 /// Component for column hints
 #[derive(Debug, Component, Clone, Copy)]
 pub struct ColumnHint {
@@ -133,75 +123,6 @@ pub struct ColumnHint {
     pub y: usize,
     pub dir: HintDirection,
     pub hint_type: HintType,
-}
-
-/// Direction of the column/row hints.
-/// Straight down (TOP), down-right (RIGHT) and down-left (LEFT)
-#[derive(Debug, Clone, Copy)]
-pub enum HintDirection {
-    Down,
-    LeftDown,
-    RightDown,
-    Up,
-    LeftUp,
-    RightUp,
-}
-
-/// Indicator for special hints (connected or seperated cells)
-#[cfg_attr(
-    feature = "bevy-inspector-egui",
-    derive(bevy_inspector_egui::Inspectable)
-)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum HintType {
-    None,
-    // SOME is quite ugly, it is used in parsing to indicate that the hint
-    // is special and the concrete specialization (CONNECTED or SEPERATED)
-    // must first be calculated
-    // TODO: Think of something better
-    Some,
-    Connected,
-    Seperated,
-}
-
-/// Required because of bevy_inspector_egui::Inspectable
-impl Default for HintType {
-    fn default() -> Self {
-        Self::None
-    }
-}
-
-/// Used to pass configuration from parser to board
-pub struct BoardConfig {
-    pub width: usize,
-    pub height: usize,
-    pub cells: Vec<Vec<(Option<CellType>, bool)>>,
-    pub hints: Vec<ColumnHint>,
-    pub text: Option<(i32, i32, String)>,
-}
-
-#[derive(Debug, Deserialize, Clone)]
-pub struct TextSectionConfig {
-    pub text: String,
-    pub color: Option<Color>,
-    pub interactable: bool,
-}
-
-impl TextSectionConfig {
-    pub fn new(text: impl Into<String>, color: Option<Color>, interactable: bool) -> Self {
-        Self {
-            text: text.into(),
-            color,
-            interactable,
-        }
-    }
-    pub fn to_text_section(&self, text_style: &TextStyle) -> TextSection {
-        let mut ts = text_style.clone();
-        if let Some(color) = self.color {
-            ts.color = color;
-        }
-        TextSection::new(self.text.clone(), ts)
-    }
 }
 
 #[derive(Component)]

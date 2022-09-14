@@ -1,8 +1,9 @@
 use crate::{
     assets::LocaleAsset,
-    components::{Language, TextSectionConfig},
+    components::Language,
     constants::{GameColor, MED_SCALE, RADIUS},
     states::AppState,
+    structs::TextSectionConfig,
 };
 use bevy::{
     asset::HandleUntyped,

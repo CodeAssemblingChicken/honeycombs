@@ -5,11 +5,13 @@ use super::{
 };
 use crate::{
     board_functions::{count_empty_cells, empty_connected, get_neighbours},
-    components::{BoardConfig, Cell, CellType, HintType, RootComponent},
+    components::{Cell, RootComponent},
+    enums::{CellType, HintType},
     functions::{rescale_board, switch_state},
     parser::board_to_string,
     resources::{GameColors, LoadState, TextSettings},
     states::AppState,
+    structs::BoardConfig,
 };
 use bevy::{
     input::Input,

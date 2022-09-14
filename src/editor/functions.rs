@@ -3,8 +3,9 @@ use super::{
     components::{CellUpdateEvent, EditorCell, EmptyCell, NumberCell, UnsetCell},
 };
 use crate::{
-    components::{Cell, CellType, HintType},
+    components::Cell,
     constants::{RADIUS, Z_INDEX_CELL_BACK},
+    enums::{CellType, HintType},
     functions::{calc_translation, make_cell_interactable, spawn_cell, spawn_cell_text},
     resources::{CellMeshes, GameColors, TextSettings},
 };

@@ -1,4 +1,4 @@
-use crate::components::TextSectionConfig;
+use crate::structs::TextSectionConfig;
 use bevy::{
     asset::{AssetLoader, LoadedAsset},
     reflect::TypeUuid,

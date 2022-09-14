@@ -1,4 +1,4 @@
-use crate::components::{CellType, HintDirection};
+use crate::enums::{CellType, HintDirection};
 use std::collections::VecDeque;
 
 /// Get a ordered list of neighbouring cells

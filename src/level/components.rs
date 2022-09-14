@@ -1,9 +1,5 @@
 use super::board::Board;
-use crate::{
-    components::{Cell, CellType},
-    constants::RADIUS,
-    resources::GameColors,
-};
+use crate::{components::Cell, constants::RADIUS, enums::CellType, resources::GameColors};
 use bevy::{
     math::Vec3,
     prelude::{ColorMaterial, Commands, Component, Entity, Handle, Query, Visibility},

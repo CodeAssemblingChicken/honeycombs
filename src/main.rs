@@ -5,6 +5,7 @@ mod board_functions;
 mod components;
 mod constants;
 mod editor;
+mod enums;
 mod functions;
 mod home;
 mod level;
@@ -13,6 +14,7 @@ mod overlay;
 mod parser;
 mod resources;
 mod states;
+mod structs;
 
 use assets::{LocaleAsset, LocaleAssetLoader};
 use bevy::{

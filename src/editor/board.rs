@@ -3,9 +3,11 @@ use super::{
     functions::{row_empty, spawn_cell_common},
 };
 use crate::{
-    components::{BoardConfig, CellType, HintType, RootComponent},
+    components::RootComponent,
+    enums::{CellType, HintType},
     functions::calc_dimensions,
     resources::{CellMeshes, GameColors, TextSettings},
+    structs::BoardConfig,
 };
 use bevy::{
     hierarchy::BuildChildren,

@@ -1,3 +1,4 @@
+use super::components::OptionCell;
 use crate::{
     components::Cell,
     constants::{MED_SCALE, RADIUS},
@@ -10,8 +11,6 @@ use bevy::{
     prelude::{Commands, Entity, Handle, Transform},
     sprite::ColorMaterial,
 };
-
-use super::components::OptionCell;
 
 pub fn spawn_option_cell(
     commands: &mut Commands,

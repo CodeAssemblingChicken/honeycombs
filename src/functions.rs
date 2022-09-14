@@ -1,7 +1,8 @@
 use crate::{
     board_functions::{count_empty_cells, empty_connected, get_column},
-    components::{CellInner, CellOuter, CellType, ColumnHint, HintDirection, HintType},
+    components::{CellInner, CellOuter, ColumnHint},
     constants::{INNER_TRANSFORM, OUTER_TRANSFORM, RADIUS, Z_INDEX_TEXT},
+    enums::{CellType, HintDirection, HintType},
     resources::{LoadState, TextSettings},
     states::AppState,
 };

@@ -1,4 +1,8 @@
-use crate::components::{BoardConfig, CellType, ColumnHint, HintDirection, HintType};
+use crate::{
+    components::ColumnHint,
+    enums::{CellType, HintDirection, HintType},
+    structs::BoardConfig,
+};
 use std::{fs, str::Lines};
 
 const DONT_MESS: &str = "Please don't mess with my files";

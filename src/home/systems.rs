@@ -1,3 +1,4 @@
+use super::components::OptionCell;
 use crate::{
     components::{Cell, Language, RootComponent},
     functions::{rescale_board, switch_state},
@@ -11,8 +12,6 @@ use bevy::{
 };
 use bevy_kira_audio::{Audio, AudioControl};
 use interactable::components::{Entered, Exited, ReleasedLeft};
-
-use super::components::OptionCell;
 
 pub fn mouse_click_cell(
     mut commands: Commands,
