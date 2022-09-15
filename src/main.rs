@@ -51,12 +51,7 @@ use std::{
 use winit::window::Icon;
 
 fn main() {
-    // When building for native apps, use the native message dialog for panics
-    #[cfg(not(target_arch = "wasm32"))]
     set_panic_hook();
-    // When building for WASM, print panics to the browser console
-    #[cfg(target_arch = "wasm32")]
-    console_error_panic_hook::set_once();
 
     let mut app = App::new();
     app.insert_resource(Msaa { samples: 4 })
@@ -147,10 +142,15 @@ fn quit_system(mut exit: EventWriter<AppExit>) {
 }
 
 fn set_panic_hook() {
+    // When building for WASM, print panics to the browser console
+    #[cfg(target_arch = "wasm32")]
+    console_error_panic_hook::set_once();
+
+    // When building for native apps, use the native message dialog for panics
+    #[cfg(not(target_arch = "wasm32"))]
     panic::set_hook(Box::new(|info| {
         let mut w = Vec::new();
         let _ = writeln!(&mut w, "{}", info);
-        #[cfg(not(target_arch = "wasm32"))]
         MessageDialog::new()
             .set_type(native_dialog::MessageType::Error)
             .set_title("Error")

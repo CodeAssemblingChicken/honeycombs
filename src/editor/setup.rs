@@ -21,8 +21,10 @@ pub fn setup(
     load_state: ResMut<LoadState>,
     mut ev_cell_update: EventWriter<CellUpdateEvent>,
 ) {
-    let config = if let Some(filename) = load_state.filename.clone() {
-        parser::board_from_file(&filename)
+    // TODO: Temporary fix
+    let enabled = false;
+    let config = if enabled && load_state.filename.is_some() {
+        parser::board_from_file(load_state.filename.as_ref().unwrap())
     } else {
         // TODO: Think about these hardcoded values
         BoardConfig {

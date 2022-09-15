@@ -11,22 +11,24 @@ use bevy::{
     window::Windows,
 };
 
+type StandardResources<'a> = (
+    Res<'a, CellMeshes>,
+    Res<'a, GameColors>,
+    Res<'a, LocaleAssets>,
+    Res<'a, Profile>,
+    Res<'a, TextSettings>,
+);
+type StandardAssets<'a> = (
+    ResMut<'a, Assets<Mesh>>,
+    ResMut<'a, Assets<ColorMaterial>>,
+    Res<'a, Assets<LocaleAsset>>,
+);
 pub fn setup(
     mut commands: Commands,
     wnds: Res<Windows>,
-    (cell_meshes, game_colors, locale, profile, text_settings): (
-        Res<CellMeshes>,
-        Res<GameColors>,
-        Res<LocaleAssets>,
-        Res<Profile>,
-        Res<TextSettings>,
-    ),
+    (cell_meshes, game_colors, locale, profile, text_settings): StandardResources,
     load_state: ResMut<LoadState>,
-    (mut meshes, mut colors, locales): (
-        ResMut<Assets<Mesh>>,
-        ResMut<Assets<ColorMaterial>>,
-        Res<Assets<LocaleAsset>>,
-    ),
+    (mut meshes, mut colors, locales): StandardAssets,
 ) {
     if load_state.filename.is_none() {
         panic!("No level specified.");

@@ -27,18 +27,16 @@ use interactable::components::{
     Entered, Exited, JustPressedLeft, JustPressedRight, PressedLeft, PressedMiddle, PressedRight,
 };
 
+type McUnset<'a> = (
+    Entity,
+    &'a mut EditorCell,
+    &'a mut Cell,
+    Option<&'a PressedLeft>,
+    Option<&'a PressedRight>,
+);
 pub fn mouse_click_unset_cell(
     mut commands: Commands,
-    mut cell_query: Query<
-        (
-            Entity,
-            &mut EditorCell,
-            &mut Cell,
-            Option<&PressedLeft>,
-            Option<&PressedRight>,
-        ),
-        With<UnsetCell>,
-    >,
+    mut cell_query: Query<McUnset, With<UnsetCell>>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     game_colors: Res<GameColors>,
     mut board: ResMut<Board>,
@@ -69,18 +67,16 @@ pub fn mouse_click_unset_cell(
     }
 }
 
+type McEmpty<'a> = (
+    Entity,
+    &'a mut EditorCell,
+    &'a mut Cell,
+    Option<&'a JustPressedLeft>,
+    Option<&'a PressedMiddle>,
+);
 pub fn mouse_click_empty_cell(
     mut commands: Commands,
-    mut cell_query: Query<
-        (
-            Entity,
-            &mut EditorCell,
-            &mut Cell,
-            Option<&JustPressedLeft>,
-            Option<&PressedMiddle>,
-        ),
-        With<EmptyCell>,
-    >,
+    mut cell_query: Query<McEmpty, With<EmptyCell>>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     game_colors: Res<GameColors>,
     mut board: ResMut<Board>,
@@ -111,17 +107,18 @@ pub fn mouse_click_empty_cell(
     }
 }
 
+type McNumber<'a> = (
+    Entity,
+    &'a mut EditorCell,
+    &'a mut Cell,
+    &'a mut NumberCell,
+    Option<&'a JustPressedLeft>,
+    Option<&'a JustPressedRight>,
+    Option<&'a PressedMiddle>,
+);
 pub fn mouse_click_number_cell(
     mut commands: Commands,
-    mut cell_query: Query<(
-        Entity,
-        &mut EditorCell,
-        &mut Cell,
-        &mut NumberCell,
-        Option<&JustPressedLeft>,
-        Option<&JustPressedRight>,
-        Option<&PressedMiddle>,
-    )>,
+    mut cell_query: Query<McNumber>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     game_colors: Res<GameColors>,
     mut board: ResMut<Board>,

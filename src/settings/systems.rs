@@ -1,3 +1,7 @@
+use super::{
+    components::MouseInverted,
+    constants::{COLOR_HOVERED, COLOR_SELECTED, COLOR_UNSELECTED},
+};
 use crate::{
     components::{Language, RootComponent},
     functions::{rescale_board, switch_state},
@@ -5,17 +9,10 @@ use crate::{
     states::AppState,
 };
 use bevy::{
-    prelude::{
-        Color, Entity, EventReader, Or, Query, Res, ResMut, Sprite, State, Transform, With, Without,
-    },
+    prelude::{EventReader, ParamSet, Query, Res, ResMut, Sprite, State, Transform, With, Without},
     window::WindowResized,
 };
 use interactable::components::{Entered, Exited, ReleasedLeft};
-
-use super::{
-    components::MouseInverted,
-    constants::{COLOR_HOVERED, COLOR_SELECTED, COLOR_UNSELECTED},
-};
 
 pub fn lang_click_system(
     lang_query: Query<&Language, With<ReleasedLeft>>,
@@ -48,16 +45,18 @@ pub fn mouse_setting_click_system(
 }
 
 pub fn lang_hover_system(
-    mut enter_query: Query<(&mut Sprite, &Language), With<Entered>>,
-    mut exit_query: Query<(&mut Sprite, &Language), (With<Exited>, Without<Entered>)>,
+    mut hover_set: ParamSet<(
+        Query<(&mut Sprite, &Language), With<Entered>>,
+        Query<(&mut Sprite, &Language), With<Exited>>,
+    )>,
     profile: Res<Profile>,
 ) {
-    for (mut sprite, lang) in enter_query.iter_mut() {
+    for (mut sprite, lang) in hover_set.p0().iter_mut() {
         if profile.lang != *lang {
             sprite.color = COLOR_HOVERED;
         }
     }
-    for (mut sprite, lang) in exit_query.iter_mut() {
+    for (mut sprite, lang) in hover_set.p1().iter_mut() {
         if profile.lang != *lang {
             sprite.color = COLOR_UNSELECTED;
         }
@@ -65,16 +64,18 @@ pub fn lang_hover_system(
 }
 
 pub fn mouse_setting_hover_system(
-    mut enter_query: Query<(&mut Sprite, &MouseInverted), With<Entered>>,
-    mut exit_query: Query<(&mut Sprite, &MouseInverted), (With<Exited>, Without<Entered>)>,
+    mut hover_set: ParamSet<(
+        Query<(&mut Sprite, &MouseInverted), With<Entered>>,
+        Query<(&mut Sprite, &MouseInverted), With<Exited>>,
+    )>,
     profile: Res<Profile>,
 ) {
-    for (mut sprite, mi) in enter_query.iter_mut() {
+    for (mut sprite, mi) in hover_set.p0().iter_mut() {
         if profile.mouse_inverted != mi.0 {
             sprite.color = COLOR_HOVERED;
         }
     }
-    for (mut sprite, mi) in exit_query.iter_mut() {
+    for (mut sprite, mi) in hover_set.p1().iter_mut() {
         if profile.mouse_inverted != mi.0 {
             sprite.color = COLOR_UNSELECTED;
         }

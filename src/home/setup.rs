@@ -15,16 +15,17 @@ use bevy::{
     window::Windows,
 };
 
+type StandardResources<'a> = (
+    Res<'a, CellMeshes>,
+    Res<'a, GameColors>,
+    Res<'a, LocaleAssets>,
+    Res<'a, Profile>,
+    Res<'a, TextSettings>,
+);
 pub fn setup(
     mut commands: Commands,
     wnds: Res<Windows>,
-    (cell_meshes, game_colors, locale, profile, text_settings): (
-        Res<CellMeshes>,
-        Res<GameColors>,
-        Res<LocaleAssets>,
-        Res<Profile>,
-        Res<TextSettings>,
-    ),
+    (cell_meshes, game_colors, locale, profile, text_settings): StandardResources,
     asset_server: Res<AssetServer>,
     locales: Res<Assets<LocaleAsset>>,
 ) {

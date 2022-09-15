@@ -18,21 +18,23 @@ use bevy::{
 };
 use interactable::{components::Interactable, shapes::Shape};
 
+type StandardResources<'a> = (
+    Res<'a, CellMeshes>,
+    Res<'a, GameColors>,
+    Res<'a, LocaleAssets>,
+    Res<'a, OverlaySettings>,
+    Res<'a, Profile>,
+    Res<'a, TextSettings>,
+);
+type StandardAssets<'a> = (
+    ResMut<'a, Assets<Mesh>>,
+    ResMut<'a, Assets<ColorMaterial>>,
+    Res<'a, Assets<LocaleAsset>>,
+);
 pub fn setup(
     mut commands: Commands,
-    (mut meshes, mut colors, locales): (
-        ResMut<Assets<Mesh>>,
-        ResMut<Assets<ColorMaterial>>,
-        Res<Assets<LocaleAsset>>,
-    ),
-    (cell_meshes, game_colors, locale, overlay_settings, profile, text_settings): (
-        Res<CellMeshes>,
-        Res<GameColors>,
-        Res<LocaleAssets>,
-        Res<OverlaySettings>,
-        Res<Profile>,
-        Res<TextSettings>,
-    ),
+    (cell_meshes, game_colors, locale, overlay_settings, profile, text_settings): StandardResources,
+    (mut meshes, mut colors, locales): StandardAssets,
     wnds: Res<Windows>,
 ) {
     // Panel width and height 1920×1080p window

@@ -1,22 +1,18 @@
 use super::{
-    components::{LangSelector, MouseInverted},
+    components::MouseInverted,
     constants::{COLOR_SELECTED, COLOR_UNSELECTED},
 };
 use crate::{
     assets::LocaleAsset,
     components::{Language, RootComponent},
-    constants::{MED_SCALE, RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_TEXT},
+    constants::{MED_SCALE, RADIUS, Z_INDEX_TEXT},
     functions::rescale_board,
-    resources::{CellMeshes, GameColors, LocaleAssets, Profile, TextSettings},
+    resources::{LocaleAssets, Profile, TextSettings},
 };
 use bevy::{
     hierarchy::BuildChildren,
-    math::Vec2,
-    prelude::{
-        default, AssetServer, Assets, Color, Commands, Mesh, Res, ResMut, SpatialBundle, Sprite,
-        Transform,
-    },
-    sprite::{ColorMaterial, ColorMesh2dBundle, SpriteBundle},
+    prelude::{default, AssetServer, Assets, Commands, Res, SpatialBundle, Sprite, Transform},
+    sprite::SpriteBundle,
     window::Windows,
 };
 use interactable::{components::Interactable, shapes::Shape};
@@ -24,19 +20,9 @@ use interactable::{components::Interactable, shapes::Shape};
 pub fn setup(
     mut commands: Commands,
     wnds: Res<Windows>,
-    (cell_meshes, game_colors, locale, profile, text_settings): (
-        Res<CellMeshes>,
-        Res<GameColors>,
-        Res<LocaleAssets>,
-        Res<Profile>,
-        Res<TextSettings>,
-    ),
+    (locale, profile, text_settings): (Res<LocaleAssets>, Res<Profile>, Res<TextSettings>),
     asset_server: Res<AssetServer>,
-    (mut meshes, mut colors, locales): (
-        ResMut<Assets<Mesh>>,
-        ResMut<Assets<ColorMaterial>>,
-        Res<Assets<LocaleAsset>>,
-    ),
+    locales: Res<Assets<LocaleAsset>>,
 ) {
     let logo_entity = commands
         .spawn_bundle(SpriteBundle {

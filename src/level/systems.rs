@@ -22,28 +22,24 @@ use bevy::{
 use bevy_kira_audio::{Audio, AudioControl};
 use interactable::components::{Entered, Exited, ReleasedLeft, ReleasedRight};
 
+type McNumberCell<'a> = (
+    &'a mut GameCell,
+    &'a mut Cell,
+    &'a NumberCell,
+    Option<&'a ReleasedLeft>,
+    Option<&'a ReleasedRight>,
+);
+type McEmptyCell<'a> = (
+    &'a mut GameCell,
+    &'a mut Cell,
+    Option<&'a ReleasedLeft>,
+    Option<&'a ReleasedRight>,
+);
 /// Calls uncover on a cell that is clicked by the mouse
 pub fn mouse_click_cell(
     mut commands: Commands,
-    mut number_cell_query: Query<
-        (
-            &mut GameCell,
-            &mut Cell,
-            &NumberCell,
-            Option<&ReleasedLeft>,
-            Option<&ReleasedRight>,
-        ),
-        Without<EmptyCell>,
-    >,
-    mut empty_cell_query: Query<
-        (
-            &mut GameCell,
-            &mut Cell,
-            Option<&ReleasedLeft>,
-            Option<&ReleasedRight>,
-        ),
-        With<EmptyCell>,
-    >,
+    mut number_cell_query: Query<McNumberCell, Without<EmptyCell>>,
+    mut empty_cell_query: Query<McEmptyCell, With<EmptyCell>>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
     game_colors: Res<GameColors>,
     mut board: ResMut<Board>,
