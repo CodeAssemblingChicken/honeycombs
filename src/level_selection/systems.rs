@@ -12,7 +12,7 @@ use bevy::{
     window::WindowResized,
 };
 use bevy_kira_audio::{Audio, AudioControl};
-use interactable::components::{Entered, Exited, ReleasedLeft};
+use interactable::components::{Entered, Exited, Interactable, ReleasedLeft};
 
 pub fn mouse_click_cell(
     mut commands: Commands,
@@ -84,6 +84,10 @@ pub fn hotkey_system(
         keys.clear_just_pressed(KeyCode::Escape);
         switch_state(Some(AppState::Home), &mut app_state, &mut load_state);
     }
+    if keys.just_pressed(KeyCode::T) {
+        keys.clear_just_pressed(KeyCode::T);
+        app_state.push(AppState::Tutorial).unwrap();
+    }
 }
 
 /// On resizing the window, the board is resized too
@@ -96,5 +100,23 @@ pub fn window_resize_system(
             // TODO: Remove hard-coded width/height
             rescale_board(11, 11, 1, ev.width, ev.height, &mut root);
         }
+    }
+}
+
+pub fn pause(
+    mut commands: Commands,
+    mut cell_query: Query<(&LevelSelectionCell, &mut Cell), With<Interactable>>,
+    mut color_query: Query<&mut Handle<ColorMaterial>>,
+    game_colors: Res<GameColors>,
+    profile: Res<Profile>,
+) {
+    for (lsc, mut cell) in cell_query.iter_mut() {
+        lsc.unhover(
+            &mut cell,
+            &mut commands,
+            &mut color_query,
+            &game_colors,
+            &profile,
+        );
     }
 }

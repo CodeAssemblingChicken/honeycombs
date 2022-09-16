@@ -157,7 +157,7 @@ impl LocaleAssets {
         locale_assets: &'a Assets<LocaleAsset>,
         profile: &Profile,
     ) -> Option<&String> {
-        if let Some(la) = locale_assets.get(&self.get_handle(profile)) {
+        if let Some(la) = locale_assets.get(&self.get_locale_handle(profile)) {
             la.strings.get(key)
         } else {
             None
@@ -169,13 +169,13 @@ impl LocaleAssets {
         locale_assets: &'a Assets<LocaleAsset>,
         profile: &Profile,
     ) -> Option<&Vec<TextSectionConfig>> {
-        if let Some(la) = locale_assets.get(&self.get_handle(profile)) {
+        if let Some(la) = locale_assets.get(&self.get_locale_handle(profile)) {
             la.text_sections.get(key)
         } else {
             None
         }
     }
-    pub fn get_handle(&self, profile: &Profile) -> Handle<LocaleAsset> {
+    pub fn get_locale_handle(&self, profile: &Profile) -> Handle<LocaleAsset> {
         match profile.lang {
             Language::DE => self.de.clone_weak(),
             Language::FR => self.fr.clone_weak(),

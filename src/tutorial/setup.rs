@@ -1,10 +1,7 @@
-use super::{
-    components::{ButtonMenu, ButtonNext, ButtonRestart, UiBackground, UiRootNode},
-    resources::{OverlaySettings, OverlayType},
-};
+use super::components::{ButtonClose, ButtonNext, UiBackground, UiRootNode};
 use crate::{
     assets::LocaleAsset,
-    constants::{RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_UI},
+    constants::Z_INDEX_UI,
     functions::spawn_cell,
     resources::{CellMeshes, GameColors, LocaleAssets, Profile, TextSettings},
 };
@@ -22,7 +19,6 @@ type StandardResources<'a> = (
     Res<'a, CellMeshes>,
     Res<'a, GameColors>,
     Res<'a, LocaleAssets>,
-    Res<'a, OverlaySettings>,
     Res<'a, Profile>,
     Res<'a, TextSettings>,
 );
@@ -33,90 +29,18 @@ type StandardAssets<'a> = (
 );
 pub fn setup(
     mut commands: Commands,
-    (cell_meshes, game_colors, locale, overlay_settings, profile, text_settings): StandardResources,
+    (cell_meshes, game_colors, locale, profile, text_settings): StandardResources,
     (mut meshes, mut colors, locales): StandardAssets,
     wnds: Res<Windows>,
 ) {
     // Panel width and height 1920×1080p window
     let (panel_width, panel_height) = (1280., 960.);
-    let (points, title_text) = match overlay_settings.overlay_type {
-        OverlayType::LevelComplete => (
-            overlay_settings.points,
-            locale
-                .get_string("complete", &locales, &profile)
-                .unwrap_or(&"String not found".to_string())
-                .clone(),
-        ),
-        OverlayType::Pause => (
-            profile.level_points[overlay_settings.stage_id as usize]
-                [overlay_settings.level_id as usize]
-                .unwrap_or_default(),
-            locale
-                .get_string("pause", &locales, &profile)
-                .unwrap_or(&"String not found".to_string())
-                .clone(),
-        ),
-    };
-    let point_text = match overlay_settings.overlay_type {
-        OverlayType::LevelComplete => format!(
-            "{}: {}",
-            locale
-                .get_string("mistakes", &locales, &profile)
-                .unwrap_or(&"String not found".to_string()),
-            overlay_settings.mistakes
-        ),
-        OverlayType::Pause => format!(
-            "{}: {}",
-            locale
-                .get_string("highscore", &locales, &profile)
-                .unwrap_or(&"String not found".to_string()),
-            profile.level_points[overlay_settings.stage_id as usize]
-                [overlay_settings.level_id as usize]
-                .unwrap_or_default()
-        ),
-    };
     let total_text = format!(
         "{}:",
         locale
             .get_string("total", &locales, &profile)
             .unwrap_or(&"String not found".to_string())
     );
-
-    let mut point_cells = Vec::new();
-    for i in 0..overlay_settings.max_points {
-        let big_transform = Transform::from_xyz(
-            (i % 6) as f32 * RADIUS / 1.2 - 208.,
-            (i / 6) as f32 * RADIUS / -1.2 + 117.,
-            Z_INDEX_CELL_BACK,
-        )
-        .with_scale(Vec3::new(0.4, 0.4, 1.0));
-        let colors = if i < points {
-            (
-                game_colors.alpha2.clone(),
-                game_colors.blue_light.clone(),
-                game_colors.blue_medium.clone(),
-            )
-        } else {
-            (
-                game_colors.alpha2.clone(),
-                game_colors.gray_light.clone(),
-                game_colors.gray_medium.clone(),
-            )
-        };
-        let cell = commands.spawn().id();
-        spawn_cell(
-            &mut commands,
-            cell,
-            (
-                cell_meshes.std_hexagon_back.clone(),
-                cell_meshes.std_hexagon_outer.clone(),
-                cell_meshes.std_hexagon_inner.clone(),
-            ),
-            colors,
-            big_transform,
-        );
-        point_cells.push(cell);
-    }
 
     let total_cell = commands.spawn().id();
     let tf = Transform::from_scale(Vec3::new(1.5, 1.5, 1.0));
@@ -167,29 +91,25 @@ pub fn setup(
         .insert(UiRootNode)
         .with_children(|parent| {
             parent.spawn_bundle(Text2dBundle {
-                text: Text::from_section(title_text, text_settings.style_menu_dark.clone())
-                    .with_alignment(text_settings.alignment),
+                text: Text::from_section(
+                    locale
+                        .get_string("complete", &locales, &profile)
+                        .unwrap_or(&"String not found".to_string())
+                        .clone(),
+                    text_settings.style_menu_dark.clone(),
+                )
+                .with_alignment(text_settings.alignment),
                 transform: Transform::from_xyz(0., 400., 1.),
                 ..default()
             });
-            parent
-                .spawn_bundle(ColorMesh2dBundle {
-                    mesh: meshes
-                        .add(Mesh::from(Quad::new(Vec2::new(600., 580.))))
-                        .into(),
-                    material: colors.add(ColorMaterial::from(Color::rgba(0.7, 0.7, 0.7, 0.92))),
-                    transform: Transform::from_xyz(-310., 50., 0.9),
-                    ..default()
-                })
-                .push_children(&point_cells)
-                .with_children(|parent| {
-                    parent.spawn_bundle(Text2dBundle {
-                        text: Text::from_section(point_text, text_settings.style_menu_dark.clone())
-                            .with_alignment(text_settings.alignment),
-                        transform: Transform::from_xyz(0., 200., 10.),
-                        ..default()
-                    });
-                });
+            parent.spawn_bundle(ColorMesh2dBundle {
+                mesh: meshes
+                    .add(Mesh::from(Quad::new(Vec2::new(600., 580.))))
+                    .into(),
+                material: colors.add(ColorMaterial::from(Color::rgba(0.7, 0.7, 0.7, 0.92))),
+                transform: Transform::from_xyz(-310., 50., 0.9),
+                ..default()
+            });
             parent
                 .spawn_bundle(ColorMesh2dBundle {
                     mesh: meshes
@@ -223,14 +143,14 @@ pub fn setup(
                         .add(Mesh::from(Quad::new(Vec2::new(240., 190.))))
                         .into(),
                     material: colors.add(ColorMaterial::from(Color::rgba(0.7, 0.7, 0.7, 0.92))),
-                    transform: Transform::from_xyz(-260., -355., 0.9),
+                    transform: Transform::from_xyz(0., -355., 0.9),
                     ..default()
                 })
                 .with_children(|parent| {
                     parent.spawn_bundle(Text2dBundle {
                         text: Text::from_section(
                             locale
-                                .get_string("restart", &locales, &profile)
+                                .get_string("next", &locales, &profile)
                                 .unwrap_or(&"String not found".to_string()),
                             text_settings.style_menu_dark.clone(),
                         )
@@ -240,7 +160,7 @@ pub fn setup(
                         ..default()
                     });
                 })
-                .insert(ButtonRestart)
+                .insert(ButtonNext)
                 .insert(Interactable {
                     shape: Shape::Quad(interactable::shapes::Quad {
                         width: 240.,
@@ -248,41 +168,7 @@ pub fn setup(
                     }),
                     ..default()
                 });
-            if overlay_settings.overlay_type == OverlayType::LevelComplete
-                && overlay_settings.level_id < 5
-            {
-                parent
-                    .spawn_bundle(ColorMesh2dBundle {
-                        mesh: meshes
-                            .add(Mesh::from(Quad::new(Vec2::new(240., 190.))))
-                            .into(),
-                        material: colors.add(ColorMaterial::from(Color::rgba(0.7, 0.7, 0.7, 0.92))),
-                        transform: Transform::from_xyz(0., -355., 0.9),
-                        ..default()
-                    })
-                    .with_children(|parent| {
-                        parent.spawn_bundle(Text2dBundle {
-                            text: Text::from_section(
-                                locale
-                                    .get_string("next", &locales, &profile)
-                                    .unwrap_or(&"String not found".to_string()),
-                                text_settings.style_menu_dark.clone(),
-                            )
-                            .with_alignment(text_settings.alignment),
-                            transform: Transform::from_xyz(0., -10., 10.)
-                                .with_scale(Vec3::new(0.75, 0.75, 1.)),
-                            ..default()
-                        });
-                    })
-                    .insert(ButtonNext)
-                    .insert(Interactable {
-                        shape: Shape::Quad(interactable::shapes::Quad {
-                            width: 240.,
-                            height: 190.,
-                        }),
-                        ..default()
-                    });
-            }
+
             parent
                 .spawn_bundle(ColorMesh2dBundle {
                     mesh: meshes
@@ -306,7 +192,7 @@ pub fn setup(
                         ..default()
                     });
                 })
-                .insert(ButtonMenu)
+                .insert(ButtonClose)
                 .insert(Interactable {
                     shape: Shape::Quad(interactable::shapes::Quad {
                         width: 240.,

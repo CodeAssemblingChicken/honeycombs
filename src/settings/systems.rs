@@ -1,5 +1,5 @@
 use super::{
-    components::MouseInverted,
+    components::{ButtonReturn, MouseInverted},
     constants::{COLOR_HOVERED, COLOR_SELECTED, COLOR_UNSELECTED},
 };
 use crate::{
@@ -9,7 +9,10 @@ use crate::{
     states::AppState,
 };
 use bevy::{
-    prelude::{EventReader, ParamSet, Query, Res, ResMut, Sprite, State, Transform, With, Without},
+    input::Input,
+    prelude::{
+        EventReader, KeyCode, ParamSet, Query, Res, ResMut, Sprite, State, Transform, With, Without,
+    },
     window::WindowResized,
 };
 use interactable::components::{Entered, Exited, ReleasedLeft};
@@ -79,6 +82,27 @@ pub fn mouse_setting_hover_system(
         if profile.mouse_inverted != mi.0 {
             sprite.color = COLOR_UNSELECTED;
         }
+    }
+}
+
+pub fn return_button_click_system(
+    return_query: Query<&ButtonReturn, With<ReleasedLeft>>,
+    mut app_state: ResMut<State<AppState>>,
+    mut load_state: ResMut<LoadState>,
+) {
+    if !return_query.is_empty() {
+        switch_state(Some(AppState::Home), &mut app_state, &mut load_state);
+    }
+}
+
+pub fn hotkey_system(
+    mut keys: ResMut<Input<KeyCode>>,
+    mut app_state: ResMut<State<AppState>>,
+    mut load_state: ResMut<LoadState>,
+) {
+    if keys.just_pressed(KeyCode::Escape) {
+        keys.clear_just_pressed(KeyCode::Escape);
+        switch_state(Some(AppState::Home), &mut app_state, &mut load_state);
     }
 }
 

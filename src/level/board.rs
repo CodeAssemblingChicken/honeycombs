@@ -215,11 +215,21 @@ impl Board {
         }
 
         let text1 = config.text.as_ref().map(|text| {
+            let display_text = match text.2.as_str() {
+                "intro" => {
+                    if profile.mouse_inverted {
+                        "intro-alt".to_string()
+                    } else {
+                        text.2.clone()
+                    }
+                }
+                _ => text.2.clone(),
+            };
             commands
                 .spawn_bundle(Text2dBundle {
                     text: Text::from_sections(
                         locale
-                            .get_text_section(text.2.as_str(), locales, profile)
+                            .get_text_section(display_text.as_str(), locales, profile)
                             .unwrap()
                             .to_vec()
                             .iter()

@@ -1,9 +1,10 @@
 use super::{
-    components::MouseInverted,
+    components::{ButtonReturn, MouseInverted},
     constants::{COLOR_SELECTED, COLOR_UNSELECTED},
 };
 use crate::{
     assets::LocaleAsset,
+    bundles::MenuButtonBundle,
     components::{Language, RootComponent},
     constants::{MED_SCALE, RADIUS, Z_INDEX_TEXT},
     functions::rescale_board,
@@ -11,18 +12,28 @@ use crate::{
 };
 use bevy::{
     hierarchy::BuildChildren,
-    prelude::{default, AssetServer, Assets, Commands, Res, SpatialBundle, Sprite, Transform},
+    math::{Vec2, Vec3},
+    prelude::{
+        default, shape::Quad, AssetServer, Assets, Color, ColorMaterial, ColorMesh2dBundle,
+        Commands, Mesh, Res, ResMut, SpatialBundle, Sprite, Transform,
+    },
     sprite::SpriteBundle,
+    text::{Text, Text2dBundle},
     window::Windows,
 };
 use interactable::{components::Interactable, shapes::Shape};
 
+type StandardAssets<'a> = (
+    ResMut<'a, Assets<Mesh>>,
+    ResMut<'a, Assets<ColorMaterial>>,
+    Res<'a, Assets<LocaleAsset>>,
+);
 pub fn setup(
     mut commands: Commands,
     wnds: Res<Windows>,
     (locale, profile, text_settings): (Res<LocaleAssets>, Res<Profile>, Res<TextSettings>),
     asset_server: Res<AssetServer>,
-    locales: Res<Assets<LocaleAsset>>,
+    (mut meshes, mut colors, locales): StandardAssets,
 ) {
     let logo_entity = commands
         .spawn_bundle(SpriteBundle {
@@ -32,146 +43,204 @@ pub fn setup(
         })
         .id();
 
-    let pos_en = (-140.0, -2. * RADIUS * MED_SCALE + 0.8 * RADIUS);
-    let pos_de = (140.0, -2. * RADIUS * MED_SCALE + 0.8 * RADIUS);
-    let pos_fr = (-140.0, -2. * RADIUS * MED_SCALE - 0.8 * RADIUS);
-    let pos_es = (140.0, -2. * RADIUS * MED_SCALE - 0.8 * RADIUS);
-    let lang_en = commands
-        .spawn_bundle(SpriteBundle {
-            sprite: Sprite {
-                color: match profile.lang {
-                    Language::EN => COLOR_SELECTED,
-                    _ => COLOR_UNSELECTED,
-                },
+    let language_panel = commands
+        .spawn_bundle(ColorMesh2dBundle {
+            mesh: meshes
+                .add(Mesh::from(Quad::new(Vec2::new(540., 500.))))
+                .into(),
+            material: colors.add(ColorMaterial::from(Color::rgba(0.7, 0.7, 0.7, 0.92))),
+            transform: Transform::from_xyz(4.0 * RADIUS, -RADIUS, 0.9),
+            ..default()
+        })
+        .with_children(|parent| {
+            parent.spawn_bundle(Text2dBundle {
+                text: Text::from_section(
+                    locale
+                        .get_string("language", &locales, &profile)
+                        .unwrap_or(&"String not found".to_string()),
+                    text_settings.style_menu_dark.clone(),
+                )
+                .with_alignment(text_settings.alignment),
+                transform: Transform::from_xyz(0., 1.5 * RADIUS, Z_INDEX_TEXT),
                 ..default()
-            },
-            texture: asset_server.load("img/en.png"),
-            transform: Transform::from_xyz(pos_en.0, pos_en.1, Z_INDEX_TEXT),
-            ..default()
+            });
+            parent
+                .spawn_bundle(SpriteBundle {
+                    sprite: Sprite {
+                        color: match profile.lang {
+                            Language::EN => COLOR_SELECTED,
+                            _ => COLOR_UNSELECTED,
+                        },
+                        ..default()
+                    },
+                    texture: asset_server.load("img/en.png"),
+                    transform: Transform::from_xyz(-140., 0.3 * RADIUS, Z_INDEX_TEXT),
+                    ..default()
+                })
+                .insert(Interactable {
+                    shape: Shape::Quad(interactable::shapes::Quad {
+                        width: 200.,
+                        height: 120.,
+                    }),
+                    ..default()
+                })
+                .insert(Language::EN);
+            parent
+                .spawn_bundle(SpriteBundle {
+                    sprite: Sprite {
+                        color: match profile.lang {
+                            Language::DE => COLOR_SELECTED,
+                            _ => COLOR_UNSELECTED,
+                        },
+                        ..default()
+                    },
+                    texture: asset_server.load("img/de.png"),
+                    transform: Transform::from_xyz(140., 0.3 * RADIUS, Z_INDEX_TEXT),
+                    ..default()
+                })
+                .insert(Interactable {
+                    shape: Shape::Quad(interactable::shapes::Quad {
+                        width: 200.,
+                        height: 120.,
+                    }),
+                    ..default()
+                })
+                .insert(Language::DE);
+            parent
+                .spawn_bundle(SpriteBundle {
+                    sprite: Sprite {
+                        color: match profile.lang {
+                            Language::FR => COLOR_SELECTED,
+                            _ => COLOR_UNSELECTED,
+                        },
+                        ..default()
+                    },
+                    texture: asset_server.load("img/fr.png"),
+                    transform: Transform::from_xyz(-140., -1.3 * RADIUS, Z_INDEX_TEXT),
+                    ..default()
+                })
+                .insert(Interactable {
+                    shape: Shape::Quad(interactable::shapes::Quad {
+                        width: 200.,
+                        height: 120.,
+                    }),
+                    ..default()
+                })
+                .insert(Language::FR);
+            parent
+                .spawn_bundle(SpriteBundle {
+                    sprite: Sprite {
+                        color: match profile.lang {
+                            Language::ES => COLOR_SELECTED,
+                            _ => COLOR_UNSELECTED,
+                        },
+                        ..default()
+                    },
+                    texture: asset_server.load("img/es.png"),
+                    transform: Transform::from_xyz(140., -1.3 * RADIUS, Z_INDEX_TEXT),
+                    ..default()
+                })
+                .insert(Interactable {
+                    shape: Shape::Quad(interactable::shapes::Quad {
+                        width: 200.,
+                        height: 120.,
+                    }),
+                    ..default()
+                })
+                .insert(Language::ES);
         })
-        .insert(Interactable {
-            shape: Shape::Quad(interactable::shapes::Quad {
-                width: 200.,
-                height: 120.,
-            }),
-            ..default()
-        })
-        .insert(Language::EN)
-        .id();
-    let lang_de = commands
-        .spawn_bundle(SpriteBundle {
-            sprite: Sprite {
-                color: match profile.lang {
-                    Language::DE => COLOR_SELECTED,
-                    _ => COLOR_UNSELECTED,
-                },
-                ..default()
-            },
-            texture: asset_server.load("img/de.png"),
-            transform: Transform::from_xyz(pos_de.0, pos_de.1, Z_INDEX_TEXT),
-            ..default()
-        })
-        .insert(Interactable {
-            shape: Shape::Quad(interactable::shapes::Quad {
-                width: 200.,
-                height: 120.,
-            }),
-            ..default()
-        })
-        .insert(Language::DE)
-        .id();
-    let lang_fr = commands
-        .spawn_bundle(SpriteBundle {
-            sprite: Sprite {
-                color: match profile.lang {
-                    Language::FR => COLOR_SELECTED,
-                    _ => COLOR_UNSELECTED,
-                },
-                ..default()
-            },
-            texture: asset_server.load("img/fr.png"),
-            transform: Transform::from_xyz(pos_fr.0, pos_fr.1, Z_INDEX_TEXT),
-            ..default()
-        })
-        .insert(Interactable {
-            shape: Shape::Quad(interactable::shapes::Quad {
-                width: 200.,
-                height: 120.,
-            }),
-            ..default()
-        })
-        .insert(Language::FR)
-        .id();
-    let lang_es = commands
-        .spawn_bundle(SpriteBundle {
-            sprite: Sprite {
-                color: match profile.lang {
-                    Language::ES => COLOR_SELECTED,
-                    _ => COLOR_UNSELECTED,
-                },
-                ..default()
-            },
-            texture: asset_server.load("img/es.png"),
-            transform: Transform::from_xyz(pos_es.0, pos_es.1, Z_INDEX_TEXT),
-            ..default()
-        })
-        .insert(Interactable {
-            shape: Shape::Quad(interactable::shapes::Quad {
-                width: 200.,
-                height: 120.,
-            }),
-            ..default()
-        })
-        .insert(Language::ES)
         .id();
 
-    let pos_lmb = (50.0, 0.);
-    let pos_rmb = (280.0, 0.);
-    let lmb = commands
-        .spawn_bundle(SpriteBundle {
-            sprite: Sprite {
-                color: if profile.mouse_inverted {
-                    COLOR_UNSELECTED
-                } else {
-                    COLOR_SELECTED
-                },
+    let mouse_panel = commands
+        .spawn_bundle(ColorMesh2dBundle {
+            mesh: meshes
+                .add(Mesh::from(Quad::new(Vec2::new(540., 500.))))
+                .into(),
+            material: colors.add(ColorMaterial::from(Color::rgba(0.7, 0.7, 0.7, 0.92))),
+            transform: Transform::from_xyz(-4.0 * RADIUS, -RADIUS, 0.9),
+            ..default()
+        })
+        .with_children(|parent| {
+            parent.spawn_bundle(Text2dBundle {
+                text: Text::from_section(
+                    locale
+                        .get_string("mouse-buttons", &locales, &profile)
+                        .unwrap_or(&"String not found".to_string()),
+                    text_settings.style_menu_dark.clone(),
+                )
+                .with_alignment(text_settings.alignment),
+                transform: Transform::from_xyz(0., 1.5 * RADIUS, Z_INDEX_TEXT),
                 ..default()
-            },
-            texture: asset_server.load("img/lmb.png"),
-            transform: Transform::from_xyz(pos_lmb.0, pos_lmb.1, Z_INDEX_TEXT),
-            ..default()
+            });
+            parent
+                .spawn_bundle(SpriteBundle {
+                    sprite: Sprite {
+                        color: if profile.mouse_inverted {
+                            COLOR_UNSELECTED
+                        } else {
+                            COLOR_SELECTED
+                        },
+                        ..default()
+                    },
+                    texture: asset_server.load("img/lmb.png"),
+                    transform: Transform::from_xyz(-1.2 * RADIUS, -0.6 * RADIUS, Z_INDEX_TEXT),
+                    ..default()
+                })
+                .insert(Interactable {
+                    shape: Shape::Quad(interactable::shapes::Quad {
+                        width: 167.,
+                        height: 278.,
+                    }),
+                    ..default()
+                })
+                .insert(MouseInverted(false));
+            parent
+                .spawn_bundle(SpriteBundle {
+                    sprite: Sprite {
+                        color: if profile.mouse_inverted {
+                            COLOR_SELECTED
+                        } else {
+                            COLOR_UNSELECTED
+                        },
+                        ..default()
+                    },
+                    texture: asset_server.load("img/rmb.png"),
+                    transform: Transform::from_xyz(1.2 * RADIUS, -0.6 * RADIUS, Z_INDEX_TEXT),
+                    ..default()
+                })
+                .insert(Interactable {
+                    shape: Shape::Quad(interactable::shapes::Quad {
+                        width: 167.,
+                        height: 278.,
+                    }),
+                    ..default()
+                })
+                .insert(MouseInverted(true));
         })
-        .insert(Interactable {
-            shape: Shape::Quad(interactable::shapes::Quad {
-                width: 222.,
-                height: 371.,
-            }),
-            ..default()
-        })
-        .insert(MouseInverted(false))
         .id();
-    let rmb = commands
-        .spawn_bundle(SpriteBundle {
-            sprite: Sprite {
-                color: if profile.mouse_inverted {
-                    COLOR_SELECTED
-                } else {
-                    COLOR_UNSELECTED
-                },
+
+    let bt_return = commands
+        .spawn_bundle(MenuButtonBundle::new(
+            Transform::from_xyz(0., -4. * RADIUS, 0.9),
+            (240., 190.),
+            Color::rgba(0.7, 0.7, 0.7, 0.92),
+            &mut meshes,
+            &mut colors,
+        ))
+        .with_children(|parent| {
+            parent.spawn_bundle(Text2dBundle {
+                text: Text::from_section(
+                    locale
+                        .get_string("return", &locales, &profile)
+                        .unwrap_or(&"String not found".to_string()),
+                    text_settings.style_menu_dark.clone(),
+                )
+                .with_alignment(text_settings.alignment),
+                transform: Transform::from_xyz(0., -10., 10.).with_scale(Vec3::new(0.75, 0.75, 1.)),
                 ..default()
-            },
-            texture: asset_server.load("img/rmb.png"),
-            transform: Transform::from_xyz(pos_rmb.0, pos_rmb.1, Z_INDEX_TEXT),
-            ..default()
+            });
         })
-        .insert(Interactable {
-            shape: Shape::Quad(interactable::shapes::Quad {
-                width: 222.,
-                height: 371.,
-            }),
-            ..default()
-        })
-        .insert(MouseInverted(true))
+        .insert(ButtonReturn)
         .id();
 
     let mut root_transform = Transform::identity();
@@ -182,7 +251,7 @@ pub fn setup(
 
     commands
         .spawn()
-        .push_children(&[logo_entity, lang_en, lang_de, lang_fr, lang_es, lmb, rmb])
+        .push_children(&[logo_entity, language_panel, mouse_panel, bt_return])
         .insert_bundle(SpatialBundle::from_transform(root_transform))
         .insert(RootComponent);
 }

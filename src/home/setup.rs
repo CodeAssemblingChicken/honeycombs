@@ -43,8 +43,8 @@ pub fn setup(
             .unwrap_or(&"String not found".to_string()),
     );
     big_transform.translation = Vec3::new(
-        -3. * RADIUS * MED_SCALE,
-        -1.5 * RADIUS * MED_SCALE,
+        -1.2 * RADIUS * MED_SCALE,
+        -2. * RADIUS * MED_SCALE,
         Z_INDEX_CELL_BACK,
     );
     let editor_cell = spawn_option_cell(
@@ -52,7 +52,7 @@ pub fn setup(
         &cell_meshes,
         &game_colors,
         &text_settings,
-        big_transform,
+        big_transform.with_scale(Vec3::new(0.75, 0.75, 0.75)),
         AppState::Editor,
         locale
             .get_string("editor", &locales, &profile)
@@ -60,7 +60,7 @@ pub fn setup(
     );
     big_transform.translation = Vec3::new(
         3. * RADIUS * MED_SCALE,
-        -1.5 * RADIUS * MED_SCALE,
+        -RADIUS * MED_SCALE,
         Z_INDEX_CELL_BACK,
     );
     let quit_cell = spawn_option_cell(
@@ -68,22 +68,42 @@ pub fn setup(
         &cell_meshes,
         &game_colors,
         &text_settings,
-        big_transform,
+        big_transform.with_scale(Vec3::new(0.75, 0.75, 0.75)),
         AppState::Quit,
         locale
             .get_string("quit", &locales, &profile)
             .unwrap_or(&"String not found".to_string()),
     );
-    big_transform.translation = Vec3::new(0., 1.5 * RADIUS * MED_SCALE, Z_INDEX_CELL_BACK);
+    big_transform.translation = Vec3::new(
+        -3. * RADIUS * MED_SCALE,
+        -RADIUS * MED_SCALE,
+        Z_INDEX_CELL_BACK,
+    );
     let options_cell = spawn_option_cell(
         &mut commands,
         &cell_meshes,
         &game_colors,
         &text_settings,
-        big_transform,
+        big_transform.with_scale(Vec3::new(0.75, 0.75, 0.75)),
         AppState::Options,
         locale
             .get_string("options", &locales, &profile)
+            .unwrap_or(&"String not found".to_string()),
+    );
+    big_transform.translation = Vec3::new(
+        1.2 * RADIUS * MED_SCALE,
+        -2. * RADIUS * MED_SCALE,
+        Z_INDEX_CELL_BACK,
+    );
+    let credits_cell = spawn_option_cell(
+        &mut commands,
+        &cell_meshes,
+        &game_colors,
+        &text_settings,
+        big_transform.with_scale(Vec3::new(0.75, 0.75, 0.75)),
+        AppState::Credits,
+        locale
+            .get_string("credits", &locales, &profile)
             .unwrap_or(&"String not found".to_string()),
     );
 
@@ -108,6 +128,7 @@ pub fn setup(
             editor_cell,
             quit_cell,
             options_cell,
+            credits_cell,
             logo_entity,
         ])
         .insert_bundle(SpatialBundle::from_transform(root_transform))

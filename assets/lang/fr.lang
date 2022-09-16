@@ -1,6 +1,7 @@
 (
     strings: {
         "editor": "Éditeur",
+        "credits": "Credits",
         "start": "Début",
         "options": "Options",
         "quit": "Quitter",
@@ -10,19 +11,26 @@
         "mistakes": "Erreurs",
         "remaining": "Restant",
         "total": "Total",
-        "retry": "Redémarrer",
+        "restart": "Relancer",
         "menu": "Menu",
         "next": "Niveau\nsuivant",
         "language": "Langue",
-        "mouse-buttons": "Boutons de souris",
+        "mouse-buttons": "Boutons souris",
         "sfx-volume": "Volume de l'effet sonore",
+        "return": "Retourner",
     },
     text_sections: {
         "intro": [
             (text: "Bienvenue à ", color: None, interactable: false),
             (text: "Honeycombs", color: Some(Rgba(red: 0.894, green: 0.627, blue: 0.125, alpha: 1.0)), interactable: false),
-            (text: " ! Votre objectif est de révéler le motif.\n Le nombre dans une cellule grise vous indique, combien de cellules bleues sont adjacentes à celle-ci.", color: None, interactable: false),
-            (text: "\nCliquez sur les cellules jaunes : à gauche pour découvrir une cellule bleue et à droite pour une cellule grise.", color: None, interactable: false),
+            (text: " ! Votre objectif est de révéler le motif.\n Le nombre dans une cellule grise indique combien de cellules bleues\nsont adjacentes à elle. ", color: None, interactable: false),
+            (text: "Cliquez sur les cellules jaunes : Gauche pour\ndécouvrir une cellule bleue et droite pour une cellule grise.", color: None, interactable: false),
+        ],
+        "intro-alt": [
+            (text: "Bienvenue à ", color: None, interactable: false),
+            (text: "Honeycombs", color: Some(Rgba(red: 0.894, green: 0.627, blue: 0.125, alpha: 1.0)), interactable: false),
+            (text: " ! Votre objectif est de révéler le motif.\n Le nombre dans une cellule grise indique combien de cellules bleues\nsont adjacentes à elle. ", color: None, interactable: false),
+            (text: " Cliquez sur les cellules jaunes : Droite pour\ndécouvrir une cellule bleue et gauche pour une cellule grise.", color: None, interactable: false),
         ],
         "mistakes": [
             (text: "Tout le monde fait des erreurs. Mais n'en fais pas\ntrop pour pouvoir débloquer les autres niveaux.", color: None, interactable: false),

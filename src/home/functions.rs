@@ -75,7 +75,7 @@ pub fn get_colors_for_app_state(
             game_colors.blue_medium.clone(),
             game_colors.blue_light.clone(),
         ),
-        AppState::Editor => (
+        AppState::Editor | AppState::Credits => (
             game_colors.yellow_dark.clone(),
             game_colors.yellow_medium.clone(),
             game_colors.yellow_light.clone(),

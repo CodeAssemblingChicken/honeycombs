@@ -31,8 +31,8 @@ native-dialog = "0.6.3"
 version = "0.8"
 # Disable the default features
 default-features = false
-features = ["bevy_core_pipeline", "bevy_asset", "bevy_sprite", "bevy_text", "x11", "png"]
-# perhaps: "bevy_render", "bevy_ui",, "bevy_winit", "bevy_scene", "animation", "filesystem_watcher" , "wayland"
+features = ["bevy_core_pipeline", "bevy_asset", "bevy_sprite", "bevy_text", "x11", "png", "filesystem_watcher"]
+# perhaps: "bevy_render", "bevy_ui",, "bevy_winit", "bevy_scene", "animation" , "wayland"
 
 [dependencies.bevy-inspector-egui]
 version = "0.12"

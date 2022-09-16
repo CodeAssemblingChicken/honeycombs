@@ -1,6 +1,7 @@
 (
     strings: {
         "editor": "Editor",
+        "credits": "Credits",
         "start": "Inicie",
         "options": "Opciones",
         "quit": "Deje",
@@ -10,19 +11,26 @@
         "mistakes": "Errores",
         "remaining": "Resto",
         "total": "Total",
-        "retry": "Reiniciar",
+        "restart": "Reiniciar",
         "menu": "Menú",
         "next": "Próximo\nnivel",
         "language": "Idioma",
-        "mouse-buttons": "Botones del ratón",
+        "mouse-buttons": "Botones ratón",
         "sfx-volume": "Volumen del efecto de sonido",
+        "return": "Volver",
     },
     text_sections: {
         "intro": [
             (text: "¡Bienvenido a ", color: None, interactable: false),
             (text: "Honeycombs", color: Some(Rgba(red: 0.894, green: 0.627, blue: 0.125, alpha: 1.0)), interactable: false),
-            (text: "! Tu objetivo es revelar el patrón.\n El número de una celda gris te indica cuántas celdas azules están adyacentes a ella.", color: None, interactable: false),
-            (text: "\nHaz clic en las celdas amarillas: Izquierda para descubrir una celda azul y derecha para una celda gris.", color: None, interactable: false),
+            (text: "! Tu objetivo es revelar el patrón.\n El número de una celda gris te indica cuántas celdas azules están\nadyacentes a ella.", color: None, interactable: false),
+            (text: " Haz clic en las celdas amarillas: Izquierda\npara descubrir una celda azul y derecha para una celda gris.", color: None, interactable: false),
+        ],
+        "intro-alt": [
+            (text: "¡Bienvenido a ", color: None, interactable: false),
+            (text: "Honeycombs", color: Some(Rgba(red: 0.894, green: 0.627, blue: 0.125, alpha: 1.0)), interactable: false),
+            (text: "! Tu objetivo es revelar el patrón.\n El número de una celda gris te indica cuántas celdas azules están\nadyacentes a ella.", color: None, interactable: false),
+            (text: " Haz clic en las celdas amarillas: Derecha\npara descubrir una celda azul y izquierda para una celda gris.", color: None, interactable: false),
         ],
         "mistakes": [
             (text: "Todo el mundo comete errores. Pero no hagas\ndemasiados para poder desbloquear los otros niveles.", color: None, interactable: false),

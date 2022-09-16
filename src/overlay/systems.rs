@@ -1,5 +1,5 @@
 use super::{
-    components::{ButtonMenu, ButtonNext, ButtonRetry, UiBackground, UiRootNode},
+    components::{ButtonMenu, ButtonNext, ButtonRestart, UiBackground, UiRootNode},
     resources::{OverlaySettings, OverlayType},
 };
 use crate::{functions::switch_state, resources::LoadState, states::AppState};
@@ -14,7 +14,7 @@ use interactable::components::ReleasedLeft;
 pub fn button_system(
     menu_button_query: Query<&ButtonMenu, With<ReleasedLeft>>,
     next_button_query: Query<&ButtonNext, With<ReleasedLeft>>,
-    retry_button_query: Query<&ButtonRetry, With<ReleasedLeft>>,
+    restart_button_query: Query<&ButtonRestart, With<ReleasedLeft>>,
     (mut app_state, mut load_state): (ResMut<State<AppState>>, ResMut<LoadState>),
     overlay_settings: Res<OverlaySettings>,
 ) {
@@ -35,7 +35,7 @@ pub fn button_system(
         ));
         switch_state(Some(AppState::Level), &mut app_state, &mut load_state);
     }
-    if !retry_button_query.is_empty() {
+    if !restart_button_query.is_empty() {
         switch_state(Some(AppState::Level), &mut app_state, &mut load_state);
     }
 }

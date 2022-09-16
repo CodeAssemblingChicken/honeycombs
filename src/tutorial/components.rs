@@ -10,8 +10,6 @@ pub struct UiRootNode;
 pub struct ContentPane;
 
 #[derive(Component)]
-pub struct ButtonMenu;
-#[derive(Component)]
 pub struct ButtonNext;
 #[derive(Component)]
-pub struct ButtonRestart;
+pub struct ButtonClose;

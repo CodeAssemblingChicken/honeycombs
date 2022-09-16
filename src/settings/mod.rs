@@ -18,6 +18,8 @@ pub fn prepare_settings(app: &mut App) {
                 .with_system(mouse_setting_click_system.after(InteractLabel::Interact))
                 .with_system(lang_hover_system.after(InteractLabel::Interact))
                 .with_system(mouse_setting_hover_system.after(InteractLabel::Interact))
+                .with_system(return_button_click_system.after(InteractLabel::Interact))
+                .with_system(hotkey_system)
                 .with_system(window_resize_system),
         )
         .add_system_set(SystemSet::on_exit(STATE).with_system(cleanup_system::<RootComponent>));

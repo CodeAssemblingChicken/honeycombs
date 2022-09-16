@@ -2,6 +2,7 @@
 
 mod assets;
 mod board_functions;
+mod bundles;
 mod components;
 mod constants;
 mod editor;
@@ -16,14 +17,15 @@ mod resources;
 mod settings;
 mod states;
 mod structs;
+mod tutorial;
 
 use assets::{LocaleAsset, LocaleAssetLoader};
 use bevy::{
     app::{App, AppExit},
     hierarchy::DespawnRecursiveExt,
     prelude::{
-        default, AddAsset, Camera2dBundle, ClearColor, Color, Commands, Component, Entity,
-        EventWriter, Msaa, NonSend, Query, Res, ResMut, State, SystemSet, With,
+        default, AddAsset, AssetServer, Camera2dBundle, ClearColor, Color, Commands, Component,
+        Entity, EventWriter, Msaa, NonSend, Query, Res, ResMut, State, SystemSet, With,
     },
     window::{WindowDescriptor, WindowId, WindowResizeConstraints, Windows},
     winit::WinitWindows,
@@ -102,6 +104,7 @@ fn main() {
     level_selection::prepare_level_selection(&mut app);
     overlay::prepare_overlay(&mut app);
     settings::prepare_settings(&mut app);
+    tutorial::prepare_tutorial(&mut app);
 
     #[cfg(feature = "bevy-inspector-egui")]
     app.add_plugin(WorldInspectorPlugin::new())
@@ -110,10 +113,11 @@ fn main() {
     app.run();
 }
 
-fn setup(mut commands: Commands, mut wnds: ResMut<Windows>) {
+fn setup(mut commands: Commands, mut wnds: ResMut<Windows>, asset_server: Res<AssetServer>) {
     commands
         .spawn_bundle(Camera2dBundle::default())
         .insert(InteractableCamera);
+    asset_server.watch_for_changes().unwrap();
     for wnd in wnds.iter_mut() {
         wnd.set_maximized(true);
     }

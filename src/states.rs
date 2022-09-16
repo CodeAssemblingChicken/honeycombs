@@ -1,6 +1,7 @@
 #[derive(Debug, Default, Clone, Copy, Eq, PartialEq, Hash)]
 pub enum AppState {
     AssetLoading,
+    Credits,
     Editor,
     #[default]
     Home,
@@ -9,5 +10,6 @@ pub enum AppState {
     Options,
     Overlay,
     StateChange,
+    Tutorial,
     Quit,
 }

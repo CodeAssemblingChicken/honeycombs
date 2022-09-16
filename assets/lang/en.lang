@@ -1,6 +1,7 @@
 (
     strings: {
         "editor": "Editor",
+        "credits": "Credits",
         "start": "Start",
         "options": "Options",
         "quit": "Quit",
@@ -10,12 +11,13 @@
         "mistakes": "Mistakes",
         "remaining": "Remaining",
         "total": "Total",
-        "retry": "Restart",
+        "restart": "Restart",
         "menu": "Menu",
         "next": "Next\nLevel",
         "language": "Language",
         "mouse-buttons": "Mouse buttons",
         "sfx-volume": "Sound effect volume",
+        "return": "Return",
     },
     text_sections: {
         "intro": [
@@ -23,6 +25,12 @@
             (text: "Honeycombs", color: Some(Rgba(red: 0.894, green: 0.627, blue: 0.125, alpha: 1.0)), interactable: false),
             (text: "! Your goal is to reveal the pattern.\n The number in a gray cell tells you, how many blue cells are adjacent to it.", color: None, interactable: false),
             (text: "\nClick on the yellow cells: Left to uncover a blue cell and right for a gray cell.", color: None, interactable: false),
+        ],
+        "intro-alt": [
+            (text: "Welcome to ", color: None, interactable: false),
+            (text: "Honeycombs", color: Some(Rgba(red: 0.894, green: 0.627, blue: 0.125, alpha: 1.0)), interactable: false),
+            (text: "! Your goal is to reveal the pattern.\n The number in a gray cell tells you, how many blue cells are adjacent to it.", color: None, interactable: false),
+            (text: "\nClick on the yellow cells: Right to uncover a blue cell and left for a gray cell.", color: None, interactable: false),
         ],
         "mistakes": [
             (text: "Everyone makes mistakes. But don't make too many\nso that you can unlock the other levels.", color: None, interactable: false),

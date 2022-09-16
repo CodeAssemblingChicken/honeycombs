@@ -1,7 +1,4 @@
-use crate::{
-    constants::{SCALE_ENLARGED, SCALE_NORMAL},
-    enums::{HintDirection, HintType},
-};
+use crate::enums::{HintDirection, HintType};
 use bevy::{
     math::Vec3,
     prelude::{Commands, Component, Entity, Handle, Query, Transform},
@@ -37,7 +34,7 @@ impl Cell {
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
     ) {
         // Enlarge
-        self.rescale(commands, SCALE_ENLARGED);
+        self.rescale(commands, self.orig.scale * Vec3::new(1.04, 1.04, 1.));
         // Set colors to hovering
         self.set_colors(background, light, dark, color_query);
     }
@@ -51,7 +48,7 @@ impl Cell {
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
     ) {
         // Normal scale
-        self.rescale(commands, SCALE_NORMAL);
+        self.rescale(commands, self.orig.scale);
         // Set colors to normal
         self.set_colors(background, light, dark, color_query);
     }
@@ -64,7 +61,7 @@ impl Cell {
         dark: Handle<ColorMaterial>,
         color_query: &mut Query<&mut Handle<ColorMaterial>>,
     ) {
-        self.rescale(commands, SCALE_NORMAL);
+        self.rescale(commands, self.orig.scale);
         self.set_colors(background, light, dark, color_query);
     }
 

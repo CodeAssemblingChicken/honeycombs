@@ -41,13 +41,17 @@ pub fn mouse_click_cell(
     mut number_cell_query: Query<McNumberCell, Without<EmptyCell>>,
     mut empty_cell_query: Query<McEmptyCell, With<EmptyCell>>,
     mut color_query: Query<&mut Handle<ColorMaterial>>,
-    game_colors: Res<GameColors>,
+    (game_colors, profile): (Res<GameColors>, Res<Profile>),
     mut board: ResMut<Board>,
 ) {
     for (mut lc, mut cell, nc, left, right) in number_cell_query.iter_mut() {
-        if left.is_some() {
+        let fail =
+            left.is_some() && !profile.mouse_inverted || right.is_some() && profile.mouse_inverted;
+        let ok =
+            left.is_some() && profile.mouse_inverted || right.is_some() && !profile.mouse_inverted;
+        if fail {
             lc.uncover_fail(&cell, &mut commands, &mut board);
-        } else if right.is_some() {
+        } else if ok {
             lc.uncover(
                 &mut cell,
                 &mut commands,
@@ -59,9 +63,13 @@ pub fn mouse_click_cell(
         }
     }
     for (mut lc, mut cell, left, right) in empty_cell_query.iter_mut() {
-        if right.is_some() {
+        let fail =
+            right.is_some() && !profile.mouse_inverted || left.is_some() && profile.mouse_inverted;
+        let ok =
+            right.is_some() && profile.mouse_inverted || left.is_some() && !profile.mouse_inverted;
+        if fail {
             lc.uncover_fail(&cell, &mut commands, &mut board);
-        } else if left.is_some() {
+        } else if ok {
             lc.uncover(
                 &mut cell,
                 &mut commands,

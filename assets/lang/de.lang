@@ -1,6 +1,7 @@
 (
     strings: {
         "editor": "Editor",
+        "credits": "Credits",
         "start": "Start",
         "options": "Optionen",
         "quit": "Beenden",
@@ -10,12 +11,13 @@
         "mistakes": "Fehler",
         "remaining": "Verbleibend",
         "total": "Gesamt",
-        "retry": "Neustart",
+        "restart": "Neustart",
         "menu": "Menü",
         "next": "Nächstes\nLevel",
         "language": "Sprache",
         "mouse-buttons": "Maustasten",
         "sfx-volume": "Soundeffekt Lautstärke",
+        "return": "Zurück",
     },
     text_sections: {
         "intro": [
@@ -23,6 +25,12 @@
             (text: "Honeycombs", color: Some(Rgba(red: 0.894, green: 0.627, blue: 0.125, alpha: 1.0)), interactable: false),
             (text: "! Das Ziel ist, das Muster freizulegen.\n Die Zahl in einer grauen Zellen verrät, wie viele blaue Zellen angrenzen.", color: None, interactable: false),
             (text: "\nKlicke auf gelbe Zellen: Links um blaue und rechts um graue Zellen aufzudecken.", color: None, interactable: false),
+        ],
+        "intro-alt": [
+            (text: "Willkommen zu ", color: None, interactable: false),
+            (text: "Honeycombs", color: Some(Rgba(red: 0.894, green: 0.627, blue: 0.125, alpha: 1.0)), interactable: false),
+            (text: "! Das Ziel ist, das Muster freizulegen.\n Die Zahl in einer grauen Zellen verrät, wie viele blaue Zellen angrenzen.", color: None, interactable: false),
+            (text: "\nKlicke auf gelbe Zellen: Rechts um blaue und links um graue Zellen aufzudecken.", color: None, interactable: false),
         ],
         "mistakes": [
             (text: "Jeder macht mal Fehler. Aber mach nicht zu viele,\ndamit du die anderen Level freischalten kannst.", color: None, interactable: false),
