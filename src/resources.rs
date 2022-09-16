@@ -70,6 +70,8 @@ pub struct GameColors {
     pub alpha0: Handle<ColorMaterial>,
     pub alpha1: Handle<ColorMaterial>,
     pub alpha2: Handle<ColorMaterial>,
+    pub menu_button: Handle<ColorMaterial>,
+    pub menu_button_hovered: Handle<ColorMaterial>,
 }
 
 impl FromWorld for GameColors {
@@ -89,6 +91,8 @@ impl FromWorld for GameColors {
             alpha0: materials.add(ColorMaterial::from(GameColor::ALPHA_0)),
             alpha1: materials.add(ColorMaterial::from(GameColor::ALPHA_1)),
             alpha2: materials.add(ColorMaterial::from(GameColor::ALPHA_2)),
+            menu_button: materials.add(ColorMaterial::from(GameColor::MENU_BUTTON)),
+            menu_button_hovered: materials.add(ColorMaterial::from(GameColor::MENU_BUTTON_HOVERED)),
         }
     }
 }
@@ -192,6 +196,8 @@ pub struct Profile {
     #[serde(default)]
     pub mouse_inverted: bool,
     #[serde(default)]
+    pub fullscreen: bool,
+    #[serde(default)]
     pub sfx_volume: f32,
     #[serde(default)]
     pub level_points: [[Option<u16>; 6]; 6],
@@ -239,6 +245,7 @@ impl Default for Profile {
         Self {
             lang: Language::EN,
             mouse_inverted: false,
+            fullscreen: false,
             sfx_volume: 0.5,
             level_points: Default::default(),
         }

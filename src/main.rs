@@ -17,6 +17,7 @@ mod resources;
 mod settings;
 mod states;
 mod structs;
+mod systems;
 mod tutorial;
 
 use assets::{LocaleAsset, LocaleAssetLoader};
@@ -113,13 +114,22 @@ fn main() {
     app.run();
 }
 
-fn setup(mut commands: Commands, mut wnds: ResMut<Windows>, asset_server: Res<AssetServer>) {
+fn setup(
+    mut commands: Commands,
+    mut wnds: ResMut<Windows>,
+    asset_server: Res<AssetServer>,
+    profile: Res<Profile>,
+) {
     commands
         .spawn_bundle(Camera2dBundle::default())
         .insert(InteractableCamera);
     asset_server.watch_for_changes().unwrap();
     for wnd in wnds.iter_mut() {
-        wnd.set_maximized(true);
+        if profile.fullscreen {
+            wnd.set_mode(bevy::window::WindowMode::Fullscreen)
+        } else {
+            wnd.set_maximized(true);
+        }
     }
 }
 

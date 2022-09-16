@@ -1,6 +1,7 @@
 use super::{
-    components::{ButtonReturn, MouseInverted},
+    components::{ButtonReturn, ButtonWindowMode, MouseInverted, TextWindowMode},
     constants::{COLOR_SELECTED, COLOR_UNSELECTED},
+    functions::window_mode_text,
 };
 use crate::{
     assets::LocaleAsset,
@@ -8,7 +9,7 @@ use crate::{
     components::{Language, RootComponent},
     constants::{MED_SCALE, RADIUS, Z_INDEX_TEXT},
     functions::rescale_board,
-    resources::{LocaleAssets, Profile, TextSettings},
+    resources::{GameColors, LocaleAssets, Profile, TextSettings},
 };
 use bevy::{
     hierarchy::BuildChildren,
@@ -31,7 +32,12 @@ type StandardAssets<'a> = (
 pub fn setup(
     mut commands: Commands,
     wnds: Res<Windows>,
-    (locale, profile, text_settings): (Res<LocaleAssets>, Res<Profile>, Res<TextSettings>),
+    (game_colors, locale, profile, text_settings): (
+        Res<GameColors>,
+        Res<LocaleAssets>,
+        Res<Profile>,
+        Res<TextSettings>,
+    ),
     asset_server: Res<AssetServer>,
     (mut meshes, mut colors, locales): StandardAssets,
 ) {
@@ -219,13 +225,32 @@ pub fn setup(
         })
         .id();
 
+    let bt_window_mode = commands
+        .spawn_bundle(MenuButtonBundle::new(
+            Transform::from_xyz(-400., -4.5 * RADIUS, 0.9),
+            (270., 170.),
+            game_colors.menu_button.clone(),
+            &mut meshes,
+        ))
+        .with_children(|parent| {
+            parent
+                .spawn_bundle(Text2dBundle {
+                    text: window_mode_text(&locale, &locales, &profile, &text_settings),
+                    transform: Transform::from_xyz(0., -10., 10.)
+                        .with_scale(Vec3::new(0.75, 0.75, 1.)),
+                    ..default()
+                })
+                .insert(TextWindowMode);
+        })
+        .insert(ButtonWindowMode)
+        .id();
+
     let bt_return = commands
         .spawn_bundle(MenuButtonBundle::new(
-            Transform::from_xyz(0., -4. * RADIUS, 0.9),
-            (240., 190.),
-            Color::rgba(0.7, 0.7, 0.7, 0.92),
+            Transform::from_xyz(400., -4.5 * RADIUS, 0.9),
+            (270., 170.),
+            game_colors.menu_button.clone(),
             &mut meshes,
-            &mut colors,
         ))
         .with_children(|parent| {
             parent.spawn_bundle(Text2dBundle {
@@ -251,7 +276,13 @@ pub fn setup(
 
     commands
         .spawn()
-        .push_children(&[logo_entity, language_panel, mouse_panel, bt_return])
+        .push_children(&[
+            logo_entity,
+            language_panel,
+            mouse_panel,
+            bt_window_mode,
+            bt_return,
+        ])
         .insert_bundle(SpatialBundle::from_transform(root_transform))
         .insert(RootComponent);
 }

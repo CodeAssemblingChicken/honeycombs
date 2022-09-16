@@ -1,19 +1,23 @@
 use super::{
-    components::{ButtonReturn, MouseInverted},
+    components::{ButtonReturn, ButtonWindowMode, MouseInverted, TextWindowMode},
     constants::{COLOR_HOVERED, COLOR_SELECTED, COLOR_UNSELECTED},
+    functions::window_mode_text,
 };
 use crate::{
+    assets::LocaleAsset,
     components::{Language, RootComponent},
     functions::{rescale_board, switch_state},
-    resources::{LoadState, Profile},
+    resources::{LoadState, LocaleAssets, Profile, TextSettings},
     states::AppState,
 };
 use bevy::{
     input::Input,
     prelude::{
-        EventReader, KeyCode, ParamSet, Query, Res, ResMut, Sprite, State, Transform, With, Without,
+        Assets, EventReader, KeyCode, ParamSet, Query, Res, ResMut, Sprite, State, Transform, With,
+        Without,
     },
-    window::WindowResized,
+    text::Text,
+    window::{WindowResized, Windows},
 };
 use interactable::components::{Entered, Exited, ReleasedLeft};
 
@@ -81,6 +85,29 @@ pub fn mouse_setting_hover_system(
     for (mut sprite, mi) in hover_set.p1().iter_mut() {
         if profile.mouse_inverted != mi.0 {
             sprite.color = COLOR_UNSELECTED;
+        }
+    }
+}
+
+pub fn window_mode_button_click_system(
+    button_query: Query<&ButtonWindowMode, With<ReleasedLeft>>,
+    mut text_query: Query<&mut Text, With<TextWindowMode>>,
+    (locale, mut profile, text_settings): (Res<LocaleAssets>, ResMut<Profile>, Res<TextSettings>),
+    locales: Res<Assets<LocaleAsset>>,
+    mut wnds: ResMut<Windows>,
+) {
+    if !button_query.is_empty() {
+        profile.fullscreen = !profile.fullscreen;
+        for wnd in wnds.iter_mut() {
+            if profile.fullscreen {
+                wnd.set_mode(bevy::window::WindowMode::Fullscreen);
+            } else {
+                wnd.set_mode(bevy::window::WindowMode::Windowed);
+                wnd.set_maximized(true);
+            }
+        }
+        if let Ok(mut text) = text_query.get_single_mut() {
+            *text = window_mode_text(&locale, &locales, &profile, &text_settings);
         }
     }
 }

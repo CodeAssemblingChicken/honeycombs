@@ -1,25 +1,35 @@
-use super::{components::StageCluster, functions::spawn_cluster};
+use super::{
+    components::{ButtonReturn, ButtonTutorial, StageCluster},
+    functions::spawn_cluster,
+};
 use crate::{
+    assets::LocaleAsset,
+    bundles::MenuButtonBundle,
     components::RootComponent,
     constants::{RADIUS, UNLOCK_POINTS, Z_INDEX_TEXT},
     functions::{rescale_board, spawn_cell},
-    resources::{CellMeshes, GameColors, Profile, TextSettings},
+    resources::{CellMeshes, GameColors, LocaleAssets, Profile, TextSettings},
 };
 use bevy::{
     hierarchy::BuildChildren,
     math::Vec3,
-    prelude::{default, Commands, Res, SpatialBundle, Transform},
+    prelude::{default, Assets, Commands, Mesh, Res, ResMut, SpatialBundle, Transform},
     text::{Text, Text2dBundle},
     window::Windows,
 };
 
+type StandardResources<'a> = (
+    Res<'a, CellMeshes>,
+    Res<'a, GameColors>,
+    Res<'a, LocaleAssets>,
+    Res<'a, Profile>,
+    Res<'a, TextSettings>,
+);
 pub fn setup(
     mut commands: Commands,
     wnds: Res<Windows>,
-    cell_meshes: Res<CellMeshes>,
-    game_colors: Res<GameColors>,
-    profile: Res<Profile>,
-    text_settings: Res<TextSettings>,
+    (cell_meshes, game_colors, locale, profile, text_settings): StandardResources,
+    (mut meshes, locales): (ResMut<Assets<Mesh>>, Res<Assets<LocaleAsset>>),
 ) {
     let mut clusters = Vec::new();
     for (id, (dx, dy)) in [(0, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0)]
@@ -73,6 +83,52 @@ pub fn setup(
             ..default()
         });
     });
+
+    let bt_tutorial = commands
+        .spawn_bundle(MenuButtonBundle::new(
+            Transform::from_xyz(-6.25 * RADIUS, -8. * RADIUS, 0.9),
+            (240., 150.),
+            game_colors.menu_button.clone(),
+            &mut meshes,
+        ))
+        .with_children(|parent| {
+            parent.spawn_bundle(Text2dBundle {
+                text: Text::from_section(
+                    locale
+                        .get_string("tutorial", &locales, &profile)
+                        .unwrap_or(&"String not found".to_string()),
+                    text_settings.style_menu_dark.clone(),
+                )
+                .with_alignment(text_settings.alignment),
+                transform: Transform::from_xyz(0., -10., 10.).with_scale(Vec3::new(0.75, 0.75, 1.)),
+                ..default()
+            });
+        })
+        .insert(ButtonTutorial)
+        .id();
+    let bt_return = commands
+        .spawn_bundle(MenuButtonBundle::new(
+            Transform::from_xyz(6.25 * RADIUS, -8. * RADIUS, 0.9),
+            (240., 150.),
+            game_colors.menu_button.clone(),
+            &mut meshes,
+        ))
+        .with_children(|parent| {
+            parent.spawn_bundle(Text2dBundle {
+                text: Text::from_section(
+                    locale
+                        .get_string("return", &locales, &profile)
+                        .unwrap_or(&"String not found".to_string()),
+                    text_settings.style_menu_dark.clone(),
+                )
+                .with_alignment(text_settings.alignment),
+                transform: Transform::from_xyz(0., -10., 10.).with_scale(Vec3::new(0.75, 0.75, 1.)),
+                ..default()
+            });
+        })
+        .insert(ButtonReturn)
+        .id();
+
     let mut root_transform = Transform::identity();
     for wnd in wnds.iter() {
         // TODO: Remove hard-coded width/height
@@ -81,7 +137,7 @@ pub fn setup(
     commands
         .spawn()
         .push_children(&clusters)
-        .add_child(center_cell)
+        .push_children(&[center_cell, bt_tutorial, bt_return])
         .insert_bundle(SpatialBundle::from_transform(root_transform))
         .insert(RootComponent);
 }

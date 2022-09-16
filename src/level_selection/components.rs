@@ -101,3 +101,8 @@ impl StageCluster {
         }
     }
 }
+
+#[derive(Component)]
+pub struct ButtonTutorial;
+#[derive(Component)]
+pub struct ButtonReturn;

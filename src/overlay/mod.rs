@@ -8,7 +8,7 @@ use self::{
     setup::setup,
     systems::*,
 };
-use crate::{cleanup_system, states::AppState};
+use crate::{cleanup_system, states::AppState, systems::menu_button_hovered};
 use bevy::prelude::{App, ParallelSystemDescriptorCoercion, SystemSet};
 use interactable::InteractLabel;
 
@@ -19,6 +19,7 @@ pub fn prepare_overlay(app: &mut App) {
         .add_system_set(
             SystemSet::on_update(STATE)
                 .with_system(button_system.after(InteractLabel::Interact))
+                .with_system(menu_button_hovered.after(InteractLabel::Interact))
                 .with_system(hotkey_system)
                 .with_system(window_resize_system),
         )

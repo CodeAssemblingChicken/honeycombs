@@ -33,4 +33,6 @@ impl GameColor {
     pub const ALPHA_0: Color = Color::rgba(0.5, 0.5, 0.5, 0.);
     pub const ALPHA_1: Color = Color::rgba(0.5, 0.5, 0.5, 0.1);
     pub const ALPHA_2: Color = Color::rgba(0.5, 0.5, 0.5, 0.2);
+    pub const MENU_BUTTON: Color = Color::rgb(0.7, 0.7, 0.7);
+    pub const MENU_BUTTON_HOVERED: Color = Color::rgb(0.8, 0.8, 0.8);
 }

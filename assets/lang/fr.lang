@@ -18,6 +18,9 @@
         "mouse-buttons": "Boutons souris",
         "sfx-volume": "Volume de l'effet sonore",
         "return": "Retourner",
+        "tutorial": "Tutoriel",
+        "fullscreen": "Plein écran",
+        "windowed": "Fenêtre",
     },
     text_sections: {
         "intro": [

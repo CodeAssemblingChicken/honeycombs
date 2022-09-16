@@ -1,4 +1,4 @@
-use super::components::LevelSelectionCell;
+use super::components::{ButtonReturn, ButtonTutorial, LevelSelectionCell};
 use crate::{
     components::{Cell, RootComponent},
     functions::{rescale_board, switch_state},
@@ -72,6 +72,19 @@ pub fn mouse_exit_cell(
             &game_colors,
             &profile,
         );
+    }
+}
+
+pub fn button_click_system(
+    return_query: Query<&ButtonReturn, With<ReleasedLeft>>,
+    tutorial_query: Query<&ButtonTutorial, With<ReleasedLeft>>,
+    mut app_state: ResMut<State<AppState>>,
+    mut load_state: ResMut<LoadState>,
+) {
+    if !return_query.is_empty() {
+        switch_state(Some(AppState::Home), &mut app_state, &mut load_state);
+    } else if !tutorial_query.is_empty() {
+        app_state.push(AppState::Tutorial).unwrap();
     }
 }
 

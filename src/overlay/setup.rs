@@ -4,6 +4,7 @@ use super::{
 };
 use crate::{
     assets::LocaleAsset,
+    bundles::MenuButtonBundle,
     constants::{RADIUS, Z_INDEX_CELL_BACK, Z_INDEX_UI},
     functions::spawn_cell,
     resources::{CellMeshes, GameColors, LocaleAssets, Profile, TextSettings},
@@ -16,7 +17,6 @@ use bevy::{
     text::{Text, Text2dBundle},
     window::Windows,
 };
-use interactable::{components::Interactable, shapes::Shape};
 
 type StandardResources<'a> = (
     Res<'a, CellMeshes>,
@@ -218,14 +218,12 @@ pub fn setup(
                     });
                 });
             parent
-                .spawn_bundle(ColorMesh2dBundle {
-                    mesh: meshes
-                        .add(Mesh::from(Quad::new(Vec2::new(240., 190.))))
-                        .into(),
-                    material: colors.add(ColorMaterial::from(Color::rgba(0.7, 0.7, 0.7, 0.92))),
-                    transform: Transform::from_xyz(-260., -355., 0.9),
-                    ..default()
-                })
+                .spawn_bundle(MenuButtonBundle::new(
+                    Transform::from_xyz(-260., -355., 0.9),
+                    (240., 190.),
+                    game_colors.menu_button.clone(),
+                    &mut meshes,
+                ))
                 .with_children(|parent| {
                     parent.spawn_bundle(Text2dBundle {
                         text: Text::from_section(
@@ -240,26 +238,17 @@ pub fn setup(
                         ..default()
                     });
                 })
-                .insert(ButtonRestart)
-                .insert(Interactable {
-                    shape: Shape::Quad(interactable::shapes::Quad {
-                        width: 240.,
-                        height: 190.,
-                    }),
-                    ..default()
-                });
+                .insert(ButtonRestart);
             if overlay_settings.overlay_type == OverlayType::LevelComplete
                 && overlay_settings.level_id < 5
             {
                 parent
-                    .spawn_bundle(ColorMesh2dBundle {
-                        mesh: meshes
-                            .add(Mesh::from(Quad::new(Vec2::new(240., 190.))))
-                            .into(),
-                        material: colors.add(ColorMaterial::from(Color::rgba(0.7, 0.7, 0.7, 0.92))),
-                        transform: Transform::from_xyz(0., -355., 0.9),
-                        ..default()
-                    })
+                    .spawn_bundle(MenuButtonBundle::new(
+                        Transform::from_xyz(0., -355., 0.9),
+                        (240., 190.),
+                        game_colors.menu_button.clone(),
+                        &mut meshes,
+                    ))
                     .with_children(|parent| {
                         parent.spawn_bundle(Text2dBundle {
                             text: Text::from_section(
@@ -274,24 +263,15 @@ pub fn setup(
                             ..default()
                         });
                     })
-                    .insert(ButtonNext)
-                    .insert(Interactable {
-                        shape: Shape::Quad(interactable::shapes::Quad {
-                            width: 240.,
-                            height: 190.,
-                        }),
-                        ..default()
-                    });
+                    .insert(ButtonNext);
             }
             parent
-                .spawn_bundle(ColorMesh2dBundle {
-                    mesh: meshes
-                        .add(Mesh::from(Quad::new(Vec2::new(240., 190.))))
-                        .into(),
-                    material: colors.add(ColorMaterial::from(Color::rgba(0.7, 0.7, 0.7, 0.92))),
-                    transform: Transform::from_xyz(260., -355., 0.9),
-                    ..default()
-                })
+                .spawn_bundle(MenuButtonBundle::new(
+                    Transform::from_xyz(260., -355., 0.9),
+                    (240., 190.),
+                    game_colors.menu_button.clone(),
+                    &mut meshes,
+                ))
                 .with_children(|parent| {
                     parent.spawn_bundle(Text2dBundle {
                         text: Text::from_section(
@@ -306,13 +286,6 @@ pub fn setup(
                         ..default()
                     });
                 })
-                .insert(ButtonMenu)
-                .insert(Interactable {
-                    shape: Shape::Quad(interactable::shapes::Quad {
-                        width: 240.,
-                        height: 190.,
-                    }),
-                    ..default()
-                });
+                .insert(ButtonMenu);
         });
 }

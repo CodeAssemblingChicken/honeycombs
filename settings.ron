@@ -1,6 +1,7 @@
 (
     lang: EN,
     mouse_inverted: false,
+    fullscreen: false,
     sfx_volume: 0.5,
     level_points: (
         (Some(5), None, None, None, None, None),

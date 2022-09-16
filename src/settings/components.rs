@@ -4,4 +4,9 @@ use bevy::prelude::Component;
 pub struct MouseInverted(pub bool);
 
 #[derive(Component)]
+pub struct ButtonWindowMode;
+#[derive(Component)]
 pub struct ButtonReturn;
+
+#[derive(Component)]
+pub struct TextWindowMode;

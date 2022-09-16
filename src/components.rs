@@ -125,6 +125,9 @@ pub struct ColumnHint {
 #[derive(Component)]
 pub struct RootComponent;
 
+#[derive(Component)]
+pub struct MenuButton;
+
 #[derive(Default, Debug, Clone, Copy, Component, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Language {
     #[default]

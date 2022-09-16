@@ -18,6 +18,9 @@
         "mouse-buttons": "Maustasten",
         "sfx-volume": "Soundeffekt Lautstärke",
         "return": "Zurück",
+        "tutorial": "Tutorial",
+        "fullscreen": "Vollbild",
+        "windowed": "Fenster",
     },
     text_sections: {
         "intro": [
