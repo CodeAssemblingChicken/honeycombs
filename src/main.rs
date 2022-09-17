@@ -5,6 +5,7 @@ mod board_functions;
 mod bundles;
 mod components;
 mod constants;
+mod dialog;
 mod editor;
 mod enums;
 mod functions;
@@ -99,6 +100,7 @@ fn main() {
         .add_system_set(SystemSet::on_update(AppState::StateChange).with_system(load_complete))
         .add_system_set(SystemSet::on_enter(AppState::Quit).with_system(quit_system));
 
+    dialog::prepare_dialog(&mut app);
     editor::prepare_editor(&mut app);
     home::prepare_home(&mut app);
     level::prepare_level(&mut app);

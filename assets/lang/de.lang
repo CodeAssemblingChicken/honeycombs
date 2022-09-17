@@ -13,7 +13,7 @@
         "total": "Gesamt",
         "restart": "Neustart",
         "menu": "Menü",
-        "next": "Nächstes\nLevel",
+        "next": "Nächstes\nRätsel",
         "language": "Sprache",
         "mouse-buttons": "Maustasten",
         "sfx-volume": "Soundeffekt Lautstärke",
@@ -115,6 +115,12 @@
         ],
         "thanks": [
             (text: "Danke für's Spielen :)", color: None, interactable: false),
+        ],
+        "need-points": [
+            (text: "Du benötigst mehr Punkte, um das nächste Level freizuschalten.\nVersuche, deine Punktzahl in den verfügbaren Rätseln zu verbessern.", color: None, interactable: false),
+        ],
+        "last-level": [
+            (text: "Das war das letzte Rätsel, es gibt keine weiteren Level. (Noch?)", color: None, interactable: false),
         ],
     }
 )

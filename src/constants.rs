@@ -1,7 +1,4 @@
-use bevy::{
-    math::Vec3,
-    prelude::{Color, Transform},
-};
+use bevy::prelude::{Color, Transform};
 
 pub const UNLOCK_POINTS: [u16; 6] = [0, 40, 100, 150, 210, 310];
 

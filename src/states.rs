@@ -2,6 +2,7 @@
 pub enum AppState {
     AssetLoading,
     Credits,
+    Dialog,
     Editor,
     #[default]
     Home,

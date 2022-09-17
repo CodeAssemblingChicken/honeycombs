@@ -1,7 +1,7 @@
 use crate::{
     assets::LocaleAsset,
     components::Language,
-    constants::{GameColor, MED_SCALE, RADIUS},
+    constants::{GameColor, MED_SCALE, RADIUS, UNLOCK_POINTS},
     states::AppState,
     structs::TextSectionConfig,
 };
@@ -215,6 +215,9 @@ impl Profile {
             .iter()
             .map(|stage| stage.iter().map(|pts| pts.unwrap_or(0)).sum::<u16>())
             .sum()
+    }
+    pub fn is_unlocked(&self, stage_id: u8) -> bool {
+        return self.get_points() >= UNLOCK_POINTS[stage_id as usize];
     }
     pub fn save(&self) {
         to_writer_pretty(

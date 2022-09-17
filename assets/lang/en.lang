@@ -13,7 +13,7 @@
         "total": "Total",
         "restart": "Restart",
         "menu": "Menu",
-        "next": "Next\nLevel",
+        "next": "Next\nPuzzle",
         "language": "Language",
         "mouse-buttons": "Mouse buttons",
         "sfx-volume": "Sound effect volume",
@@ -115,6 +115,12 @@
         ],
         "thanks": [
             (text: "Thanks for playing :)", color: None, interactable: false),
+        ],
+        "need-points": [
+            (text: "You need more points to unlock the next level.\nTry to improve your score in the available puzzles.", color: None, interactable: false),
+        ],
+        "last-level": [
+            (text: "That was the last puzzle, there are no more levels. (Yet?)", color: None, interactable: false),
         ],
     }
 )

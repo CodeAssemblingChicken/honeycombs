@@ -1,4 +1,4 @@
-use bevy::{asset::Asset, prelude::Assets, text::Text};
+use bevy::{prelude::Assets, text::Text};
 
 use crate::{
     assets::LocaleAsset,

@@ -13,7 +13,7 @@
         "total": "Total",
         "restart": "Relancer",
         "menu": "Menu",
-        "next": "Niveau\nsuivant",
+        "next": "Puzzle\nsuivant",
         "language": "Langue",
         "mouse-buttons": "Boutons souris",
         "sfx-volume": "Volume de l'effet sonore",
@@ -119,6 +119,12 @@
         ],
         "thanks": [
             (text: "Merci de jouer :)", color: None, interactable: false),
+        ],
+        "need-points": [
+            (text: "Vous avez besoin de plus de points pour débloquer le niveau suivant.\nEssayez d'améliorer votre score dans les puzzles disponibles.", color: None, interactable: false),
+        ],
+        "last-level": [
+            (text: "C'était le dernier puzzle, il n'y a pas d'autres niveaux. (Encore ?)", color: None, interactable: false),
         ],
     }
 )

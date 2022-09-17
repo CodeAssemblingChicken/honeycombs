@@ -13,7 +13,7 @@
         "total": "Total",
         "restart": "Reiniciar",
         "menu": "Menú",
-        "next": "Próximo\nnivel",
+        "next": "Próximo\npuzzle",
         "language": "Idioma",
         "mouse-buttons": "Botones ratón",
         "sfx-volume": "Volumen del efecto de sonido",
@@ -117,6 +117,12 @@
         ],
         "thanks": [
             (text: "Gracias por jugar :)", color: None, interactable: false),
+        ],
+        "need-points": [
+            (text: "Necesitas más puntos para desbloquear el siguiente nivel.\nIntenta mejorar tu puntuación en los rompecabezas disponibles.", color: None, interactable: false),
+        ],
+        "last-level": [
+            (text: "Ese fue el último puzzle, no hay más niveles. (¿Todavía?)", color: None, interactable: false),
         ],
     }
 )

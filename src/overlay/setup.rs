@@ -1,5 +1,5 @@
 use super::{
-    components::{ButtonMenu, ButtonNext, ButtonRestart, UiBackground, UiRootNode},
+    components::{ButtonMenu, ButtonRestart, ButtonVariable, UiBackground, UiRootNode},
     resources::{OverlaySettings, OverlayType},
 };
 use crate::{
@@ -239,35 +239,9 @@ pub fn setup(
                     });
                 })
                 .insert(ButtonRestart);
-            if overlay_settings.overlay_type == OverlayType::LevelComplete
-                && overlay_settings.level_id < 5
-            {
-                parent
-                    .spawn_bundle(MenuButtonBundle::new(
-                        Transform::from_xyz(0., -355., 0.9),
-                        (240., 190.),
-                        game_colors.menu_button.clone(),
-                        &mut meshes,
-                    ))
-                    .with_children(|parent| {
-                        parent.spawn_bundle(Text2dBundle {
-                            text: Text::from_section(
-                                locale
-                                    .get_string("next", &locales, &profile)
-                                    .unwrap_or(&"String not found".to_string()),
-                                text_settings.style_menu_dark.clone(),
-                            )
-                            .with_alignment(text_settings.alignment),
-                            transform: Transform::from_xyz(0., -10., 10.)
-                                .with_scale(Vec3::new(0.75, 0.75, 1.)),
-                            ..default()
-                        });
-                    })
-                    .insert(ButtonNext);
-            }
             parent
                 .spawn_bundle(MenuButtonBundle::new(
-                    Transform::from_xyz(260., -355., 0.9),
+                    Transform::from_xyz(0., -355., 0.9),
                     (240., 190.),
                     game_colors.menu_button.clone(),
                     &mut meshes,
@@ -287,5 +261,36 @@ pub fn setup(
                     });
                 })
                 .insert(ButtonMenu);
+            parent
+                .spawn_bundle(MenuButtonBundle::new(
+                    Transform::from_xyz(260., -355., 0.9),
+                    (240., 190.),
+                    game_colors.menu_button.clone(),
+                    &mut meshes,
+                ))
+                .with_children(|parent| {
+                    parent.spawn_bundle(Text2dBundle {
+                        text: Text::from_section(
+                            locale
+                                .get_string(
+                                    match overlay_settings.overlay_type {
+                                        OverlayType::LevelComplete => "next",
+                                        _ => "return",
+                                    },
+                                    &locales,
+                                    &profile,
+                                )
+                                .unwrap_or(&"String not found".to_string()),
+                            text_settings.style_menu_dark.clone(),
+                        )
+                        .with_alignment(text_settings.alignment),
+                        transform: Transform::from_xyz(0., -10., 10.)
+                            .with_scale(Vec3::new(0.75, 0.75, 1.)),
+                        ..default()
+                    });
+                })
+                .insert(ButtonVariable(
+                    overlay_settings.overlay_type == OverlayType::LevelComplete,
+                ));
         });
 }
