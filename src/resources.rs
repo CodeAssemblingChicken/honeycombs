@@ -2,6 +2,7 @@ use crate::{
     assets::LocaleAsset,
     components::Language,
     constants::{GameColor, MED_SCALE, RADIUS, UNLOCK_POINTS},
+    functions::get_base_path,
     states::AppState,
     structs::TextSectionConfig,
 };
@@ -204,7 +205,7 @@ pub struct Profile {
 }
 impl Profile {
     pub fn new() -> Self {
-        if let Ok(file) = File::open("./settings.ron") {
+        if let Ok(file) = File::open(get_base_path().join("settings.ron")) {
             from_reader(file).unwrap()
         } else {
             Self::default()
@@ -221,7 +222,7 @@ impl Profile {
     }
     pub fn save(&self) {
         to_writer_pretty(
-            File::create("./settings.ron").expect("Failed opening file"),
+            File::create(get_base_path().join("settings.ron")).expect("Failed opening file"),
             self,
             PrettyConfig::new()
                 .depth_limit(2)
