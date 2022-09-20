@@ -35,6 +35,7 @@ use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
 use bevy_kira_audio::AudioPlugin;
 #[cfg(feature = "bevy-inspector-egui")]
 use components::Cell;
+use functions::get_base_path;
 use interactable::{InteractableCamera, InteractablePlugin};
 #[cfg(not(target_arch = "wasm32"))]
 use native_dialog::MessageDialog;
@@ -168,7 +169,7 @@ fn set_window_icon(windows: NonSend<WinitWindows>) {
     // here we use the `image` crate to load our icon data from a png file
     // this is not a very bevy-native solution, but it will do
     let (icon_rgba, icon_width, icon_height) = {
-        let image = image::open("assets/branding/icon.png")
+        let image = image::open(get_base_path().join("assets/branding/icon.png"))
             .expect("Failed to open icon path")
             .into_rgba8();
         let (width, height) = image.dimensions();

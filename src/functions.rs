@@ -1,3 +1,5 @@
+use std::{env, path::PathBuf};
+
 use crate::{
     board_functions::{count_empty_cells, empty_connected, get_column},
     components::{CellInner, CellOuter, ColumnHint},
@@ -207,4 +209,23 @@ pub fn switch_state(
 ) {
     load_state.next_state = next_state;
     app_state.replace(AppState::StateChange).unwrap();
+}
+
+/// Returns the base path of the assets directory, which is normally the executable's parent
+/// directory.
+///
+/// If the `CARGO_MANIFEST_DIR` environment variable is set, then its value will be used
+/// instead. It's set by cargo when running with `cargo run`.
+pub fn get_base_path() -> PathBuf {
+    if let Ok(manifest_dir) = env::var("CARGO_MANIFEST_DIR") {
+        PathBuf::from(manifest_dir)
+    } else {
+        env::current_exe()
+            .map(|path| {
+                path.parent()
+                    .map(|exe_parent_path| exe_parent_path.to_owned())
+                    .unwrap()
+            })
+            .unwrap()
+    }
 }

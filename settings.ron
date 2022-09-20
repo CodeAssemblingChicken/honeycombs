@@ -2,7 +2,7 @@
     lang: EN,
     sfx_volume: 0.5,
     level_points: (
-        (None, None, None, None, None, None),
+        (Some(5), None, None, None, None, None),
         (None, None, None, None, None, None),
         (None, None, None, None, None, None),
         (None, None, None, None, None, None),

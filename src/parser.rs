@@ -1,6 +1,7 @@
 use crate::{
     components::ColumnHint,
     enums::{CellType, HintDirection, HintType},
+    functions::get_base_path,
     structs::BoardConfig,
 };
 use std::{fs, str::Lines};
@@ -12,8 +13,8 @@ const TOO_FEW_ARGS: &str = "Expected more arguments";
 /// Receives a file and creates a BoardConfig from it
 pub fn board_from_file(filename: &str) -> BoardConfig {
     let mut cells = Vec::new();
-    let file =
-        fs::read_to_string(filename).unwrap_or_else(|_| panic!("File \"{}\" not found!", filename));
+    let file = fs::read_to_string(get_base_path().join(filename))
+        .unwrap_or_else(|_| panic!("File \"{}\" not found!", filename));
     let mut lines = file.lines();
     let mut line_no = 1;
     let (width, height) = parse_tuple(
