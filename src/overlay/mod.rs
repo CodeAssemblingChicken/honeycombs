@@ -4,7 +4,7 @@ mod setup;
 mod systems;
 
 use self::{
-    components::{UiBackground, UiRootNode},
+    components::{OverlayButton, UiBackground, UiRootNode},
     setup::setup,
     systems::*,
 };
@@ -19,7 +19,7 @@ pub fn prepare_overlay(app: &mut App) {
         .add_system_set(
             SystemSet::on_update(STATE)
                 .with_system(button_system.after(InteractLabel::Interact))
-                .with_system(menu_button_hovered.after(InteractLabel::Interact))
+                .with_system(menu_button_hovered::<OverlayButton>.after(InteractLabel::Interact))
                 .with_system(hotkey_system)
                 .with_system(window_resize_system),
         )
@@ -27,5 +27,7 @@ pub fn prepare_overlay(app: &mut App) {
             SystemSet::on_exit(STATE)
                 .with_system(cleanup_system::<UiRootNode>)
                 .with_system(cleanup_system::<UiBackground>),
-        );
+        )
+        // TODO: In theory, on_in_stack_update should be perfect but it doesn't seem to work
+        .add_system_set(SystemSet::on_inactive_update(STATE).with_system(window_resize_system));
 }

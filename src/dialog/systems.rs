@@ -1,9 +1,9 @@
 use super::components::{ButtonReturn, UiRootNode};
-use crate::{resources::Profile, states::AppState};
+use crate::states::AppState;
 use bevy::{
     input::Input,
     math::Vec3,
-    prelude::{EventReader, KeyCode, Query, Res, ResMut, State, Transform, With},
+    prelude::{EventReader, KeyCode, Query, ResMut, State, Transform, With},
     window::WindowResized,
 };
 use interactable::components::ReleasedLeft;

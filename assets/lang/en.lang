@@ -32,7 +32,7 @@
         "intro-alt": [
             (text: "Welcome to ", color: None, interactable: false),
             (text: "Honeycombs", color: Some(Rgba(red: 0.894, green: 0.627, blue: 0.125, alpha: 1.0)), interactable: false),
-            (text: "! Your goal is to reveal the pattern.\n The number in a gray cell tells you, how many blue cells are adjacent to it.", color: None, interactable: false),
+            (text: "! Your goal is to reveal the pattern.\n The number in a gray cell tells you how many blue cells are adjacent to it.", color: None, interactable: false),
             (text: "\nClick on the yellow cells: Right to uncover a blue cell and left for a gray cell.", color: None, interactable: false),
         ],
         "mistakes": [
@@ -117,7 +117,7 @@
             (text: "Thanks for playing :)", color: None, interactable: false),
         ],
         "need-points": [
-            (text: "You need more points to unlock the next level.\nTry to improve your score in the available puzzles.", color: None, interactable: false),
+            (text: "You need more points to unlock\nthe next level. Try to improve your\nscore in the available puzzles.", color: None, interactable: false),
         ],
         "last-level": [
             (text: "That was the last puzzle, there are no more levels. (Yet?)", color: None, interactable: false),

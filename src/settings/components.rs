@@ -10,3 +10,6 @@ pub struct ButtonReturn;
 
 #[derive(Component)]
 pub struct TextWindowMode;
+
+#[derive(Component)]
+pub struct SettingsButton;

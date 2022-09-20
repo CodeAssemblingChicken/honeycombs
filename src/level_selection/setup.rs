@@ -1,5 +1,5 @@
 use super::{
-    components::{ButtonReturn, ButtonTutorial, StageCluster},
+    components::{ButtonReturn, ButtonTutorial, LevelSelectionButton, StageCluster},
     functions::spawn_cluster,
 };
 use crate::{
@@ -105,6 +105,7 @@ pub fn setup(
             });
         })
         .insert(ButtonTutorial)
+        .insert(LevelSelectionButton)
         .id();
     let bt_return = commands
         .spawn_bundle(MenuButtonBundle::new(
@@ -127,6 +128,7 @@ pub fn setup(
             });
         })
         .insert(ButtonReturn)
+        .insert(LevelSelectionButton)
         .id();
 
     let mut root_transform = Transform::identity();

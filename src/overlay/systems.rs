@@ -3,6 +3,7 @@ use super::{
     resources::{OverlaySettings, OverlayType},
 };
 use crate::{
+    dialog::resources::DialogSettings,
     functions::switch_state,
     resources::{LoadState, Profile},
     states::AppState,
@@ -19,7 +20,11 @@ pub fn button_system(
     menu_button_query: Query<&ButtonMenu, With<ReleasedLeft>>,
     variable_button_query: Query<&ButtonVariable, With<ReleasedLeft>>,
     restart_button_query: Query<&ButtonRestart, With<ReleasedLeft>>,
-    (mut app_state, mut load_state): (ResMut<State<AppState>>, ResMut<LoadState>),
+    (mut app_state, mut dialog_settings, mut load_state): (
+        ResMut<State<AppState>>,
+        ResMut<DialogSettings>,
+        ResMut<LoadState>,
+    ),
     (overlay_settings, profile): (Res<OverlaySettings>, Res<Profile>),
 ) {
     if !menu_button_query.is_empty() {
@@ -49,10 +54,24 @@ pub fn button_system(
                     ));
                     switch_state(Some(AppState::Level), &mut app_state, &mut load_state);
                 } else {
-                    todo!("Need more points");
+                    *dialog_settings = DialogSettings {
+                        text: "need-points".to_string(),
+                        width: 800.,
+                        height: 400.,
+                        x: 0.,
+                        y: 0.,
+                    };
+                    app_state.push(AppState::Dialog).unwrap();
                 }
             } else {
-                todo!("Last level");
+                *dialog_settings = DialogSettings {
+                    text: "last-level".to_string(),
+                    width: 800.,
+                    height: 400.,
+                    x: 0.,
+                    y: 0.,
+                };
+                app_state.push(AppState::Dialog).unwrap();
             }
         } else {
             app_state.pop().unwrap();

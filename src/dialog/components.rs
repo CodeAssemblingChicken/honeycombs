@@ -8,3 +8,6 @@ pub struct ContentPane;
 
 #[derive(Component)]
 pub struct ButtonReturn;
+
+#[derive(Component)]
+pub struct DialogButton;

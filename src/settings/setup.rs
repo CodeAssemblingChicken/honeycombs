@@ -1,5 +1,5 @@
 use super::{
-    components::{ButtonReturn, ButtonWindowMode, MouseInverted, TextWindowMode},
+    components::{ButtonReturn, ButtonWindowMode, MouseInverted, SettingsButton, TextWindowMode},
     constants::{COLOR_SELECTED, COLOR_UNSELECTED},
     functions::window_mode_text,
 };
@@ -243,6 +243,7 @@ pub fn setup(
                 .insert(TextWindowMode);
         })
         .insert(ButtonWindowMode)
+        .insert(SettingsButton)
         .id();
 
     let bt_return = commands
@@ -266,6 +267,7 @@ pub fn setup(
             });
         })
         .insert(ButtonReturn)
+        .insert(SettingsButton)
         .id();
 
     let mut root_transform = Transform::identity();

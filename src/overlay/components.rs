@@ -15,3 +15,6 @@ pub struct ButtonMenu;
 pub struct ButtonRestart;
 #[derive(Component)]
 pub struct ButtonVariable(pub bool);
+
+#[derive(Component)]
+pub struct OverlayButton;

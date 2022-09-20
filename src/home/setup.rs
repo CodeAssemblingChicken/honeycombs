@@ -47,17 +47,21 @@ pub fn setup(
         -2. * RADIUS * MED_SCALE,
         Z_INDEX_CELL_BACK,
     );
-    let editor_cell = spawn_option_cell(
-        &mut commands,
-        &cell_meshes,
-        &game_colors,
-        &text_settings,
-        big_transform.with_scale(Vec3::new(0.75, 0.75, 0.75)),
-        AppState::Editor,
-        locale
-            .get_string("editor", &locales, &profile)
-            .unwrap_or(&"String not found".to_string()),
-    );
+    let editor_cell = if profile.show_editor {
+        Some(spawn_option_cell(
+            &mut commands,
+            &cell_meshes,
+            &game_colors,
+            &text_settings,
+            big_transform.with_scale(Vec3::new(0.75, 0.75, 0.75)),
+            AppState::Editor,
+            locale
+                .get_string("editor", &locales, &profile)
+                .unwrap_or(&"String not found".to_string()),
+        ))
+    } else {
+        None
+    };
     big_transform.translation = Vec3::new(
         3. * RADIUS * MED_SCALE,
         -RADIUS * MED_SCALE,
@@ -91,7 +95,11 @@ pub fn setup(
             .unwrap_or(&"String not found".to_string()),
     );
     big_transform.translation = Vec3::new(
-        1.2 * RADIUS * MED_SCALE,
+        if profile.show_editor {
+            1.2 * RADIUS * MED_SCALE
+        } else {
+            0.
+        },
         -2. * RADIUS * MED_SCALE,
         Z_INDEX_CELL_BACK,
     );
@@ -121,16 +129,19 @@ pub fn setup(
         rescale_board(10, 6, 1, wnd.width(), wnd.height(), &mut root_transform);
     }
 
-    commands
+    let root = commands
         .spawn()
         .push_children(&[
             start_cell,
-            editor_cell,
             quit_cell,
             options_cell,
             credits_cell,
             logo_entity,
         ])
         .insert_bundle(SpatialBundle::from_transform(root_transform))
-        .insert(RootComponent);
+        .insert(RootComponent)
+        .id();
+    if let Some(ec) = editor_cell {
+        commands.entity(root).push_children(&[ec]);
+    }
 }

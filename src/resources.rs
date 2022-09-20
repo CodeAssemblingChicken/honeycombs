@@ -199,6 +199,8 @@ pub struct Profile {
     #[serde(default)]
     pub fullscreen: bool,
     #[serde(default)]
+    pub show_editor: bool,
+    #[serde(default)]
     pub sfx_volume: f32,
     #[serde(default)]
     pub level_points: [[Option<u16>; 6]; 6],
@@ -250,6 +252,7 @@ impl Default for Profile {
             lang: Language::EN,
             mouse_inverted: false,
             fullscreen: false,
+            show_editor: false,
             sfx_volume: 0.5,
             level_points: Default::default(),
         }

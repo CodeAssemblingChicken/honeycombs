@@ -1,5 +1,7 @@
 use super::{
-    components::{ButtonMenu, ButtonRestart, ButtonVariable, UiBackground, UiRootNode},
+    components::{
+        ButtonMenu, ButtonRestart, ButtonVariable, OverlayButton, UiBackground, UiRootNode,
+    },
     resources::{OverlaySettings, OverlayType},
 };
 use crate::{
@@ -238,7 +240,8 @@ pub fn setup(
                         ..default()
                     });
                 })
-                .insert(ButtonRestart);
+                .insert(ButtonRestart)
+                .insert(OverlayButton);
             parent
                 .spawn_bundle(MenuButtonBundle::new(
                     Transform::from_xyz(0., -355., 0.9),
@@ -260,7 +263,8 @@ pub fn setup(
                         ..default()
                     });
                 })
-                .insert(ButtonMenu);
+                .insert(ButtonMenu)
+                .insert(OverlayButton);
             parent
                 .spawn_bundle(MenuButtonBundle::new(
                     Transform::from_xyz(260., -355., 0.9),
@@ -291,6 +295,7 @@ pub fn setup(
                 })
                 .insert(ButtonVariable(
                     overlay_settings.overlay_type == OverlayType::LevelComplete,
-                ));
+                ))
+                .insert(OverlayButton);
         });
 }
